@@ -29,7 +29,8 @@
     "attendance": "الغيابات",
     "teachers": "المدرّسون",
     "timetables": "جداول الأوقات",
-    "payments": "الخلاص"
+    "payments": "الخلاص",
+    "messages": "المراسلات"
   },
   "roles": {
     "ADMIN": "الإدارة",
@@ -114,7 +115,9 @@
     "dateFuture": "لا يمكن أن يكون التاريخ في المستقبل.",
     "checkNumber": "أدخل رقم الصكّ.",
     "nothingOverdue": "لا توجد مبالغ متأخّرة لهذا التلميذ.",
-    "noGuardianPhone": "لا يوجد رقم هاتف للوليّ الرئيسي."
+    "noGuardianPhone": "لا يوجد رقم هاتف للوليّ الرئيسي.",
+    "noGuardian": "لا يوجد وليّ مسجّل لهذا التلميذ.",
+    "audienceMissing": "اختر المستوى أو القسم."
   },
   "classes": {
     "title": "الأقسام",
@@ -469,5 +472,70 @@
     "today": "اليوم",
     "myPayments": "الخلاص",
     "parentIntro": "معاليم السنة، الدفوعات المقبوضة والباقي للخلاص."
+  },
+  "messages": {
+    "title": "المراسلات",
+    "inbox": "المحادثات",
+    "new": "محادثة جديدة",
+    "subject": "الموضوع",
+    "child": "التلميذ(ة) المعني(ة)",
+    "body": "الرسالة",
+    "send": "إرسال",
+    "reply": "الردّ",
+    "none": "لا توجد محادثات حاليًا.",
+    "unread": "غير مقروء",
+    "school": "المدرسة",
+    "you": "أنتم",
+    "student": "التلميذ(ة)",
+    "withParent": "مع {parent}",
+    "about": "بخصوص {student}",
+    "parentWrites": "مراسلة المدرسة",
+    "newHint": "تُرسل الرسالة إلى الوليّ الرئيسي للتلميذ(ة)، ويتمّ إعلامه بإرسالية قصيرة.",
+    "announcements": "الإعلانات",
+    "newAnnouncement": "إعلان جديد",
+    "annTitle": "العنوان",
+    "audience": "المرسل إليهم",
+    "audiences": {
+      "SCHOOL": "كامل المدرسة",
+      "LEVEL": "مستوى",
+      "CLASS": "قسم"
+    },
+    "level": "المستوى",
+    "class": "القسم",
+    "sendAlert": "إعلام الأولياء أيضًا بإرسالية قصيرة",
+    "noAnnouncements": "لا توجد إعلانات.",
+    "deleteAnnouncement": "حذف الإعلان",
+    "publish": "نشر",
+    "alerts": "التنبيهات القصيرة",
+    "alertsIntro": "رسائل قصيرة تُرسل آليًا إلى الوليّ الرئيسي.",
+    "alertSettings": "إرسال تنبيه عندما…",
+    "alertAbsence": "يتغيّب التلميذ(ة) أو يتأخّر",
+    "alertReportCard": "تُنشر بطاقة الأعداد",
+    "alertMessage": "تراسل المدرسة أحد الأولياء",
+    "noAlerts": "لم يُرسل أيّ تنبيه بعد.",
+    "retry": "إعادة إرسال التنبيهات الفاشلة",
+    "simulatedHint": "لم يتمّ بعد ربط أيّ مزوّد للإرساليات القصيرة: التنبيهات تُحضَّر وتُسجَّل هنا دون إرسال. يكفي ربط مزوّد لتُرسل.",
+    "statuses": {
+      "PENDING": "في الانتظار",
+      "SENT": "أُرسل",
+      "SIMULATED": "محاكاة",
+      "FAILED": "فشل"
+    },
+    "kinds": {
+      "ABSENCE": "غياب",
+      "REPORT_CARD": "بطاقة أعداد",
+      "ANNOUNCEMENT": "إعلان",
+      "MESSAGE": "رسالة",
+      "PAYMENT": "خلاص"
+    },
+    "myMessages": "الرسائل",
+    "latestAnnouncements": "آخر الإعلانات"
+  },
+  "alerts": {
+    "absence": "{school}: تمّ تسجيل غياب {student} يوم {date} ({period}).",
+    "late": "{school}: تأخّر {student} يوم {date} ({period}).",
+    "reportCard": "{school}: بطاقة أعداد {student} ({term}) متوفّرة في فضاء الأولياء.",
+    "message": "{school}: وصلتكم رسالة جديدة من المدرسة. اطّلعوا عليها في فضاء الأولياء.",
+    "announcement": "{school}: {title}. مزيد من التفاصيل في فضاء الأولياء."
   }
 }

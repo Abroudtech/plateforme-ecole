@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getCurrentYear } from "@/lib/data/school";
+import { countUnread, getGuardianForUser, listAnnouncementsFor, parentScope } from "@/lib/data/messages";
 import { getSchoolAccounts } from "@/lib/data/payments";
 import type { Cycle } from "@prisma/client";
 import type { Locale } from "@/i18n/config";
@@ -14,7 +16,7 @@ import { parseISODate, todayISO } from "@/lib/dates";
 const CYCLES: Cycle[] = ["PRIMARY", "MIDDLE", "SECONDARY"];
 
 /** Modules déjà disponibles (les autres affichent "Bientôt"). */
-const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes", attendance: "absences", payments: "paiements", timetable: "emplois-du-temps", teachers: "enseignants" };
+const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes", attendance: "absences", payments: "paiements", messages: "messages", timetable: "emplois-du-temps", teachers: "enseignants" };
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
@@ -137,7 +139,26 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
   const attendance = new Map(
     await Promise.all(children.map(async (c) => [c.id, await getStudentAttendance(ctx.school.id, c.id)] as const)),
   );
+  const guardian = await getGuardianForUser(ctx.school.id, ctx.user.id);
+  const year = await getCurrentYear(ctx.school.id);
+  const [unread, announcements] = guardian
+    ? await Promise.all([
+        countUnread(ctx.school.id, ctx.user.id, guardian.id),
+        listAnnouncementsFor(ctx.school.id, await parentScope(ctx.school.id, guardian.id, year?.id ?? null), 2),
+      ])
+    : [0, []];
   return (
+    <>
+    <section className="mb-6 grid grid-cols-2 gap-3">
+      <Link href={`/${lang}/messages`} className="rounded-xl bg-white p-4 ring-1 ring-blue-200 hover:bg-blue-50">
+        <p className="font-medium text-blue-800">{dict.messages.myMessages}</p>
+        {unread > 0 && <p className="mt-1 inline-block rounded-full bg-blue-700 px-2 py-0.5 text-xs font-semibold text-white">{unread} · {dict.messages.unread}</p>}
+      </Link>
+      <Link href={`/${lang}/annonces`} className="rounded-xl bg-white p-4 ring-1 ring-blue-200 hover:bg-blue-50">
+        <p className="font-medium text-blue-800">{dict.messages.announcements}</p>
+        {announcements[0] && <p className="mt-1 line-clamp-2 text-sm text-slate-600" dir="auto">{announcements[0].title}</p>}
+      </Link>
+    </section>
     <section className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold">{dict.dashboard.myChildren}</h2>
       {children.length === 0 ? (
@@ -187,6 +208,7 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
         </ul>
       )}
     </section>
+    </>
   );
 }
 

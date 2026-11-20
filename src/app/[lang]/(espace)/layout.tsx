@@ -43,6 +43,7 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
               { href: "absences", label: dict.nav.attendance },
               { href: "emplois-du-temps", label: dict.nav.timetables },
               ...(can(ctx.roles, "payments.read") ? [{ href: "paiements", label: dict.nav.payments }] : []),
+              ...(can(ctx.roles, "messages.school") ? [{ href: "messages", label: dict.nav.messages }] : []),
             ].map((item) => (
               <Link key={item.href} href={`/${lang}/${item.href}`} className="shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 hover:bg-slate-100">
                 {item.label}

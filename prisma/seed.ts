@@ -297,6 +297,36 @@ async function main() {
     }
   }
 
+  // Messagerie : une annonce et une conversation avec le parent de démonstration.
+  if ((await db.announcement.count({ where: { schoolId } })) === 0) {
+    await db.announcement.create({
+      data: {
+        schoolId,
+        title: "Réunion parents-enseignants le 5 décembre",
+        body: "Les parents sont invités à rencontrer les enseignants le samedi 5 décembre de 9h à 12h.\nاجتماع الأولياء بالمربين يوم السبت 5 ديسمبر من الساعة 9 إلى الساعة 12.",
+        audience: "SCHOOL",
+        createdById: admin.id,
+      },
+    });
+    const adamId = (await db.student.findUniqueOrThrow({ where: { schoolId_studentNumber: { schoolId, studentNumber: "2026-002" } } })).id;
+    const t0 = new Date("2026-11-18T08:30:00Z");
+    await db.conversation.create({
+      data: {
+        schoolId,
+        guardianId: guardian.id,
+        studentId: adamId,
+        subject: "Absence du 10 novembre",
+        lastMessageAt: new Date(t0.getTime() + 3600_000),
+        messages: {
+          create: [
+            { authorId: admin.id, fromSchool: true, body: "Bonjour, nous avons bien reçu le certificat médical pour l'absence d'Adam. Bon rétablissement !", createdAt: t0 },
+            { authorId: parentUser.id, fromSchool: false, body: "Merci beaucoup. Adam revient demain.", createdAt: new Date(t0.getTime() + 3600_000) },
+          ],
+        },
+      },
+    });
+  }
+
   console.log("✔ Données de démonstration prêtes.");
   console.log(`  Administration : admin@demo.tn / ${PASSWORD}`);
   console.log(`  Parent         : 22 000 000 (ou parent@demo.tn) / ${PASSWORD}`);

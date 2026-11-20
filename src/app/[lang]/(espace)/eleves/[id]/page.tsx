@@ -61,6 +61,9 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
               {can(ctx.roles, "payments.read") && (
                 <ButtonLink href={`/${lang}/eleves/${student.id}/paiements`}>{dict.payments.myPayments}</ButtonLink>
               )}
+              {can(ctx.roles, "messages.school") && (
+                <ButtonLink href={`/${lang}/messages?eleve=${student.id}`}>{dict.messages.new}</ButtonLink>
+              )}
             </div>
           ) : undefined
         }
