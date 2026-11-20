@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "منصة المدرسة",
+    "tagline": "تسيير مدرستك ببساطة."
+  },
+  "language": {
+    "switchTo": "Français",
+    "label": "اللغة"
+  },
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "سجّل الدخول بواسطة بريدك الإلكتروني أو رقم هاتفك.",
+    "identifier": "البريد الإلكتروني أو الهاتف",
+    "password": "كلمة المرور",
+    "submit": "دخول",
+    "submitting": "جارٍ الدخول…",
+    "invalid": "المعرّف أو كلمة المرور غير صحيحة.",
+    "noAccess": "هذا الحساب غير مرتبط بأي مؤسسة. يرجى الاتصال بإدارة المدرسة.",
+    "missingFields": "يرجى ملء الخانتين."
+  },
+  "nav": {
+    "dashboard": "الرئيسية",
+    "logout": "تسجيل الخروج",
+    "school": "المؤسسة",
+    "switchSchool": "تغيير المؤسسة"
+  },
+  "roles": {
+    "ADMIN": "الإدارة",
+    "TEACHER": "مدرّس",
+    "PARENT": "وليّ",
+    "STUDENT": "تلميذ"
+  },
+  "cycles": {
+    "PRIMARY": "الابتدائي",
+    "MIDDLE": "الإعدادي",
+    "SECONDARY": "الثانوي"
+  },
+  "dashboard": {
+    "hello": "مرحبا {name}",
+    "currentYear": "السنة الدراسية {year}",
+    "noCurrentYear": "لم يتم تحديد سنة دراسية جارية.",
+    "students": "التلاميذ",
+    "classes": "الأقسام",
+    "levels": "المستويات",
+    "byCycle": "الأقسام حسب المرحلة",
+    "noClasses": "لا توجد أقسام في هذه المرحلة.",
+    "studentsCount": "{count} تلميذ",
+    "modules": "الوحدات",
+    "comingSoon": "قريبًا",
+    "myChildren": "أبنائي",
+    "noChildren": "لم يتم ربط أي طفل بحسابك بعد.",
+    "notEnrolled": "غير مسجّل هذه السنة بعد",
+    "teacherSoon": "فضاء المدرّس متوفّر في النسخة الثانية.",
+    "studentSoon": "فضاء التلميذ متوفّر في النسخة الثالثة."
+  },
+  "modules": {
+    "students": "التلاميذ",
+    "classes": "الأقسام",
+    "grades": "الأعداد",
+    "reportCards": "بطاقات الأعداد",
+    "attendance": "الغيابات",
+    "payments": "الخلاص",
+    "messages": "المراسلات"
+  },
+  "errors": {
+    "notFound": "الصفحة غير موجودة.",
+    "forbidden": "ليس لديك صلاحية الوصول إلى هذه الصفحة.",
+    "backHome": "العودة إلى الرئيسية"
+  }
+}

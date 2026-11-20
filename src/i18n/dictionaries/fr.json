@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "Plateforme École",
+    "tagline": "La gestion de votre école, simplement."
+  },
+  "language": {
+    "switchTo": "العربية",
+    "label": "Langue"
+  },
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Connectez-vous avec votre e-mail ou votre numéro de téléphone.",
+    "identifier": "E-mail ou téléphone",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion…",
+    "invalid": "Identifiant ou mot de passe incorrect.",
+    "noAccess": "Ce compte n'a accès à aucun établissement. Contactez l'administration de l'école.",
+    "missingFields": "Merci de remplir les deux champs."
+  },
+  "nav": {
+    "dashboard": "Accueil",
+    "logout": "Se déconnecter",
+    "school": "Établissement",
+    "switchSchool": "Changer d'établissement"
+  },
+  "roles": {
+    "ADMIN": "Administration",
+    "TEACHER": "Enseignant",
+    "PARENT": "Parent",
+    "STUDENT": "Élève"
+  },
+  "cycles": {
+    "PRIMARY": "Primaire",
+    "MIDDLE": "Collège",
+    "SECONDARY": "Lycée"
+  },
+  "dashboard": {
+    "hello": "Bonjour {name}",
+    "currentYear": "Année scolaire {year}",
+    "noCurrentYear": "Aucune année scolaire en cours n'est définie.",
+    "students": "Élèves",
+    "classes": "Classes",
+    "levels": "Niveaux",
+    "byCycle": "Classes par cycle",
+    "noClasses": "Aucune classe pour ce cycle.",
+    "studentsCount": "{count} élèves",
+    "modules": "Modules",
+    "comingSoon": "Bientôt",
+    "myChildren": "Mes enfants",
+    "noChildren": "Aucun enfant n'est encore relié à votre compte.",
+    "notEnrolled": "Pas encore inscrit cette année",
+    "teacherSoon": "L'espace enseignant arrive dans la version 2.",
+    "studentSoon": "L'espace élève arrive dans la version 3."
+  },
+  "modules": {
+    "students": "Élèves",
+    "classes": "Classes",
+    "grades": "Notes",
+    "reportCards": "Bulletins",
+    "attendance": "Absences",
+    "payments": "Paiements",
+    "messages": "Messagerie"
+  },
+  "errors": {
+    "notFound": "Page introuvable.",
+    "forbidden": "Vous n'avez pas accès à cette page.",
+    "backHome": "Retour à l'accueil"
+  }
+}

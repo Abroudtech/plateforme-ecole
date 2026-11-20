@@ -1,0 +1,383 @@
+// =============================================================================
+// Modèle de données de la plateforme scolaire
+// =============================================================================
+//
+// Principe "multi-établissement" : presque chaque table porte un champ
+// `schoolId`. Toutes les lectures et écritures passent par ce champ, ce qui
+// permet d'héberger plusieurs écoles dans la même base sans qu'elles voient
+// les données des autres.
+//
+// Bilingue : les libellés visibles (noms d'élèves, de classes, de matières...)
+// existent en français et en arabe (champs suffixés `Ar`).
+//
+// Voir docs/ARCHITECTURE.md pour une explication en français simple.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// Énumérations
+// -----------------------------------------------------------------------------
+
+/// Les trois cycles de l'enseignement tunisien.
+enum Cycle {
+  PRIMARY // Primaire (année préparatoire + 1re à 6e année)
+  MIDDLE // Collège (7e à 9e année de base)
+  SECONDARY // Lycée (1re à 4e année secondaire)
+}
+
+/// Rôle d'une personne dans un établissement.
+/// V1 : ADMIN et PARENT. V2 : TEACHER. V3 : STUDENT.
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+  STUDENT
+}
+
+enum Locale {
+  fr
+  ar
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum GuardianRelationship {
+  FATHER
+  MOTHER
+  GUARDIAN
+  OTHER
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  TRANSFERRED
+  WITHDRAWN
+  GRADUATED
+}
+
+// -----------------------------------------------------------------------------
+// Établissements, comptes et rôles
+// -----------------------------------------------------------------------------
+
+/// Un établissement (une école cliente de la plateforme).
+model School {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  nameFr        String
+  nameAr        String
+  city          String?
+  address       String?
+  phone         String?
+  email         String?
+  /// Cycles proposés par l'école (une école peut avoir primaire + collège + lycée).
+  cycles        Cycle[]
+  defaultLocale Locale   @default(fr)
+  currency      String   @default("TND")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships        Membership[]
+  academicYears      AcademicYear[]
+  terms              Term[]
+  gradeLevels        GradeLevel[]
+  tracks             Track[]
+  classGroups        ClassGroup[]
+  subjects           Subject[]
+  curriculumSubjects CurriculumSubject[]
+  students           Student[]
+  guardians          Guardian[]
+  enrollments        Enrollment[]
+}
+
+/// Un compte de connexion. Une même personne peut avoir des rôles dans
+/// plusieurs écoles (par ex. un parent dont les enfants sont dans deux écoles).
+model User {
+  id              String    @id @default(cuid())
+  /// Connexion par e-mail ou par téléphone (les parents utilisent souvent le téléphone).
+  email           String?   @unique
+  phone           String?   @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  firstNameAr     String?
+  lastNameAr      String?
+  preferredLocale Locale    @default(fr)
+  /// Équipe de la plateforme (gestion de toutes les écoles). Jamais donné à un client.
+  isPlatformAdmin Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  memberships Membership[]
+  sessions    Session[]
+  guardians   Guardian[]
+  /// Compte élève (V3), relié à la fiche élève.
+  student     Student?
+}
+
+/// Le rôle d'un compte dans une école donnée.
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  schoolId  String
+  role      Role
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, schoolId, role])
+  @@index([schoolId, role])
+}
+
+/// Session de connexion. Le navigateur garde un jeton secret ; la base ne
+/// garde que son empreinte (hash), jamais le jeton lui-même.
+model Session {
+  id             String   @id @default(cuid())
+  tokenHash      String   @unique
+  userId         String
+  /// École choisie quand le compte a accès à plusieurs écoles.
+  activeSchoolId String?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  userAgent      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// -----------------------------------------------------------------------------
+// Organisation scolaire : années, périodes, niveaux, filières, classes
+// -----------------------------------------------------------------------------
+
+/// Année scolaire, par ex. "2026-2027".
+model AcademicYear {
+  id        String   @id @default(cuid())
+  schoolId  String
+  label     String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  terms       Term[]
+  classGroups ClassGroup[]
+  enrollments Enrollment[]
+
+  @@unique([schoolId, label])
+}
+
+/// Période d'évaluation (trimestre ou semestre). `cycle` vide = valable pour
+/// tous les cycles ; sinon la période ne concerne qu'un cycle, ce qui permet
+/// d'avoir des trimestres au primaire et un autre découpage au lycée.
+model Term {
+  id             String    @id @default(cuid())
+  schoolId       String
+  academicYearId String
+  cycle          Cycle?
+  order          Int
+  nameFr         String
+  nameAr         String
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, academicYearId])
+}
+
+/// Niveau scolaire : "1re année", "7e année de base", "4e année secondaire"...
+model GradeLevel {
+  id       String @id @default(cuid())
+  schoolId String
+  cycle    Cycle
+  /// Code stable, par ex. "P1", "C7", "S4".
+  code     String
+  /// Rang global de 0 (préparatoire) à 13 (4e secondaire), pour trier.
+  rank     Int
+  nameFr   String
+  nameAr   String
+
+  school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroups        ClassGroup[]
+  curriculumSubjects CurriculumSubject[]
+
+  @@unique([schoolId, code])
+  @@index([schoolId, cycle])
+}
+
+/// Filière / section du lycée : Mathématiques, Sciences expérimentales, Lettres...
+model Track {
+  id       String @id @default(cuid())
+  schoolId String
+  code     String
+  nameFr   String
+  nameAr   String
+
+  school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroups        ClassGroup[]
+  curriculumSubjects CurriculumSubject[]
+
+  @@unique([schoolId, code])
+}
+
+/// Une classe pour une année donnée, par ex. "7B1" en 2026-2027.
+model ClassGroup {
+  id             String   @id @default(cuid())
+  schoolId       String
+  academicYearId String
+  gradeLevelId   String
+  trackId        String?
+  name           String
+  nameAr         String?
+  capacity       Int?
+  createdAt      DateTime @default(now())
+
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  gradeLevel   GradeLevel   @relation(fields: [gradeLevelId], references: [id])
+  track        Track?       @relation(fields: [trackId], references: [id])
+  enrollments  Enrollment[]
+
+  @@unique([schoolId, academicYearId, name])
+  @@index([schoolId, academicYearId])
+}
+
+/// Matière enseignée (catalogue de l'école).
+model Subject {
+  id       String @id @default(cuid())
+  schoolId String
+  code     String
+  nameFr   String
+  nameAr   String
+
+  school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  curriculumSubjects CurriculumSubject[]
+
+  @@unique([schoolId, code])
+}
+
+/// Programme : quelle matière est enseignée à quel niveau (et filière au
+/// lycée), avec quel coefficient. Servira au calcul des moyennes et bulletins.
+model CurriculumSubject {
+  id           String   @id @default(cuid())
+  schoolId     String
+  gradeLevelId String
+  trackId      String?
+  subjectId    String
+  coefficient  Decimal  @default(1) @db.Decimal(4, 2)
+  hoursPerWeek Decimal? @db.Decimal(4, 1)
+
+  school     School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  gradeLevel GradeLevel @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
+  track      Track?     @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([gradeLevelId, trackId, subjectId])
+  @@index([schoolId])
+}
+
+// -----------------------------------------------------------------------------
+// Élèves et familles
+// -----------------------------------------------------------------------------
+
+/// Fiche élève. Le compte de connexion élève (`userId`) viendra en V3.
+model Student {
+  id            String    @id @default(cuid())
+  schoolId      String
+  /// Matricule interne de l'école.
+  studentNumber String
+  firstName     String
+  lastName      String
+  firstNameAr   String?
+  lastNameAr    String?
+  gender        Gender?
+  birthDate     DateTime? @db.Date
+  birthPlace    String?
+  isActive      Boolean   @default(true)
+  userId        String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  school      School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  enrollments Enrollment[]
+  guardians   StudentGuardian[]
+
+  @@unique([schoolId, studentNumber])
+  @@index([schoolId, lastName])
+}
+
+/// Parent ou tuteur. Existe même sans compte sur l'application (on peut
+/// quand même lui envoyer des SMS de relance). `userId` relie au compte parent.
+model Guardian {
+  id          String   @id @default(cuid())
+  schoolId    String
+  firstName   String
+  lastName    String
+  firstNameAr String?
+  lastNameAr  String?
+  phone       String?
+  email       String?
+  /// Numéro WhatsApp s'il est différent du téléphone.
+  whatsapp    String?
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user     User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  students StudentGuardian[]
+
+  @@unique([schoolId, userId])
+  @@index([schoolId])
+}
+
+model StudentGuardian {
+  studentId    String
+  guardianId   String
+  relationship GuardianRelationship
+  /// Contact principal pour l'école (messages, relances de paiement).
+  isPrimary    Boolean              @default(false)
+
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  guardian Guardian @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, guardianId])
+  @@index([guardianId])
+}
+
+/// Inscription d'un élève dans une classe pour une année scolaire.
+model Enrollment {
+  id             String           @id @default(cuid())
+  schoolId       String
+  studentId      String
+  academicYearId String
+  classGroupId   String
+  status         EnrollmentStatus @default(ACTIVE)
+  enrolledAt     DateTime         @default(now())
+
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  classGroup   ClassGroup   @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, academicYearId])
+  @@index([schoolId, classGroupId])
+}

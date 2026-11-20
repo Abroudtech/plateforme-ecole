@@ -1,0 +1,38 @@
+# Vérifications automatiques à chaque proposition de code (pull request) :
+# la base se crée, le code est vérifié, les tests passent et le site se construit.
+name: Vérifications
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ecole
+          POSTGRES_PASSWORD: ecole
+          POSTGRES_DB: ecole
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ecole"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ecole:ecole@localhost:5432/ecole
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run db:seed
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
