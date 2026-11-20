@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generalAverage, ranks, round2, stats, subjectAverage } from "@/lib/grades/compute";
+import { generalAverage, ranks, round2, stats, subjectAverage, subjectAverageByKind } from "@/lib/grades/compute";
 
 const n = (score: number | null, maxScore = 20, weight = 1, absent = false) => ({ score, maxScore, weight, absent });
 
@@ -43,5 +43,22 @@ describe("statistiques", () => {
     expect(stats([10, 14, null, 12])).toEqual({ mean: 12, max: 14, min: 10 });
     expect(stats([null])).toBeNull();
     expect(round2(12.3456)).toBe(12.35);
+  });
+});
+
+describe("moyenne par type de note", () => {
+  const k = (kind: string, score: number | null, maxScore = 20) => ({ kind, score, maxScore, weight: 1, absent: false });
+  const scheme = { ORAL: 1, CONTROL: 1, SYNTHESIS: 2 };
+
+  it("applique oral ×1, contrôle ×1, synthèse ×2", () => {
+    // (12 + 14 + 2×16) / 4 = 14.5
+    expect(subjectAverageByKind([k("ORAL", 12), k("CONTROL", 14), k("SYNTHESIS", 16)], scheme)).toBe(14.5);
+  });
+  it("fait d'abord la moyenne de deux contrôles", () => {
+    // contrôles 10 et 14 → 12 ; (12 + 2×18) / 3 = 16
+    expect(subjectAverageByKind([k("CONTROL", 10), k("CONTROL", 14), k("SYNTHESIS", 18)], scheme)).toBe(16);
+  });
+  it("ignore un type pas encore noté", () => {
+    expect(subjectAverageByKind([k("ORAL", null), k("SYNTHESIS", 15)], scheme)).toBe(15);
   });
 });

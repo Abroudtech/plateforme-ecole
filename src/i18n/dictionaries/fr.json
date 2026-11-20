@@ -97,7 +97,8 @@
     "contactRequired": "Un téléphone ou un e-mail est nécessaire pour créer un accès.",
     "accountConflict": "Ce téléphone ou cet e-mail appartient déjà à un compte du personnel ; l'accès ne peut pas être modifié ici.",
     "phoneInvalid": "Numéro de téléphone invalide.",
-    "scoreRange": "Une note est en dehors du barème (entre 0 et la note maximale)."
+    "scoreRange": "Une note est en dehors du barème (entre 0 et la note maximale).",
+    "noKind": "Cochez au moins un type de note."
   },
   "classes": {
     "title": "Classes",
@@ -196,7 +197,19 @@
     "deleteAssessment": "Supprimer l'évaluation",
     "noCurriculum": "Aucune matière n'est définie pour cette classe. Commencez par « Matières et coefficients ».",
     "noTerms": "Aucun trimestre n'est défini pour cette année.",
-    "scoreHint": "Note sur {max}. Laisser vide si pas encore noté."
+    "scoreHint": "Note sur {max}. Laisser vide si pas encore noté.",
+    "kindsShort": {
+      "CONTROL": "Contrôle",
+      "SYNTHESIS": "Synthèse",
+      "ORAL": "Oral",
+      "PRACTICAL": "TP",
+      "OTHER": "Autre"
+    },
+    "gridHint": "Notes sur 20. Tapez « abs » pour un élève absent. Laissez vide si pas encore noté.",
+    "pickSubject": "Choisissez une matière",
+    "extra": "Évaluations supplémentaires",
+    "addExtra": "Ajouter une évaluation supplémentaire",
+    "average": "Moy."
   },
   "curriculum": {
     "title": "Matières et coefficients",
@@ -268,5 +281,32 @@
     "none": "Aucune absence.",
     "show": "Afficher",
     "todayCount": "Absents aujourd'hui"
+  },
+  "scheme": {
+    "title": "Structure des notes",
+    "intro": "Quelles notes existent dans cette matière, et combien chacune compte.",
+    "used": "Utilisée",
+    "weight": "Poids",
+    "scope": "Appliquer à",
+    "scopes": {
+      "school": "Toute l'école (règle générale)",
+      "level": "Toutes les classes de ce niveau",
+      "class": "Cette classe uniquement"
+    },
+    "forSubject": "Pour la matière",
+    "allSubjects": "Toutes les matières",
+    "current": "Règle actuelle : {source}",
+    "sources": {
+      "classSubject": "cette classe, pour cette matière",
+      "class": "cette classe, toutes matières",
+      "levelSubject": "ce niveau, pour cette matière",
+      "level": "ce niveau, toutes matières",
+      "school": "toute l'école",
+      "default": "par défaut (oral ×1, contrôle ×1, synthèse ×2)"
+    },
+    "reset": "Supprimer la règle à cet endroit",
+    "resetHint": "La matière reprendra alors la règle plus générale.",
+    "edit": "Modifier",
+    "noneSelected": "Cochez au moins un type de note."
   }
 }

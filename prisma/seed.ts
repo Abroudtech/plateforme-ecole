@@ -202,12 +202,13 @@ async function main() {
   const sixA = classes["6A"];
   if ((await db.assessment.count({ where: { classGroupId: sixA } })) === 0) {
     const yasmine = await db.student.findUniqueOrThrow({ where: { schoolId_studentNumber: { schoolId, studentNumber: "2026-001" } } });
-    const demoScores: Record<string, [number, number]> = { AR: [15, 16.5], FR: [13, 14], MATH: [17, 18.5], EVEIL: [14, 15], EN: [12, 13.5] };
-    for (const [code, [control, synthesis]] of Object.entries(demoScores)) {
+    // Oral, contrôle, synthèse (structure par défaut : ×1, ×1, ×2).
+    const demoScores: Record<string, [number, number, number]> = { AR: [16, 15, 16.5], FR: [14, 13, 14], MATH: [18, 17, 18.5], EVEIL: [15, 14, 15], EN: [13, 12, 13.5] };
+    for (const [code, [oral, control, synthesis]] of Object.entries(demoScores)) {
       const subject = await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code } } });
-      for (const [kind, score] of [["CONTROL", control], ["SYNTHESIS", synthesis]] as const) {
+      for (const [kind, score] of [["ORAL", oral], ["CONTROL", control], ["SYNTHESIS", synthesis]] as const) {
         const a = await db.assessment.create({
-          data: { schoolId, classGroupId: sixA, subjectId: subject.id, termId: t1.id, kind, weight: kind === "SYNTHESIS" ? 2 : 1 },
+          data: { schoolId, classGroupId: sixA, subjectId: subject.id, termId: t1.id, kind },
         });
         await db.grade.create({ data: { schoolId, assessmentId: a.id, studentId: yasmine.id, score } });
       }

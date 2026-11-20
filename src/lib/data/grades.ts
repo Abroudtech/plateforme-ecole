@@ -1,7 +1,8 @@
 import "server-only";
 import type { Cycle } from "@prisma/client";
 import { db } from "@/lib/db";
-import { generalAverage, ranks, stats, subjectAverage } from "@/lib/grades/compute";
+import { generalAverage, ranks, stats, subjectAverage, subjectAverageByKind } from "@/lib/grades/compute";
+import { KIND_ORDER, kindWeights, loadSchemeResolver } from "@/lib/grades/scheme";
 
 /** Trimestres de l'année valables pour un cycle. */
 export function getTerms(schoolId: string, academicYearId: string, cycle: Cycle) {
@@ -88,33 +89,45 @@ export async function computeClassReport(schoolId: string, classGroupId: string,
 
   const students = cls.enrollments.map((e) => e.student);
 
-  // Moyenne de chaque élève dans chaque matière.
+  const schemeFor = await loadSchemeResolver(db, schoolId, cls);
+
+  // Moyenne de chaque élève dans chaque matière, et de chaque type de note
+  // (oral, contrôle, synthèse) pour les colonnes du bulletin.
   const subjectRows = curriculum.map((c) => {
+    const scheme = schemeFor(c.subjectId);
+    const weights = kindWeights(scheme.items);
     const subjectAssessments = assessments.filter((a) => a.subjectId === c.subjectId);
     const averages = new Map<string, number | null>();
+    const kindAverages = new Map<string, Map<string, number | null>>();
     for (const s of students) {
-      averages.set(
+      const inputs = subjectAssessments.map((a) => {
+        const g = a.grades.find((x) => x.studentId === s.id);
+        return {
+          kind: a.kind,
+          score: g?.score != null ? Number(g.score) : null,
+          absent: g?.absent ?? false,
+          maxScore: Number(a.maxScore),
+          weight: Number(a.weight),
+        };
+      });
+      averages.set(s.id, subjectAverageByKind(inputs, weights));
+      kindAverages.set(
         s.id,
-        subjectAverage(
-          subjectAssessments.map((a) => {
-            const g = a.grades.find((x) => x.studentId === s.id);
-            return {
-              score: g?.score != null ? Number(g.score) : null,
-              absent: g?.absent ?? false,
-              maxScore: Number(a.maxScore),
-              weight: Number(a.weight),
-            };
-          }),
-        ),
+        new Map(KIND_ORDER.map((k) => [k, subjectAverage(inputs.filter((i) => i.kind === k))])),
       );
     }
     return {
       subject: c.subject,
       coefficient: Number(c.coefficient),
+      scheme: scheme.items,
       averages,
+      kindAverages,
       classStats: stats([...averages.values()]),
     };
   });
+
+  // Types de notes à afficher en colonnes (ceux utilisés par au moins une matière).
+  const usedKinds = KIND_ORDER.filter((k) => subjectRows.some((r) => r.scheme.some((i) => i.kind === k)));
 
   const generals = new Map<string, number | null>(
     students.map((s) => [
@@ -133,6 +146,7 @@ export async function computeClassReport(schoolId: string, classGroupId: string,
     classStats: stats([...generals.values()]),
     comments: new Map(comments.map((c) => [c.studentId, c.comment])),
     publication,
+    usedKinds,
     assessmentCount: assessments.length,
   };
 }

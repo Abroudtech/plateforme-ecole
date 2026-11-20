@@ -100,6 +100,7 @@ model School {
   guardians          Guardian[]
   enrollments        Enrollment[]
   assessments        Assessment[]
+  evaluationSchemes  EvaluationScheme[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -222,6 +223,7 @@ model GradeLevel {
   school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   classGroups        ClassGroup[]
   curriculumSubjects CurriculumSubject[]
+  evaluationSchemes  EvaluationScheme[]
 
   @@unique([schoolId, code])
   @@index([schoolId, cycle])
@@ -238,6 +240,7 @@ model Track {
   school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   classGroups        ClassGroup[]
   curriculumSubjects CurriculumSubject[]
+  evaluationSchemes  EvaluationScheme[]
 
   @@unique([schoolId, code])
 }
@@ -254,15 +257,16 @@ model ClassGroup {
   capacity       Int?
   createdAt      DateTime @default(now())
 
-  school       School                  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  academicYear AcademicYear            @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
-  gradeLevel   GradeLevel              @relation(fields: [gradeLevelId], references: [id])
-  track        Track?                  @relation(fields: [trackId], references: [id])
-  enrollments  Enrollment[]
-  assessments  Assessment[]
-  publications ReportCardPublication[]
-  attendance   AttendanceRecord[]
-  rollCalls    RollCall[]
+  school            School                  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear      AcademicYear            @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  gradeLevel        GradeLevel              @relation(fields: [gradeLevelId], references: [id])
+  track             Track?                  @relation(fields: [trackId], references: [id])
+  enrollments       Enrollment[]
+  assessments       Assessment[]
+  publications      ReportCardPublication[]
+  attendance        AttendanceRecord[]
+  rollCalls         RollCall[]
+  evaluationSchemes EvaluationScheme[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -279,6 +283,7 @@ model Subject {
   school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   curriculumSubjects CurriculumSubject[]
   assessments        Assessment[]
+  evaluationSchemes  EvaluationScheme[]
 
   @@unique([schoolId, code])
 }
@@ -529,4 +534,44 @@ model RollCall {
 
   @@unique([classGroupId, date, period])
   @@index([schoolId, date])
+}
+
+// -----------------------------------------------------------------------------
+// Structure des notes (étape 5)
+// -----------------------------------------------------------------------------
+
+/// Structure d'évaluation : quelles notes existent (oral, contrôle, synthèse...)
+/// et combien chacune compte. Elle peut être définie à plusieurs endroits ;
+/// la plus précise l'emporte :
+///   1. classe + matière      4. niveau/filière (toutes matières)
+///   2. classe (toutes)       5. école (toutes matières)
+///   3. niveau/filière + matière
+/// Sans rien de défini : oral ×1, contrôle ×1, synthèse ×2.
+model EvaluationScheme {
+  id           String  @id @default(cuid())
+  schoolId     String
+  gradeLevelId String?
+  trackId      String?
+  classGroupId String?
+  subjectId    String?
+
+  school     School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  gradeLevel GradeLevel?            @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
+  track      Track?                 @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup?            @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  subject    Subject?               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  items      EvaluationSchemeItem[]
+
+  @@index([schoolId])
+}
+
+model EvaluationSchemeItem {
+  id       String         @id @default(cuid())
+  schemeId String
+  kind     AssessmentKind
+  weight   Decimal        @db.Decimal(4, 2)
+
+  scheme EvaluationScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+
+  @@unique([schemeId, kind])
 }

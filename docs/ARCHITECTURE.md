@@ -122,3 +122,32 @@ tests/                   Les tests automatiques
   dernières absences de chaque enfant).
 - Les dates et le matin/après-midi sont calculés à l'heure de Tunis.
 - **À venir** : alerte automatique aux parents (SMS/WhatsApp) avec la messagerie.
+
+## 9. Structure des notes (étape 5)
+
+Chaque matière a une **structure d'évaluation** : les types de notes (oral,
+contrôle, synthèse, TP, autre) et le poids de chacun. Par défaut :
+**oral ×1, contrôle ×1, synthèse ×2**.
+
+La structure peut être réglée à plusieurs endroits ; **la plus précise l'emporte** :
+
+1. une classe, pour une matière ;
+2. une classe, pour toutes ses matières ;
+3. un niveau (et sa filière au lycée), pour une matière ;
+4. un niveau, pour toutes ses matières ;
+5. toute l'école ;
+6. sinon, la règle par défaut.
+
+Réglage : onglet « Matières et coefficients » d'une classe, lien sous chaque
+matière (`src/lib/grades/scheme.ts`, testé).
+
+**Saisie** : onglet « Notes » → trimestre → matière → un tableau avec une ligne
+par élève et une colonne par type de note (« abs » pour un absent). Les
+évaluations sont créées automatiquement. On peut ajouter des évaluations
+supplémentaires (deuxième contrôle, projet…).
+
+**Calcul de la moyenne d'une matière** : moyenne de chaque type (s'il y a deux
+contrôles, on prend leur moyenne), puis moyenne des types pondérée par la
+structure. Exemple : oral 12, contrôle 14, synthèse 16 → (12 + 14 + 2×16) / 4 = 14,5.
+
+Le **bulletin** affiche une colonne par type de note.
