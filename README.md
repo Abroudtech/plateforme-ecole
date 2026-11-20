@@ -18,7 +18,8 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | 8. Messagerie | Conversations école ↔ parents, annonces (école, niveau, classe), alertes SMS automatiques (absence, bulletin, message) | ✅ |
 
 Également disponibles : moyenne annuelle et bulletin annuel, tableau de bord
-du directeur, paramètres de l'école et de l'équipe, changement de mot de passe.
+du directeur, paramètres de l'école et de l'équipe, changement de mot de passe,
+import depuis Excel (classes, matières, salles, enseignants, élèves et parents).
 
 Le fonctionnement général est expliqué simplement dans
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

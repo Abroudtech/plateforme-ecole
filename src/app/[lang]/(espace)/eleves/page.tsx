@@ -29,7 +29,18 @@ export default async function StudentsPage({ params, searchParams }: PageProps<"
         title={dict.students.title}
         subtitle={t(dict.students.count, { count: students.length })}
         back={{ href: `/${lang}/tableau-de-bord`, label: dict.nav.dashboard }}
-        action={can(ctx.roles, "students.write") ? <ButtonLink href={`/${lang}/eleves/nouveau`}>{dict.students.add}</ButtonLink> : undefined}
+        action={
+          can(ctx.roles, "students.write") ? (
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href={`/${lang}/eleves/nouveau`}>{dict.students.add}</ButtonLink>
+              {can(ctx.roles, "import.write") && (
+                <Link href={`/${lang}/importer`} className="inline-block rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">
+                  {dict.nav.import}
+                </Link>
+              )}
+            </div>
+          ) : undefined
+        }
       />
 
       {/* Recherche : simple formulaire, l'adresse garde les filtres. */}

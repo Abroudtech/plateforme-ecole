@@ -32,7 +32,8 @@
     "timetables": "Emplois du temps",
     "payments": "Paiements",
     "messages": "Messagerie",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "import": "Importer"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -625,5 +626,89 @@
     "hint": "8 caractères minimum",
     "language": "Langue préférée (messages et SMS)",
     "identity": "Identifiant de connexion"
+  },
+  "importer": {
+    "title": "Importer depuis Excel",
+    "subtitle": "Classes, matières, salles, enseignants, élèves et parents en une fois",
+    "shortcut": "Importer depuis Excel",
+    "tip": "Pour démarrer vite, importez vos classes, enseignants et élèves depuis un fichier Excel.",
+    "step1": "Téléchargez le modèle",
+    "step1Text": "Un fichier Excel avec un onglet par type de données, en français et en arabe. Ce qui existe déjà dans la plateforme y est pré-rempli.",
+    "download": "Télécharger le modèle Excel",
+    "step2": "Remplissez-le",
+    "step2Points": [
+      "Les colonnes en bleu foncé sont obligatoires, les autres peuvent rester vides.",
+      "Pour la classe, le niveau, le sexe et le lien du parent, choisissez dans la liste de la case.",
+      "Ne changez pas les titres des colonnes ni les noms des onglets.",
+      "Vous pouvez remplir seulement certains onglets, par exemple uniquement les élèves."
+    ],
+    "step3": "Envoyez le fichier",
+    "chooseFile": "Fichier Excel (.xlsx)",
+    "check": "Vérifier le fichier",
+    "checkAgain": "Vérifier à nouveau",
+    "checking": "Vérification…",
+    "previewIntro": "Voici ce que l'import va faire. Rien n'est encore enregistré.",
+    "importNow": "Importer maintenant",
+    "importing": "Import en cours…",
+    "confirm": "Importer ces données dans la plateforme ?",
+    "done": "Import terminé. Les données sont enregistrées.",
+    "nothingToImport": "Rien de nouveau à importer.",
+    "errorsSkipped": "Les lignes en erreur seront ignorées. Corrigez-les dans le fichier puis renvoyez-le : ce qui a déjà été importé ne sera pas créé en double.",
+    "emptySheet": "onglet vide",
+    "details": "Lignes à vérifier",
+    "where": "Où",
+    "what": "Remarque",
+    "row": "ligne",
+    "seeStudents": "Voir les élèves",
+    "seeClasses": "Voir les classes",
+    "seeTeachers": "Voir les enseignants",
+    "sheets": {
+      "classes": "Classes",
+      "subjects": "Matières",
+      "rooms": "Salles",
+      "teachers": "Enseignants",
+      "students": "Élèves"
+    },
+    "status": {
+      "create": "à créer",
+      "update": "à compléter",
+      "exists": "déjà présents",
+      "error": "en erreur"
+    },
+    "statusDone": {
+      "create": "créés",
+      "update": "complétés",
+      "exists": "déjà présents",
+      "error": "ignorés (erreur)"
+    },
+    "fileErrors": {
+      "noFile": "Choisissez d'abord un fichier.",
+      "tooBig": "Le fichier est trop gros (4 Mo au plus).",
+      "unreadable": "Ce fichier ne peut pas être lu. Enregistrez-le au format Excel (.xlsx) puis réessayez.",
+      "noSheets": "Aucun onglet reconnu. Utilisez le modèle téléchargé sur cette page, sans renommer les onglets.",
+      "conflict": "Les données ont changé pendant l'import. Cliquez sur « Vérifier à nouveau »."
+    },
+    "issues": {
+      "required": "« {column} » est obligatoire.",
+      "tooLong": "« {column} » est trop long.",
+      "phoneInvalid": "« {column} » : numéro de téléphone incorrect ({value}).",
+      "emailInvalid": "« {column} » : adresse e-mail incorrecte ({value}).",
+      "dateInvalid": "« {column} » : date incorrecte ({value}). Format attendu : 15/03/2019.",
+      "genderInvalid": "« {column} » : écrire G ou F ({value}).",
+      "relationshipInvalid": "« {column} » : écrire Père, Mère, Tuteur ou Autre ({value}).",
+      "numberInvalid": "« {column} » : nombre incorrect ({value}).",
+      "parentNameMissing": "Parent {parent} : le prénom est obligatoire.",
+      "levelUnknown": "Niveau inconnu : « {value} ». Choisissez dans la liste.",
+      "trackUnknown": "Filière inconnue : « {value} ».",
+      "classUnknown": "Classe inconnue : « {value} ». Ajoutez-la dans l'onglet Classes.",
+      "duplicateInFile": "Cette ligne est en double dans le fichier.",
+      "numberTaken": "Le matricule {value} appartient déjà à {name}.",
+      "noYear": "Aucune année scolaire en cours : impossible de créer des classes.",
+      "coefficientChanged": "Coefficient modifié : {from} → {to}.",
+      "newSubject": "Nouvelle matière.",
+      "enrolled": "Élève déjà présent, inscrit en {value}.",
+      "otherClass": "Élève déjà inscrit dans une autre classe : il n'est pas déplacé.",
+      "parentAdded": "Parent ajouté : {value}."
+    }
   }
 }

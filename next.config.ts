@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
   // Version autonome du serveur, pour une image Docker légère (voir Dockerfile).
   output: "standalone",
   poweredByHeader: false,
+  // Lecture des fichiers Excel côté serveur (import des élèves...).
+  serverExternalPackages: ["exceljs"],
+  experimental: {
+    // Les fichiers Excel envoyés pour l'import peuvent dépasser 1 Mo.
+    serverActions: { bodySizeLimit: "5mb" },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -227,3 +227,28 @@ Le **bulletin** affiche une colonne par type de note.
   (base, migrations, site, HTTPS automatique avec Caddy), `deploy/sauvegarde.sh`,
   `/api/sante` pour la surveillance. Création d'une vraie école : `npm run ecole:creer`
   (`scripts/creer-ecole.ts`). Guide pas à pas : [DEPLOIEMENT.md](DEPLOIEMENT.md).
+
+## 14. Import depuis Excel
+
+Page **Importer** (`/fr/importer`, réservée à l'administration) pour démarrer
+une école en une fois : classes, matières et coefficients, salles,
+enseignants, élèves (avec leur classe) et parents.
+
+- **Modèle** (`importer/modele/route.ts`) : fichier Excel fabriqué à la demande
+  avec un onglet par type de données, des en-têtes bilingues, des listes de
+  choix (niveau, classe, sexe, lien du parent) et ce que l'école contient déjà.
+- **Lecture** (`src/lib/import/parse.ts`) : reconnaît les onglets et les
+  colonnes en français ou en arabe, et vérifie chaque ligne (téléphone, date,
+  champs obligatoires...).
+- **Préparation** (`src/lib/import/plan.ts`) : pour chaque ligne, dit si elle
+  sera créée, complétée, ignorée (déjà présente) ou si elle est en erreur. Un
+  élève existe déjà s'il a le même matricule, ou les mêmes nom et prénom (et
+  la même date de naissance quand elle est connue). Un parent existe déjà
+  s'il a le même téléphone ou e-mail : les frères et sœurs partagent ainsi le
+  même parent.
+- **Écriture** (`src/lib/data/import.ts`) : tout le plan est écrit dans une
+  seule transaction. Rien n'est jamais supprimé ni déplacé, et on peut renvoyer
+  le même fichier sans créer de doublons.
+
+L'écran montre d'abord un aperçu (rien n'est enregistré), puis importe les
+lignes correctes ; les lignes en erreur sont listées pour être corrigées.
