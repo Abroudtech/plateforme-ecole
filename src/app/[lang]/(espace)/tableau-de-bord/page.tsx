@@ -11,7 +11,7 @@ import { getAdminOverview, getParentChildren } from "@/lib/data/school";
 const CYCLES: Cycle[] = ["PRIMARY", "MIDDLE", "SECONDARY"];
 
 /** Modules déjà disponibles (les autres affichent "Bientôt"). */
-const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes" };
+const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes" };
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
@@ -138,6 +138,11 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                     ? `${pickName(enrollment.classGroup.gradeLevel, lang)} · ${lang === "ar" && enrollment.classGroup.nameAr ? enrollment.classGroup.nameAr : enrollment.classGroup.name}`
                     : dict.dashboard.notEnrolled}
                 </p>
+                {enrollment && (
+                  <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="mt-3 inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
+                    {dict.reportCards.myBulletins}
+                  </Link>
+                )}
               </li>
             );
           })}

@@ -10,7 +10,7 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 |---|---|---|
 | 1. Fondation | Structure, base de données multi-établissement, connexion et rôles, français/arabe | ✅ |
 | 2. Élèves et classes | Ajouter, modifier, inscrire les élèves ; gérer les classes ; parents et accès parents | ✅ |
-| 3. Notes et bulletins | Saisie des notes, moyennes, bulletins bilingues | à venir |
+| 3. Notes et bulletins | Matières et coefficients, saisie des notes, moyennes et rang, bulletins bilingues publiés aux parents | ✅ |
 | 4. Absences | Appel, justificatifs, alertes aux parents | à venir |
 | 5. Paiements | Frais de scolarité, échéances, relances des impayés | à venir |
 | 6. Messagerie | École ↔ parents, notifications | à venir |

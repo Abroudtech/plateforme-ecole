@@ -95,7 +95,8 @@
     "noYear": "Aucune année scolaire en cours. Créez-la d'abord.",
     "contactRequired": "Un téléphone ou un e-mail est nécessaire pour créer un accès.",
     "accountConflict": "Ce téléphone ou cet e-mail appartient déjà à un compte du personnel ; l'accès ne peut pas être modifié ici.",
-    "phoneInvalid": "Numéro de téléphone invalide."
+    "phoneInvalid": "Numéro de téléphone invalide.",
+    "scoreRange": "Une note est en dehors du barème (entre 0 et la note maximale)."
   },
   "classes": {
     "title": "Classes",
@@ -167,5 +168,68 @@
     "login": "Identifiant",
     "tempPassword": "Mot de passe provisoire",
     "unlink": "Retirer"
+  },
+  "grades": {
+    "title": "Notes",
+    "term": "Trimestre",
+    "assessments": "Évaluations",
+    "addAssessment": "Nouvelle évaluation",
+    "subject": "Matière",
+    "kind": "Type",
+    "kinds": {
+      "CONTROL": "Devoir de contrôle",
+      "SYNTHESIS": "Devoir de synthèse",
+      "ORAL": "Oral",
+      "PRACTICAL": "Travaux pratiques",
+      "OTHER": "Autre"
+    },
+    "label": "Intitulé",
+    "date": "Date",
+    "maxScore": "Barème",
+    "weight": "Poids",
+    "noAssessments": "Aucune évaluation pour ce trimestre.",
+    "entered": "{count} / {total} notes",
+    "enterGrades": "Saisir les notes",
+    "score": "Note",
+    "absent": "Absent",
+    "deleteAssessment": "Supprimer l'évaluation",
+    "noCurriculum": "Aucune matière n'est définie pour cette classe. Commencez par « Matières et coefficients ».",
+    "noTerms": "Aucun trimestre n'est défini pour cette année.",
+    "scoreHint": "Note sur {max}. Laisser vide si pas encore noté."
+  },
+  "curriculum": {
+    "title": "Matières et coefficients",
+    "subtitle": "S'applique à toutes les classes : {level}",
+    "coefficient": "Coefficient",
+    "hint": "Laisser vide si la matière n'est pas enseignée à ce niveau.",
+    "applyDefaults": "Remplir avec le programme par défaut"
+  },
+  "reportCards": {
+    "title": "Bulletins",
+    "bulletin": "Bulletin de notes",
+    "average": "Moyenne",
+    "general": "Moyenne générale",
+    "rank": "Rang",
+    "classAverage": "Moy. classe",
+    "highest": "Plus haute",
+    "lowest": "Plus basse",
+    "coefficient": "Coef.",
+    "subject": "Matière",
+    "comment": "Appréciation du conseil de classe",
+    "publish": "Publier les bulletins aux parents",
+    "unpublish": "Retirer la publication",
+    "published": "Publié aux parents le {date}",
+    "notPublished": "Non publié : les parents ne le voient pas encore.",
+    "print": "Imprimer",
+    "student": "Élève",
+    "class": "Classe",
+    "year": "Année scolaire",
+    "number": "Matricule",
+    "noGrades": "Pas encore de notes.",
+    "view": "Bulletin",
+    "rankOf": "{rank} / {count}",
+    "signature": "Le directeur",
+    "notAvailable": "Le bulletin de ce trimestre n'est pas encore disponible.",
+    "myBulletins": "Bulletins"
   }
 }
