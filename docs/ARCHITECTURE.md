@@ -169,3 +169,25 @@ Le **bulletin** affiche une colonne par type de note.
   (lecture seule, uniquement pour leurs enfants). Toutes les vues s'impriment.
 - Droits : `timetable.read` (administration, enseignants plus tard), `timetable.write` et `staff.write`
   (administration).
+
+## 11. Paiements et relances (étape 7)
+
+- **Montants en millimes** (entiers, 1 DT = 1000) : aucune erreur d'arrondi. Saisie et affichage
+  dans `src/lib/payments.ts` (`parseAmount`, `formatMoney`), testés.
+- **Frais** (`Fee`) : définis pour l'année, pour un niveau ou toute l'école, avec une échéance.
+  Un frais *obligatoire* est dû par tous les élèves concernés ; un frais *optionnel*
+  (cantine, transport) seulement par les élèves inscrits au service.
+- **`StudentFee`** : inscription à un service optionnel, ou montant personnalisé
+  (réduction, bourse ; 0 = exonéré).
+- **Paiements** (`Payment`) : imputés à une année, numéro de reçu unique et croissant par école.
+  Un paiement n'est jamais supprimé : il est annulé avec un motif (le reçu reste, barré).
+- **Calcul du compte** (`computeAccount`) : les paiements sont répartis sur les frais par ordre
+  d'échéance ; un frais non soldé dont l'échéance est passée est « en retard ».
+  Rien n'est stocké : le solde est toujours recalculé, donc toujours juste.
+- **Relances** (`PaymentReminder`) : WhatsApp (lien `wa.me` avec un message en arabe et en
+  français vers le parent principal), lettre bilingue imprimable, ou appel noté.
+  Chaque relance est tracée. Les SMS automatiques viendront avec la messagerie (étape 8).
+- Pages : `/paiements` (chiffres clés, impayés par classe), `/paiements/frais`,
+  `/paiements/encaissements` (journal de caisse), `/paiements/recus/[id]`,
+  `/eleves/[id]/paiements` (compte de l'élève ; lecture seule pour les parents) et
+  `/eleves/[id]/paiements/relance`.
