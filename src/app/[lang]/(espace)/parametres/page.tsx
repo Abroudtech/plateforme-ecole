@@ -71,6 +71,13 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
         </div>
       </Card>
 
+      <Card title={dict.importer.title}>
+        <p className="mb-3 text-sm text-slate-600">{dict.importer.subtitle}.</p>
+        <Link href={`/${lang}/importer`} className="inline-block rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">
+          {dict.importer.shortcut}
+        </Link>
+      </Card>
+
       <Card title={st.team}>
         <ul className="mb-4 flex flex-col gap-2">
           {team.map((m) => (

@@ -73,6 +73,12 @@ async function AdminDashboard({ ctx, lang, dict }: Props) {
         )}
       </p>
 
+      {o.studentCount === 0 && (
+        <Link href={`/${lang}/importer`} className="block rounded-2xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-200 hover:bg-blue-100">
+          <span className="font-semibold">{dict.importer.shortcut}</span> · {dict.importer.tip}
+        </Link>
+      )}
+
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Tile label={dict.dashboard.students} value={String(o.studentCount)} href={`/${lang}/eleves`} />
         <Tile label={d.absentToday} value={String(o.absentToday)} sub={o.lateToday ? `${o.lateToday} ${d.lateToday.toLowerCase()}` : undefined} href={`/${lang}/absences`} />
