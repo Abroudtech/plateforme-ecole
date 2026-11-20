@@ -9,6 +9,8 @@ import { can } from "@/lib/auth/permissions";
 import { listClasses } from "@/lib/data/classes";
 import { getCurrentYear } from "@/lib/data/school";
 import { getStudent } from "@/lib/data/students";
+import { getStudentAttendance } from "@/lib/data/attendance";
+import { AttendanceList } from "@/components/attendance-list";
 import { ActionForm } from "@/components/action-form";
 import { ButtonLink, Card, Field, PageHeader, Select } from "@/components/ui";
 import {
@@ -33,6 +35,7 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
   const canWrite = can(ctx.roles, "students.write");
   const classes = year && canWrite ? await listClasses(ctx.school.id, year.id) : [];
   const enrollment = student.enrollments[0];
+  const attendance = await getStudentAttendance(ctx.school.id, student.id, year?.startDate);
   const labels = formLabels(dict);
   const g = dict.guardians;
 
@@ -81,6 +84,18 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
           </ActionForm>
         </Card>
       )}
+
+      {/* Absences de l'année */}
+      <Card title={dict.attendance.history}>
+        <p className="mb-3 text-sm text-slate-600">{t(dict.attendance.summary, attendance.summary)}</p>
+        <AttendanceList
+          records={attendance.records}
+          dict={dict}
+          lang={lang}
+          canWrite={can(ctx.roles, "attendance.write")}
+          renderLabel={(r) => dict.attendance.statuses[r.status]}
+        />
+      </Card>
 
       {/* Parents et tuteurs */}
       <Card title={g.title}>

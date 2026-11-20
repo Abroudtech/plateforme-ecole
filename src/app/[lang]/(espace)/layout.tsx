@@ -40,6 +40,7 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
               { href: "tableau-de-bord", label: dict.nav.dashboard },
               { href: "eleves", label: dict.nav.students },
               { href: "classes", label: dict.nav.classes },
+              { href: "absences", label: dict.nav.attendance },
             ].map((item) => (
               <Link key={item.href} href={`/${lang}/${item.href}`} className="rounded-full px-3 py-1.5 hover:bg-slate-100">
                 {item.label}

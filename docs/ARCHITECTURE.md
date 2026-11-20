@@ -109,3 +109,16 @@ tests/                   Les tests automatiques
   uniquement pour leurs propres enfants.
 - **À venir** : la moyenne annuelle (la formule diffère selon le cycle) et les
   décisions de fin d'année.
+
+## 8. Absences (étape 4)
+
+- **Appel** : par classe, le matin ou l'après-midi (onglet « Appel » de la
+  classe). Par défaut tout le monde est présent ; on touche « Absent » ou
+  « Retard » pour les exceptions. L'appel est marqué « fait » même si tout le
+  monde est présent.
+- **Absents du jour** (menu « Absences ») : liste de l'école pour une date,
+  justification avec un motif, et liste des classes dont l'appel n'est pas fait.
+- **Suivi** : fiche élève (historique et décompte) et espace parent (décompte et
+  dernières absences de chaque enfant).
+- Les dates et le matin/après-midi sont calculés à l'heure de Tunis.
+- **À venir** : alerte automatique aux parents (SMS/WhatsApp) avec la messagerie.
