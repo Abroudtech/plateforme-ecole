@@ -25,7 +25,8 @@
     "switchSchool": "تغيير المؤسسة",
     "students": "التلاميذ",
     "classes": "الأقسام",
-    "back": "رجوع"
+    "back": "رجوع",
+    "attendance": "الغيابات"
   },
   "roles": {
     "ADMIN": "الإدارة",
@@ -231,5 +232,41 @@
     "signature": "المدير",
     "notAvailable": "بطاقة أعداد هذا الثلاثي غير متوفّرة بعد.",
     "myBulletins": "بطاقات الأعداد"
+  },
+  "attendance": {
+    "title": "الغيابات",
+    "rollCall": "المناداة",
+    "today": "اليوم",
+    "date": "التاريخ",
+    "period": "الفترة",
+    "periods": {
+      "MORNING": "صباحًا",
+      "AFTERNOON": "مساءً"
+    },
+    "present": "حاضر",
+    "absent": "غائب",
+    "late": "متأخّر",
+    "statuses": {
+      "ABSENT": "غياب",
+      "LATE": "تأخّر"
+    },
+    "saveRollCall": "حفظ المناداة",
+    "done": "تمّت المناداة",
+    "notDone": "لم تتمّ المناداة",
+    "allPresent": "الجميع حاضرون.",
+    "dayList": "الغيابات والتأخيرات بتاريخ {date}",
+    "noneToday": "لا توجد غيابات ولا تأخيرات في هذا التاريخ.",
+    "classesTodo": "أقسام لم تتمّ مناداتها",
+    "justified": "مبرَّر",
+    "unjustified": "غير مبرَّر",
+    "justify": "تبرير",
+    "unjustify": "إلغاء التبرير",
+    "reason": "السبب",
+    "reasonPlaceholder": "شهادة طبية، كلمة من الوليّ…",
+    "summary": "{absences} غياب ({unjustified} غير مبرَّر) · {lates} تأخير",
+    "history": "سجلّ الغيابات",
+    "none": "لا توجد غيابات.",
+    "show": "عرض",
+    "todayCount": "الغائبون اليوم"
   }
 }

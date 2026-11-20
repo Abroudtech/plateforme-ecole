@@ -25,7 +25,8 @@
     "switchSchool": "Changer d'établissement",
     "students": "Élèves",
     "classes": "Classes",
-    "back": "Retour"
+    "back": "Retour",
+    "attendance": "Absences"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -231,5 +232,41 @@
     "signature": "Le directeur",
     "notAvailable": "Le bulletin de ce trimestre n'est pas encore disponible.",
     "myBulletins": "Bulletins"
+  },
+  "attendance": {
+    "title": "Absences",
+    "rollCall": "Appel",
+    "today": "Aujourd'hui",
+    "date": "Date",
+    "period": "Moment",
+    "periods": {
+      "MORNING": "Matin",
+      "AFTERNOON": "Après-midi"
+    },
+    "present": "Présent",
+    "absent": "Absent",
+    "late": "Retard",
+    "statuses": {
+      "ABSENT": "Absent",
+      "LATE": "Retard"
+    },
+    "saveRollCall": "Enregistrer l'appel",
+    "done": "Appel fait",
+    "notDone": "Appel non fait",
+    "allPresent": "Tout le monde est présent.",
+    "dayList": "Absents et retards du {date}",
+    "noneToday": "Aucune absence ni retard enregistré pour cette date.",
+    "classesTodo": "Classes sans appel",
+    "justified": "Justifiée",
+    "unjustified": "Non justifiée",
+    "justify": "Justifier",
+    "unjustify": "Annuler la justification",
+    "reason": "Motif",
+    "reasonPlaceholder": "Certificat médical, mot des parents…",
+    "summary": "{absences} absences ({unjustified} non justifiées) · {lates} retards",
+    "history": "Historique des absences",
+    "none": "Aucune absence.",
+    "show": "Afficher",
+    "todayCount": "Absents aujourd'hui"
   }
 }

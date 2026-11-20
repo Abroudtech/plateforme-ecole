@@ -7,11 +7,13 @@ import { personName, pickName } from "@/i18n/localized";
 import { requireContext, type AppContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { getAdminOverview, getParentChildren } from "@/lib/data/school";
+import { countAbsences, getStudentAttendance } from "@/lib/data/attendance";
+import { parseISODate, todayISO } from "@/lib/dates";
 
 const CYCLES: Cycle[] = ["PRIMARY", "MIDDLE", "SECONDARY"];
 
 /** Modules déjà disponibles (les autres affichent "Bientôt"). */
-const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes" };
+const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes", attendance: "absences" };
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
@@ -37,6 +39,7 @@ type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; 
 
 async function AdminDashboard({ ctx, lang, dict }: Props) {
   const { year, studentCount, levelCount, classes } = await getAdminOverview(ctx.school.id);
+  const absentToday = await countAbsences(ctx.school.id, parseISODate(todayISO())!);
   const cycles = CYCLES.filter((c) => ctx.school.cycles.includes(c));
   const modules = ["students", "classes", "grades", "reportCards", "attendance", "payments", "messages"] as const;
 
@@ -53,10 +56,13 @@ async function AdminDashboard({ ctx, lang, dict }: Props) {
         )}
       </p>
 
-      <section className="grid grid-cols-3 gap-3">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label={dict.dashboard.students} value={studentCount} />
         <Stat label={dict.dashboard.classes} value={classes.length} />
         <Stat label={dict.dashboard.levels} value={levelCount} />
+        <Link href={`/${lang}/absences`}>
+          <Stat label={dict.attendance.todayCount} value={absentToday} />
+        </Link>
       </section>
 
       <section className="flex flex-col gap-4">
@@ -121,6 +127,9 @@ async function AdminDashboard({ ctx, lang, dict }: Props) {
 
 async function ParentDashboard({ ctx, lang, dict }: Props) {
   const children = await getParentChildren(ctx.school.id, ctx.user.id);
+  const attendance = new Map(
+    await Promise.all(children.map(async (c) => [c.id, await getStudentAttendance(ctx.school.id, c.id)] as const)),
+  );
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold">{dict.dashboard.myChildren}</h2>
@@ -138,6 +147,20 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                     ? `${pickName(enrollment.classGroup.gradeLevel, lang)} · ${lang === "ar" && enrollment.classGroup.nameAr ? enrollment.classGroup.nameAr : enrollment.classGroup.name}`
                     : dict.dashboard.notEnrolled}
                 </p>
+                <p className="mt-2 text-sm text-slate-600">
+                  {dict.attendance.title} : {t(dict.attendance.summary, attendance.get(child.id)!.summary)}
+                </p>
+                {attendance.get(child.id)!.records.length > 0 && (
+                  <ul className="mt-1 text-xs text-slate-500">
+                    {attendance.get(child.id)!.records.slice(0, 3).map((r) => (
+                      <li key={r.id}>
+                        {new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", timeZone: "UTC" }).format(r.date)}
+                        {" · "}{dict.attendance.periods[r.period]} · {dict.attendance.statuses[r.status]}
+                        {r.justified ? ` (${dict.attendance.justified})` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {enrollment && (
                   <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="mt-3 inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
                     {dict.reportCards.myBulletins}

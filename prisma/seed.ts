@@ -215,6 +215,14 @@ async function main() {
     await db.reportCardPublication.create({ data: { schoolId, classGroupId: sixA, termId: t1.id } });
   }
 
+  // Une absence de démonstration pour Adam (enfant du compte parent).
+  const adam = await db.student.findUniqueOrThrow({ where: { schoolId_studentNumber: { schoolId, studentNumber: "2026-002" } } });
+  await db.attendanceRecord.upsert({
+    where: { studentId_date_period: { studentId: adam.id, date: new Date("2026-11-10"), period: "MORNING" } },
+    update: {},
+    create: { schoolId, studentId: adam.id, classGroupId: classes["9B1"], date: new Date("2026-11-10"), period: "MORNING", status: "ABSENT", justified: true, reason: "Certificat médical" },
+  });
+
   console.log("✔ Données de démonstration prêtes.");
   console.log(`  Administration : admin@demo.tn / ${PASSWORD}`);
   console.log(`  Parent         : 22 000 000 (ou parent@demo.tn) / ${PASSWORD}`);

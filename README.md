@@ -11,9 +11,11 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | 1. Fondation | Structure, base de données multi-établissement, connexion et rôles, français/arabe | ✅ |
 | 2. Élèves et classes | Ajouter, modifier, inscrire les élèves ; gérer les classes ; parents et accès parents | ✅ |
 | 3. Notes et bulletins | Matières et coefficients, saisie des notes, moyennes et rang, bulletins bilingues publiés aux parents | ✅ |
-| 4. Absences | Appel, justificatifs, alertes aux parents | à venir |
-| 5. Paiements | Frais de scolarité, échéances, relances des impayés | à venir |
-| 6. Messagerie | École ↔ parents, notifications | à venir |
+| 4. Absences | Appel matin/après-midi, absents du jour, justification, suivi parent | ✅ |
+| 5. Structure des notes | Oral, contrôle, synthèse configurables par matière, niveau et classe | à venir |
+| 6. Emplois du temps | Emploi du temps par classe, consultable par les parents | à venir |
+| 7. Paiements | Frais de scolarité, échéances, relances des impayés | à venir |
+| 8. Messagerie | École ↔ parents, notifications | à venir |
 
 Le fonctionnement général est expliqué simplement dans
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

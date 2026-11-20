@@ -261,6 +261,8 @@ model ClassGroup {
   enrollments  Enrollment[]
   assessments  Assessment[]
   publications ReportCardPublication[]
+  attendance   AttendanceRecord[]
+  rollCalls    RollCall[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -323,12 +325,13 @@ model Student {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  school       School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user         User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   enrollments  Enrollment[]
   guardians    StudentGuardian[]
   grades       Grade[]
   termComments TermComment[]
+  attendance   AttendanceRecord[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -474,4 +477,56 @@ model ReportCardPublication {
   term       Term       @relation(fields: [termId], references: [id], onDelete: Cascade)
 
   @@unique([classGroupId, termId])
+}
+
+// -----------------------------------------------------------------------------
+// Absences (étape 4)
+// -----------------------------------------------------------------------------
+
+/// Demi-journée concernée par l'appel.
+enum DayPeriod {
+  MORNING // Matin
+  AFTERNOON // Après-midi
+}
+
+enum AttendanceStatus {
+  ABSENT
+  LATE // Retard
+}
+
+/// Une absence ou un retard d'un élève. Un élève présent n'a pas de ligne.
+model AttendanceRecord {
+  id           String           @id @default(cuid())
+  schoolId     String
+  studentId    String
+  classGroupId String
+  date         DateTime         @db.Date
+  period       DayPeriod
+  status       AttendanceStatus
+  justified    Boolean          @default(false)
+  reason       String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date, period])
+  @@index([schoolId, date])
+  @@index([classGroupId, date])
+}
+
+/// Trace qu'un appel a été fait pour une classe (même si tout le monde était présent).
+model RollCall {
+  id           String    @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  date         DateTime  @db.Date
+  period       DayPeriod
+  createdAt    DateTime  @default(now())
+
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([classGroupId, date, period])
+  @@index([schoolId, date])
 }
