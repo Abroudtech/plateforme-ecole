@@ -50,6 +50,12 @@ démarrage, et chaque fusion sur `main` met le site à jour tout seul.
    chez soi, utiliser **Export** de temps en temps.
 6. SMS (plus tard) : service `ecole` > **Environment**, ajouter
    `SMS_API_URL`, `SMS_API_TOKEN` et `SMS_SENDER`.
+7. Atelier IA des enseignants : créer une clé sur
+   [console.anthropic.com](https://console.anthropic.com) (**API Keys** >
+   **Create Key**, avec un moyen de paiement), puis service `ecole` >
+   **Environment** > **Add Environment Variable** : `ANTHROPIC_API_KEY` = la clé.
+   Facultatif : `AI_MONTHLY_LIMIT` (documents par mois et par école, 300 par
+   défaut). Sans clé, l'atelier affiche simplement « pas encore activé ».
 
 ---
 
@@ -144,6 +150,18 @@ SMS_SENDER=ECOLE
 puis `docker compose up -d`. La plateforme envoie à cette adresse
 `{ "to": "+216…", "from": "ECOLE", "text": "…" }`. Si le fournisseur attend un
 autre format, une petite adaptation de `src/lib/sms.ts` suffit.
+
+## 5 bis. Activer l'atelier IA
+
+Ajouter dans `deploy/.env` la clé créée sur console.anthropic.com :
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+AI_MONTHLY_LIMIT=300
+```
+
+puis `docker compose up -d`. Chaque document coûte quelques centimes ; la
+limite mensuelle évite les mauvaises surprises.
 
 ## 6. Vérifier que tout fonctionne
 

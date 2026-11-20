@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { scopeOf } from "@/lib/auth/scope";
 import type { Cycle } from "@prisma/client";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -21,7 +22,8 @@ export default async function ClassesPage({ params }: PageProps<"/[lang]/classes
   const dict = await getDictionary(lang);
   const ctx = await requirePermission(lang, "classes.read");
   const year = await getCurrentYear(ctx.school.id);
-  const classes = year ? await listClasses(ctx.school.id, year.id) : [];
+  const scope = await scopeOf(ctx);
+  const classes = (year ? await listClasses(ctx.school.id, year.id) : []).filter((c) => !scope || scope.includes(c.id));
   const { levels, tracks } = await getLevelsAndTracks(ctx.school.id, ctx.school.cycles);
   const canWrite = can(ctx.roles, "classes.write");
 

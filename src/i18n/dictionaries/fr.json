@@ -35,7 +35,12 @@
     "settings": "Paramètres",
     "import": "Importer",
     "more": "Plus",
-    "menu": "Menu"
+    "menu": "Menu",
+    "workshop": "Atelier IA",
+    "classSpace": "Espace classe",
+    "myClasses": "Mes classes",
+    "challenges": "Défis",
+    "games": "Jeux"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -130,7 +135,13 @@
     "passwordMismatch": "Les deux nouveaux mots de passe ne sont pas identiques.",
     "emailInvalid": "Adresse e-mail invalide.",
     "alreadyAdmin": "Cette personne fait déjà partie de l'administration.",
-    "cannotRemoveSelf": "Vous ne pouvez pas retirer votre propre accès."
+    "cannotRemoveSelf": "Vous ne pouvez pas retirer votre propre accès.",
+    "forbidden": "Vous n'avez pas accès à cette classe.",
+    "aiDisabled": "L'atelier IA n'est pas activé.",
+    "aiQuota": "Le nombre de documents de ce mois est atteint. Réessayez le mois prochain ou contactez la direction.",
+    "aiRefused": "L'IA n'a pas pu préparer ce document. Reformulez le thème ou les consignes.",
+    "aiBusy": "Le service est très demandé en ce moment. Réessayez dans une minute.",
+    "aiUnavailable": "Le service d'IA ne répond pas. Réessayez plus tard."
   },
   "classes": {
     "title": "Classes",
@@ -385,7 +396,17 @@
     "hoursWeek": "{hours} par semaine",
     "deactivate": "Désactiver",
     "reactivate": "Réactiver",
-    "inactive": "Inactif"
+    "inactive": "Inactif",
+    "access": "Accès à l'application",
+    "hasAccount": "A accès à l'application : il voit uniquement ses classes.",
+    "noAccount": "Pas encore d'accès. Ajoutez son téléphone ou son e-mail, puis créez l'accès.",
+    "createAccount": "Créer l'accès enseignant",
+    "resetPassword": "Nouveau mot de passe",
+    "accountCreated": "Accès prêt. Communiquez ces informations à l'enseignant :",
+    "classes": "Classes de l'enseignant",
+    "classesHelp": "Cochez les classes de cet enseignant. Il pourra y faire l'appel et saisir les notes. Les classes de son emploi du temps sont ajoutées automatiquement.",
+    "fromTimetable": "emploi du temps",
+    "noClasses": "Aucune classe cette année."
   },
   "rooms": {
     "title": "Salles",
@@ -722,5 +743,59 @@
       "otherClass": "Élève déjà inscrit dans une autre classe : il n'est pas déplacé.",
       "parentAdded": "Parent ajouté : {value}."
     }
+  },
+  "teacherHome": {
+    "today": "Mes cours aujourd'hui",
+    "noLessons": "Pas de cours prévu aujourd'hui dans votre emploi du temps.",
+    "noClasses": "Aucune classe ne vous est encore confiée. La direction peut vous en attribuer depuis votre fiche enseignant.",
+    "myTimetable": "Mon emploi du temps",
+    "resources": "{count} documents",
+    "notLinked": "Votre compte n'est relié à aucune fiche enseignant. Contactez la direction."
+  },
+  "workshop": {
+    "title": "Atelier IA",
+    "subtitle": "Préparez en une minute une fiche de leçon, une série d'exercices ou un examen, conforme au programme tunisien.",
+    "newDoc": "Nouveau document",
+    "kind": "Type de document",
+    "kinds": {
+      "LESSON": {
+        "title": "Fiche de leçon",
+        "text": "Préparation de séance, étape par étape"
+      },
+      "EXERCISES": {
+        "title": "Exercices",
+        "text": "Série progressive avec corrigé"
+      },
+      "EXAM": {
+        "title": "Examen",
+        "text": "Évaluation par critères, barème et corrigé"
+      }
+    },
+    "level": "Niveau",
+    "subject": "Matière",
+    "topic": "Thème ou leçon",
+    "topicHint": "par exemple : la multiplication par 10, 100, 1000",
+    "term": "Trimestre",
+    "duration": "Durée",
+    "count": "Nombre d'exercices",
+    "difficulty": "Difficulté",
+    "difficulties": {
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
+    },
+    "instructions": "Consignes particulières",
+    "instructionsHint": "facultatif",
+    "minutes": "minutes",
+    "waitNote": "La préparation prend environ une minute. Le document est en arabe, sauf en français et en anglais.",
+    "generate": "Préparer le document",
+    "generating": "Préparation en cours… (environ une minute)",
+    "disabled": "L'atelier IA n'est pas encore activé sur cette plateforme. La direction doit ajouter la clé ANTHROPIC_API_KEY dans les réglages du serveur (voir le guide de déploiement).",
+    "myDocs": "Mes documents",
+    "schoolDocs": "Documents de l'école",
+    "none": "Aucun document pour le moment.",
+    "print": "Imprimer",
+    "delete": "Supprimer le document",
+    "reviewNote": "Document préparé par l'IA : relisez-le et adaptez-le à votre classe avant de l'utiliser."
   }
 }

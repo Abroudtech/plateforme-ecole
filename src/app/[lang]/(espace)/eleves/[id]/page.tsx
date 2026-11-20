@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { hasStudentAccess } from "@/lib/auth/scope";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { formLabels } from "@/i18n/form-labels";
@@ -32,6 +33,7 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
   const year = await getCurrentYear(ctx.school.id);
   const student = await getStudent(ctx.school.id, id, year?.id ?? null);
   if (!student) notFound();
+  if (!(await hasStudentAccess(ctx, student.id))) redirect(`/${lang}/acces-refuse`);
   const canWrite = can(ctx.roles, "students.write");
   const classes = year && canWrite ? await listClasses(ctx.school.id, year.id) : [];
   const enrollment = student.enrollments[0];
@@ -100,7 +102,7 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
           records={attendance.records}
           dict={dict}
           lang={lang}
-          canWrite={can(ctx.roles, "attendance.write")}
+          canWrite={can(ctx.roles, "attendance.justify")}
           renderLabel={(r) => dict.attendance.statuses[r.status]}
         />
       </Card>

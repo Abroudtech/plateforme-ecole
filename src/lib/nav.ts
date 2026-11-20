@@ -12,6 +12,35 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
   const home: NavItem = { href: h("tableau-de-bord"), label: dict.nav.dashboard, icon: "home" };
   const account: NavItem = { href: h("mon-compte"), label: dict.account.title, icon: "account" };
 
+  const workshop: NavItem = { href: h("atelier"), label: dict.nav.workshop, icon: "workshop" };
+  const classSpace: NavItem = { href: h("espace-classe"), label: dict.nav.classSpace, icon: "classSpace" };
+
+  // Enseignant (sans être de la direction) : ses classes, l'appel, l'atelier IA.
+  if (can(roles, "teacher.space") && !can(roles, "dashboard.admin")) {
+    const classes: NavItem = { href: h("classes"), label: dict.nav.myClasses, icon: "classes" };
+    const attendance: NavItem = { href: h("absences"), label: dict.nav.attendance, icon: "attendance" };
+    const parent: NavItem[] = can(roles, "children.read")
+      ? [
+          { href: h("messages"), label: dict.nav.messages, icon: "messages" },
+          { href: h("annonces"), label: dict.messages.announcements, icon: "announcements" },
+        ]
+      : [];
+    const all: NavItem[] = [home, classes, attendance, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, ...parent, account];
+    return { all, bottom: [home, classes, attendance, workshop, { href: h("menu"), label: dict.nav.more, icon: "more" }] };
+  }
+
+  // Élève : défis, jeux, classement et mur de la classe.
+  if (can(roles, "student.space")) {
+    const items: NavItem[] = [
+      home,
+      { href: h("defis"), label: dict.nav.challenges, icon: "challenges" },
+      { href: h("jeux"), label: dict.nav.games, icon: "games" },
+      classSpace,
+      account,
+    ];
+    return { all: items, bottom: items };
+  }
+
   if (can(roles, "students.read")) {
     const students: NavItem = { href: h("eleves"), label: dict.nav.students, icon: "students" };
     const classes: NavItem = { href: h("classes"), label: dict.nav.classes, icon: "classes" };

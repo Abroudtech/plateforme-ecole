@@ -28,3 +28,8 @@ export function personName(
   }
   return `${p.firstName} ${p.lastName}`;
 }
+
+/** Nom d'une classe dans la bonne langue (le nom arabe est facultatif). */
+export function className(c: { name: string; nameAr?: string | null }, lang: Locale): string {
+  return lang === "ar" && c.nameAr ? c.nameAr : c.name;
+}

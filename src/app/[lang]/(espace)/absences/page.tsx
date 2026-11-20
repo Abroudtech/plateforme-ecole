@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { scopeOf } from "@/lib/auth/scope";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
@@ -19,7 +20,11 @@ export default async function AbsencesPage({ params, searchParams }: PageProps<"
   const date = parseISODate(typeof sp.date === "string" ? sp.date : null) ?? parseISODate(todayISO())!;
   const dateISO = toISODate(date);
   const year = await getCurrentYear(ctx.school.id);
-  const { records, classes, done } = await getDayOverview(ctx.school.id, year?.id ?? null, date);
+  const scope = await scopeOf(ctx);
+  const overview = await getDayOverview(ctx.school.id, year?.id ?? null, date);
+  const { done } = overview;
+  const records = overview.records.filter((r) => !scope || scope.includes(r.classGroupId));
+  const classes = overview.classes.filter((c) => !scope || scope.includes(c.id));
   const a = dict.attendance;
   const dateLabel = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { dateStyle: "full", timeZone: "UTC" }).format(date);
   const todo = (["MORNING", "AFTERNOON"] as const).map((p) => ({ period: p, classes: classes.filter((c) => !done.has(`${c.id}:${p}`)) }));
@@ -43,7 +48,7 @@ export default async function AbsencesPage({ params, searchParams }: PageProps<"
             records={records}
             dict={dict}
             lang={lang}
-            canWrite={can(ctx.roles, "attendance.write")}
+            canWrite={can(ctx.roles, "attendance.justify")}
             renderLabel={(r) => {
               const rec = records.find((x) => x.id === r.id)!;
               return (

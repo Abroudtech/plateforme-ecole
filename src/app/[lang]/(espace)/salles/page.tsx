@@ -11,7 +11,7 @@ import { addRoom, deleteRoom } from "../emplois-du-temps/actions";
 export default async function RoomsPage({ params }: PageProps<"/[lang]/salles">) {
   const lang = (await params).lang as Locale;
   const dict = await getDictionary(lang);
-  const ctx = await requirePermission(lang, "timetable.read");
+  const ctx = await requirePermission(lang, "staff.write");
   const rooms = await listRooms(ctx.school.id);
   const canWrite = can(ctx.roles, "staff.write");
 

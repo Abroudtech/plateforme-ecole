@@ -18,7 +18,7 @@ import { TeacherFields } from "./teacher-fields";
 export default async function TeachersPage({ params }: PageProps<"/[lang]/enseignants">) {
   const lang = (await params).lang as Locale;
   const dict = await getDictionary(lang);
-  const ctx = await requirePermission(lang, "timetable.read");
+  const ctx = await requirePermission(lang, "staff.write");
   const year = await getCurrentYear(ctx.school.id);
   const [teachers, entries] = await Promise.all([
     listTeachers(ctx.school.id),

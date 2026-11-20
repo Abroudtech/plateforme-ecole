@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { scopeOf } from "@/lib/auth/scope";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
@@ -18,10 +19,14 @@ export default async function StudentsPage({ params, searchParams }: PageProps<"
   const dict = await getDictionary(lang);
   const ctx = await requirePermission(lang, "students.read");
   const year = await getCurrentYear(ctx.school.id);
-  const [classes, students] = await Promise.all([
+  const scope = await scopeOf(ctx);
+  const [allClasses, allStudents] = await Promise.all([
     year ? listClasses(ctx.school.id, year.id) : Promise.resolve([]),
     searchStudents(ctx.school.id, year?.id ?? null, { q, classId }),
   ]);
+  // Un enseignant ne voit que les élèves de ses classes.
+  const classes = allClasses.filter((c) => !scope || scope.includes(c.id));
+  const students = allStudents.filter((s) => !scope || s.enrollments.some((e) => scope.includes(e.classGroupId)));
 
   return (
     <div className="flex flex-col gap-4">

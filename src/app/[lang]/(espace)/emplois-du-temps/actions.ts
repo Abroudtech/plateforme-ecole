@@ -4,6 +4,9 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import type { FormState } from "@/components/action-form";
 import { db } from "@/lib/db";
+import { hashPassword } from "@/lib/auth/password";
+import { generateTempPassword } from "@/lib/auth/temp-password";
+import { getCurrentYear } from "@/lib/data/school";
 import { parseForm, runAction } from "@/lib/actions";
 import { FormError, optionalText, requiredText } from "@/lib/forms";
 import { normalizePhone } from "@/lib/phone";
@@ -42,6 +45,92 @@ export async function saveTeacher(lang: string, teacherId: string | null, _prev:
 export async function setTeacherActive(lang: string, teacherId: string, active: boolean, _prev: FormState, _fd: FormData) {
   return runAction(lang, "staff.write", async (ctx) => {
     await db.teacher.updateMany({ where: { id: teacherId, schoolId: ctx.school.id }, data: { isActive: active } });
+    refresh();
+  });
+}
+
+/**
+ * Crée (ou réinitialise) le compte de connexion d'un enseignant. Un même
+ * compte peut aussi être parent d'élève dans l'école ; on refuse seulement
+ * les comptes de direction, pour ne jamais toucher à leur mot de passe.
+ */
+export async function createTeacherAccess(lang: string, teacherId: string, _prev: FormState, _fd: FormData) {
+  return runAction(lang, "staff.write", async (ctx) => {
+    const schoolId = ctx.school.id;
+    const teacher = await db.teacher.findFirst({ where: { id: teacherId, schoolId } });
+    if (!teacher) throw new FormError("notFound");
+    if (!teacher.phone && !teacher.email) throw new FormError("contactRequired");
+
+    const or = [teacher.phone ? { phone: teacher.phone } : null, teacher.email ? { email: teacher.email } : null].filter(
+      (x) => x !== null,
+    );
+    const user =
+      (teacher.userId && (await db.user.findUnique({ where: { id: teacher.userId }, include: { memberships: true } }))) ||
+      (await db.user.findFirst({ where: { OR: or }, include: { memberships: true } }));
+
+    if (user && (user.isPlatformAdmin || user.memberships.some((m) => m.role !== "PARENT" && m.role !== "TEACHER"))) {
+      throw new FormError("accountConflict");
+    }
+    if (user) {
+      const other = await db.teacher.findFirst({ where: { schoolId, userId: user.id, NOT: { id: teacher.id } } });
+      if (other) throw new FormError("accountConflict");
+    }
+
+    const password = generateTempPassword();
+    const passwordHash = await hashPassword(password);
+
+    await db.$transaction(async (tx) => {
+      const account = user
+        ? await tx.user.update({ where: { id: user.id }, data: { passwordHash, isActive: true } })
+        : await tx.user.create({
+            data: {
+              phone: teacher.phone,
+              email: teacher.email,
+              passwordHash,
+              firstName: teacher.firstName,
+              lastName: teacher.lastName,
+              firstNameAr: teacher.firstNameAr,
+              lastNameAr: teacher.lastNameAr,
+              preferredLocale: ctx.school.defaultLocale,
+            },
+          });
+      if (user) await tx.session.deleteMany({ where: { userId: account.id } });
+      await tx.teacher.update({ where: { id: teacher.id }, data: { userId: account.id } });
+      await tx.membership.upsert({
+        where: { userId_schoolId_role: { userId: account.id, schoolId, role: "TEACHER" } },
+        update: { isActive: true },
+        create: { userId: account.id, schoolId, role: "TEACHER" },
+      });
+    });
+
+    return {
+      ok: true,
+      credentials: { login: teacher.phone ? teacher.phone.replace(/^\+216/, "") : teacher.email!, password },
+    };
+  });
+}
+
+/** Classes confiées à un enseignant (en plus de celles de son emploi du temps). */
+export async function saveTeacherClasses(lang: string, teacherId: string, _prev: FormState, formData: FormData) {
+  return runAction(lang, "staff.write", async (ctx) => {
+    const schoolId = ctx.school.id;
+    const teacher = await db.teacher.findFirst({ where: { id: teacherId, schoolId } });
+    if (!teacher) throw new FormError("notFound");
+    const year = await getCurrentYear(schoolId);
+    const wanted = formData.getAll("classIds").map(String);
+    const valid = await db.classGroup.findMany({
+      where: { schoolId, id: { in: wanted }, academicYearId: year?.id ?? "__aucune__" },
+      select: { id: true },
+    });
+    await db.$transaction([
+      db.teacherAssignment.deleteMany({
+        where: { teacherId, schoolId, classGroup: { academicYearId: year?.id ?? "__aucune__" } },
+      }),
+      db.teacherAssignment.createMany({
+        data: valid.map((c) => ({ schoolId, teacherId, classGroupId: c.id })),
+        skipDuplicates: true,
+      }),
+    ]);
     refresh();
   });
 }
