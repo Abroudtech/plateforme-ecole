@@ -17,7 +17,7 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b print:hidden border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <Link href={`/${lang}/tableau-de-bord`} className="min-w-0">
             <p className="truncate text-base font-bold">{pickName(ctx.school, lang)}</p>

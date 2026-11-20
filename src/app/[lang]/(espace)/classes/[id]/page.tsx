@@ -12,6 +12,7 @@ import { ActionForm } from "@/components/action-form";
 import { ButtonLink, Card, PageHeader } from "@/components/ui";
 import { deleteClass, saveClass } from "../actions";
 import { ClassFields } from "../class-fields";
+import { ClassTabs } from "../class-tabs";
 
 export default async function ClassPage({ params }: PageProps<"/[lang]/classes/[id]">) {
   const { lang: rawLang, id } = await params;
@@ -34,6 +35,8 @@ export default async function ClassPage({ params }: PageProps<"/[lang]/classes/[
         back={{ href: `/${lang}/classes`, label: dict.classes.title }}
         action={canWrite ? <ButtonLink href={`/${lang}/eleves/nouveau?classe=${cls.id}`}>{dict.students.add}</ButtonLink> : undefined}
       />
+
+      <ClassTabs lang={lang} classId={cls.id} dict={dict} active="students" />
 
       <Card
         title={`${dict.classes.students} (${cls.capacity ? t(dict.classes.seats, { count, capacity: cls.capacity }) : count})`}

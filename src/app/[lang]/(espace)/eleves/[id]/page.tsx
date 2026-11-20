@@ -10,7 +10,7 @@ import { listClasses } from "@/lib/data/classes";
 import { getCurrentYear } from "@/lib/data/school";
 import { getStudent } from "@/lib/data/students";
 import { ActionForm } from "@/components/action-form";
-import { Card, Field, PageHeader, Select } from "@/components/ui";
+import { ButtonLink, Card, Field, PageHeader, Select } from "@/components/ui";
 import {
   addGuardian,
   createGuardianAccess,
@@ -51,6 +51,11 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
           </>
         }
         back={{ href: `/${lang}/eleves`, label: dict.students.title }}
+        action={
+          enrollment ? (
+            <ButtonLink href={`/${lang}/eleves/${student.id}/bulletin`}>{dict.reportCards.view}</ButtonLink>
+          ) : undefined
+        }
       />
 
       {/* Inscription dans une classe de l'année en cours */}

@@ -61,3 +61,29 @@ export const TRIMESTERS: { order: number; nameFr: string; nameAr: string }[] = [
   { order: 2, nameFr: "2e trimestre", nameAr: "الثلاثي الثاني" },
   { order: 3, nameFr: "3e trimestre", nameAr: "الثلاثي الثالث" },
 ];
+
+/**
+ * Programme par défaut (matières et coefficients), proposé pour démarrer.
+ * Ce sont des valeurs indicatives : chaque école les ajuste sur la page
+ * "Matières et coefficients" d'une classe.
+ */
+const PRIMARY_LOWER = { AR: 2, FR: 2, MATH: 2, EVEIL: 1, ISL: 1, ART: 1, EPS: 1 };
+const PRIMARY_UPPER = { ...PRIMARY_LOWER, EN: 1, HG: 1, CIV: 1 };
+const MIDDLE = { AR: 2, FR: 2, EN: 1.5, MATH: 2, SVT: 1.5, PHYS: 1.5, TECH: 1, INFO: 1, ISL: 1, HG: 1.5, CIV: 1, ART: 1, EPS: 1 };
+const SECONDARY = { AR: 2, FR: 2, EN: 1.5, MATH: 3, PHYS: 2, SVT: 1.5, TECH: 1.5, INFO: 1, ISL: 1, HG: 1.5, CIV: 1, EPS: 1 };
+const BAC_BY_TRACK: Record<string, Record<string, number>> = {
+  MATH: { MATH: 4, PHYS: 4, SVT: 1, INFO: 1, AR: 1, FR: 1, EN: 1, PHILO: 1, EPS: 1 },
+  SEXP: { SVT: 4, PHYS: 4, MATH: 3, INFO: 1, AR: 1, FR: 1, EN: 1, PHILO: 1, EPS: 1 },
+  STECH: { TECH: 4, MATH: 3, PHYS: 3, INFO: 1, AR: 1, FR: 1, EN: 1, PHILO: 1, EPS: 1 },
+  SINFO: { INFO: 4, MATH: 3, PHYS: 2, AR: 1, FR: 1, EN: 1, PHILO: 1, EPS: 1 },
+  ECOGEST: { MATH: 2, HG: 2, AR: 1, FR: 1, EN: 1, PHILO: 1, INFO: 1, EPS: 1 },
+  LET: { AR: 4, PHILO: 3, FR: 2, EN: 2, HG: 2, ISL: 1, INFO: 1, EPS: 1 },
+};
+
+export function defaultCurriculum(levelCode: string, trackCode: string | null): Record<string, number> {
+  if (["PREP", "P1", "P2", "P3"].includes(levelCode)) return PRIMARY_LOWER;
+  if (levelCode.startsWith("P")) return PRIMARY_UPPER;
+  if (levelCode.startsWith("C")) return MIDDLE;
+  if ((levelCode === "S3" || levelCode === "S4") && trackCode && BAC_BY_TRACK[trackCode]) return BAC_BY_TRACK[trackCode];
+  return SECONDARY;
+}

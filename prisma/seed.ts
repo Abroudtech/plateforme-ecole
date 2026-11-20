@@ -8,6 +8,7 @@
 import { PrismaClient, type Cycle } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { GRADE_LEVELS, SUBJECTS, TRACKS, TRIMESTERS } from "../src/lib/setup/tunisia";
+import { applyDefaultCurriculum } from "../src/lib/setup/curriculum";
 
 const db = new PrismaClient();
 const PASSWORD = process.env.SEED_PASSWORD ?? "Demo2026!";
@@ -190,6 +191,28 @@ async function main() {
         create: { studentId: student.id, guardianId: guardian.id, relationship: "FATHER", isPrimary: true },
       });
     }
+  }
+
+  // Programme par défaut (matières + coefficients) pour chaque classe.
+  const allClasses = await db.classGroup.findMany({ where: { schoolId, academicYearId: year.id } });
+  for (const c of allClasses) await applyDefaultCurriculum(db, schoolId, c.gradeLevelId, c.trackId);
+
+  // Quelques notes du 1er trimestre en 6A pour montrer un bulletin.
+  const t1 = await db.term.findFirstOrThrow({ where: { academicYearId: year.id, order: 1 } });
+  const sixA = classes["6A"];
+  if ((await db.assessment.count({ where: { classGroupId: sixA } })) === 0) {
+    const yasmine = await db.student.findUniqueOrThrow({ where: { schoolId_studentNumber: { schoolId, studentNumber: "2026-001" } } });
+    const demoScores: Record<string, [number, number]> = { AR: [15, 16.5], FR: [13, 14], MATH: [17, 18.5], EVEIL: [14, 15], EN: [12, 13.5] };
+    for (const [code, [control, synthesis]] of Object.entries(demoScores)) {
+      const subject = await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code } } });
+      for (const [kind, score] of [["CONTROL", control], ["SYNTHESIS", synthesis]] as const) {
+        const a = await db.assessment.create({
+          data: { schoolId, classGroupId: sixA, subjectId: subject.id, termId: t1.id, kind, weight: kind === "SYNTHESIS" ? 2 : 1 },
+        });
+        await db.grade.create({ data: { schoolId, assessmentId: a.id, studentId: yasmine.id, score } });
+      }
+    }
+    await db.reportCardPublication.create({ data: { schoolId, classGroupId: sixA, termId: t1.id } });
   }
 
   console.log("✔ Données de démonstration prêtes.");

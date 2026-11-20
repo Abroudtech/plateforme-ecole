@@ -99,6 +99,7 @@ model School {
   students           Student[]
   guardians          Guardian[]
   enrollments        Enrollment[]
+  assessments        Assessment[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -197,8 +198,11 @@ model Term {
   startDate      DateTime? @db.Date
   endDate        DateTime? @db.Date
 
-  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  school       School                  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear            @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  assessments  Assessment[]
+  comments     TermComment[]
+  publications ReportCardPublication[]
 
   @@index([schoolId, academicYearId])
 }
@@ -250,11 +254,13 @@ model ClassGroup {
   capacity       Int?
   createdAt      DateTime @default(now())
 
-  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
-  gradeLevel   GradeLevel   @relation(fields: [gradeLevelId], references: [id])
-  track        Track?       @relation(fields: [trackId], references: [id])
+  school       School                  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear            @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  gradeLevel   GradeLevel              @relation(fields: [gradeLevelId], references: [id])
+  track        Track?                  @relation(fields: [trackId], references: [id])
   enrollments  Enrollment[]
+  assessments  Assessment[]
+  publications ReportCardPublication[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -270,6 +276,7 @@ model Subject {
 
   school             School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   curriculumSubjects CurriculumSubject[]
+  assessments        Assessment[]
 
   @@unique([schoolId, code])
 }
@@ -316,10 +323,12 @@ model Student {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  school      School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
-  enrollments Enrollment[]
-  guardians   StudentGuardian[]
+  school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  enrollments  Enrollment[]
+  guardians    StudentGuardian[]
+  grades       Grade[]
+  termComments TermComment[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -380,4 +389,89 @@ model Enrollment {
 
   @@unique([studentId, academicYearId])
   @@index([schoolId, classGroupId])
+}
+
+// -----------------------------------------------------------------------------
+// Notes et bulletins (étape 3)
+// -----------------------------------------------------------------------------
+
+/// Type d'évaluation (usage tunisien).
+enum AssessmentKind {
+  CONTROL // Devoir de contrôle
+  SYNTHESIS // Devoir de synthèse
+  ORAL // Oral
+  PRACTICAL // Travaux pratiques
+  OTHER // Autre (test, projet...)
+}
+
+/// Une évaluation passée par une classe dans une matière, pendant un trimestre.
+model Assessment {
+  id           String         @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  subjectId    String
+  termId       String
+  kind         AssessmentKind
+  title        String?
+  date         DateTime?      @db.Date
+  /// Barème (20 par défaut).
+  maxScore     Decimal        @default(20) @db.Decimal(5, 2)
+  /// Poids de cette évaluation dans la moyenne de la matière.
+  weight       Decimal        @default(1) @db.Decimal(4, 2)
+  createdAt    DateTime       @default(now())
+
+  school     School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  term       Term       @relation(fields: [termId], references: [id], onDelete: Cascade)
+  grades     Grade[]
+
+  @@index([schoolId, classGroupId, termId])
+}
+
+/// La note d'un élève à une évaluation. `score` vide + `absent` = absent.
+model Grade {
+  id           String   @id @default(cuid())
+  schoolId     String
+  assessmentId String
+  studentId    String
+  score        Decimal? @db.Decimal(5, 2)
+  absent       Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, studentId])
+  @@index([schoolId, studentId])
+}
+
+/// Appréciation générale du conseil de classe pour un élève et un trimestre.
+model TermComment {
+  id        String   @id @default(cuid())
+  schoolId  String
+  studentId String
+  termId    String
+  comment   String
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  term    Term    @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, termId])
+}
+
+/// Publication des bulletins d'une classe pour un trimestre : tant qu'ils ne
+/// sont pas publiés, les parents ne les voient pas.
+model ReportCardPublication {
+  id           String   @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  termId       String
+  publishedAt  DateTime @default(now())
+
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  term       Term       @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  @@unique([classGroupId, termId])
 }

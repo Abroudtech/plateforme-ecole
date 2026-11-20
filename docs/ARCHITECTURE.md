@@ -88,3 +88,24 @@ tests/                   Les tests automatiques
   clic. Un mot de passe provisoire s'affiche **une seule fois**, à communiquer au
   parent ; il se connecte ensuite avec son numéro de téléphone. Par sécurité, ce
   bouton ne modifie jamais le mot de passe d'un compte du personnel.
+
+## 7. Notes et bulletins (étape 3)
+
+- **Matières et coefficients** : réglés par niveau (et par filière au lycée),
+  depuis l'onglet « Matières et coefficients » d'une classe. Un programme par
+  défaut est proposé (`src/lib/setup/tunisia.ts`) ; ce sont des valeurs
+  indicatives à ajuster par l'école.
+- **Évaluations** : devoir de contrôle, devoir de synthèse, oral, TP, autre.
+  Chacune a un barème (sur 20 par défaut) et un poids.
+- **Calcul** (`src/lib/grades/compute.ts`, testé automatiquement) :
+  - chaque note est ramenée sur 20 ;
+  - moyenne d'une matière = moyenne des notes pondérée par le poids de chaque
+    évaluation (un élève absent n'est pas compté pour cette évaluation) ;
+  - moyenne générale = moyenne des matières pondérée par les coefficients, en ne
+    comptant que les matières où l'élève a une note ;
+  - rang : les ex aequo ont le même rang.
+- **Bulletin** : un seul document en français **et** en arabe, imprimable.
+  Les parents ne le voient qu'après la **publication** par la direction, et
+  uniquement pour leurs propres enfants.
+- **À venir** : la moyenne annuelle (la formule diffère selon le cycle) et les
+  décisions de fin d'année.
