@@ -22,7 +22,10 @@ export function formToObject(formData: FormData): Record<string, string> {
 
 /** Erreur "attendue" dont la clé est traduite dans `formErrors`. */
 export class FormError extends Error {
-  constructor(public key: string) {
+  constructor(
+    public key: string,
+    public params?: Record<string, string>,
+  ) {
     super(key);
   }
 }

@@ -7,7 +7,7 @@ import { startTransition, useActionState, useEffect, useRef, type ReactNode } fr
  * `error` est une clé de traduction (voir `formErrors` dans les dictionnaires).
  */
 export type FormState =
-  | { ok?: boolean; error?: string; credentials?: { login: string; password: string } }
+  | { ok?: boolean; error?: string; errorParams?: Record<string, string>; credentials?: { login: string; password: string } }
   | undefined;
 
 type Labels = {
@@ -68,7 +68,7 @@ export function ActionForm({
       {children}
       {state?.error && (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {labels.errors[state.error] ?? labels.errors.invalid}
+          {(labels.errors[state.error] ?? labels.errors.invalid).replace(/\{(\w+)\}/g, (m, k: string) => state.errorParams?.[k] ?? m)}
         </p>
       )}
       {state?.ok && labels.saved && !state.credentials && (

@@ -101,6 +101,9 @@ model School {
   enrollments        Enrollment[]
   assessments        Assessment[]
   evaluationSchemes  EvaluationScheme[]
+  teachers           Teacher[]
+  rooms              Room[]
+  timetable          TimetableEntry[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -267,6 +270,7 @@ model ClassGroup {
   attendance        AttendanceRecord[]
   rollCalls         RollCall[]
   evaluationSchemes EvaluationScheme[]
+  timetable         TimetableEntry[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -284,6 +288,7 @@ model Subject {
   curriculumSubjects CurriculumSubject[]
   assessments        Assessment[]
   evaluationSchemes  EvaluationScheme[]
+  timetable          TimetableEntry[]
 
   @@unique([schoolId, code])
 }
@@ -574,4 +579,65 @@ model EvaluationSchemeItem {
   scheme EvaluationScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
 
   @@unique([schemeId, kind])
+}
+
+// -----------------------------------------------------------------------------
+// Emplois du temps (étape 6)
+// -----------------------------------------------------------------------------
+
+/// Enseignant de l'école. `userId` servira au compte enseignant (V2).
+model Teacher {
+  id          String   @id @default(cuid())
+  schoolId    String
+  firstName   String
+  lastName    String
+  firstNameAr String?
+  lastNameAr  String?
+  phone       String?
+  email       String?
+  isActive    Boolean  @default(true)
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  school  School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  entries TimetableEntry[]
+
+  @@index([schoolId])
+}
+
+/// Salle de classe, laboratoire, terrain de sport...
+model Room {
+  id       String @id @default(cuid())
+  schoolId String
+  name     String
+  capacity Int?
+
+  school  School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  entries TimetableEntry[]
+
+  @@unique([schoolId, name])
+}
+
+/// Un cours dans l'emploi du temps hebdomadaire d'une classe.
+/// Jour : 1 = lundi ... 6 = samedi. Heures en minutes depuis minuit (8h30 = 510).
+model TimetableEntry {
+  id           String  @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  subjectId    String
+  teacherId    String?
+  roomId       String?
+  dayOfWeek    Int
+  startMinute  Int
+  endMinute    Int
+
+  school     School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher    Teacher?   @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  room       Room?      @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, dayOfWeek])
+  @@index([classGroupId])
+  @@index([teacherId])
 }

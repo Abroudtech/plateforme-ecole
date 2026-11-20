@@ -151,3 +151,21 @@ contrôles, on prend leur moyenne), puis moyenne des types pondérée par la
 structure. Exemple : oral 12, contrôle 14, synthèse 16 → (12 + 14 + 2×16) / 4 = 14,5.
 
 Le **bulletin** affiche une colonne par type de note.
+
+## 10. Emplois du temps (étape 6)
+
+- **Enseignants** (`Teacher`) : fiche simple (nom FR/AR, téléphone, e-mail), activable/désactivable.
+  Le champ `userId` est prévu pour la V2, quand les enseignants auront leur propre compte.
+- **Salles** (`Room`) : nom unique par école, capacité facultative.
+- **Créneaux** (`TimetableEntry`) : une classe, une matière, un jour (1 = lundi … 6 = samedi),
+  une heure de début et de fin (en minutes depuis minuit), un enseignant et une salle facultatifs.
+- À l'ajout d'un créneau, on refuse les chevauchements (`src/lib/timetable.ts`, testé) :
+  même classe, même enseignant ou même salle au même moment (sur l'année en cours).
+  Le message indique la classe et l'horaire déjà occupés.
+- La matière doit faire partie du programme de la classe. Les heures prévues au programme
+  (`CurriculumSubject.hoursPerWeek`) sont comparées aux heures réellement placées.
+- Pages : `/emplois-du-temps` (vue d'ensemble), `/classes/[id]/emploi-du-temps`,
+  `/enseignants`, `/enseignants/[id]`, `/salles`, et `/eleves/[id]/emploi-du-temps` pour les parents
+  (lecture seule, uniquement pour leurs enfants). Toutes les vues s'impriment.
+- Droits : `timetable.read` (administration, enseignants plus tard), `timetable.write` et `staff.write`
+  (administration).

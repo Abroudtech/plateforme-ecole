@@ -2,13 +2,14 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { Tabs } from "@/components/tabs";
 
 /** Onglets d'une classe : élèves, notes, bulletins, matières. */
-export function ClassTabs({ lang, classId, dict, active }: { lang: string; classId: string; dict: Dictionary; active: "students" | "grades" | "reports" | "curriculum" | "attendance" }) {
+export function ClassTabs({ lang, classId, dict, active }: { lang: string; classId: string; dict: Dictionary; active: "students" | "grades" | "reports" | "curriculum" | "attendance" | "timetable" }) {
   const base = `/${lang}/classes/${classId}`;
   return (
     <Tabs
       active={active}
       items={[
         { key: "students", href: base, label: dict.classes.students },
+        { key: "timetable", href: `${base}/emploi-du-temps`, label: dict.timetable.title },
         { key: "attendance", href: `${base}/absences`, label: dict.attendance.rollCall },
         { key: "grades", href: `${base}/notes`, label: dict.grades.title },
         { key: "reports", href: `${base}/bulletins`, label: dict.reportCards.title },

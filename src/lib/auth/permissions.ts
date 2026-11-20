@@ -25,6 +25,10 @@ export const PERMISSIONS = {
   // Paiements des familles
   "payments.read": ["ADMIN"],
   "payments.write": ["ADMIN"],
+  // Emplois du temps, enseignants et salles
+  "timetable.read": ["ADMIN", "TEACHER"],
+  "timetable.write": ["ADMIN"],
+  "staff.write": ["ADMIN"],
   // Messagerie
   "messages.send": ["ADMIN", "TEACHER", "PARENT"],
   // Espace parent : voir uniquement ses propres enfants

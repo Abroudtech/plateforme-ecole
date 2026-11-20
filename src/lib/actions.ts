@@ -24,7 +24,7 @@ export async function runAction(
   try {
     return (await fn(ctx, lang)) ?? { ok: true };
   } catch (e) {
-    if (e instanceof FormError) return { error: e.key };
+    if (e instanceof FormError) return { error: e.key, errorParams: e.params };
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return { error: duplicateKey };
     }
