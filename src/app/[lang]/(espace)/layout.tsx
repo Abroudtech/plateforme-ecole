@@ -3,6 +3,7 @@ import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { pickName } from "@/i18n/localized";
 import { requireContext } from "@/lib/auth/context";
+import { can } from "@/lib/auth/permissions";
 import { logout, switchSchool } from "@/app/actions/session";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -25,7 +26,7 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
             </p>
           </Link>
           <div className="flex shrink-0 items-center gap-2">
-            <LanguageSwitch lang={lang} path="/tableau-de-bord" label={dict.language.switchTo} />
+            <LanguageSwitch lang={lang} label={dict.language.switchTo} />
             <form action={logout.bind(null, lang)}>
               <button className="rounded-full bg-slate-900 px-3 py-1 text-sm font-medium text-white hover:bg-slate-700">
                 {dict.nav.logout}
@@ -33,6 +34,19 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
             </form>
           </div>
         </div>
+        {can(ctx.roles, "students.read") && (
+          <nav className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-2 text-sm font-medium">
+            {[
+              { href: "tableau-de-bord", label: dict.nav.dashboard },
+              { href: "eleves", label: dict.nav.students },
+              { href: "classes", label: dict.nav.classes },
+            ].map((item) => (
+              <Link key={item.href} href={`/${lang}/${item.href}`} className="rounded-full px-3 py-1.5 hover:bg-slate-100">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        )}
         {ctx.schools.length > 1 && (
           <form
             action={switchSchool.bind(null, lang)}

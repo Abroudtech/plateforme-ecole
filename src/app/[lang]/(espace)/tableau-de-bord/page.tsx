@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Cycle } from "@prisma/client";
 import type { Locale } from "@/i18n/config";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
@@ -8,6 +9,9 @@ import { can } from "@/lib/auth/permissions";
 import { getAdminOverview, getParentChildren } from "@/lib/data/school";
 
 const CYCLES: Cycle[] = ["PRIMARY", "MIDDLE", "SECONDARY"];
+
+/** Modules déjà disponibles (les autres affichent "Bientôt"). */
+const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes" };
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
@@ -67,17 +71,19 @@ async function AdminDashboard({ ctx, lang, dict }: Props) {
               ) : (
                 <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {list.map((c) => (
-                    <li key={c.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-                      <span>
-                        <span className="font-medium">{lang === "ar" && c.nameAr ? c.nameAr : c.name}</span>
-                        <span className="ms-2 text-sm text-slate-500">
-                          {pickName(c.gradeLevel, lang)}
-                          {c.track ? ` · ${pickName(c.track, lang)}` : ""}
+                    <li key={c.id}>
+                      <Link href={`/${lang}/classes/${c.id}`} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-blue-50">
+                        <span>
+                          <span className="font-medium">{lang === "ar" && c.nameAr ? c.nameAr : c.name}</span>
+                          <span className="ms-2 text-sm text-slate-500">
+                            {pickName(c.gradeLevel, lang)}
+                            {c.track ? ` · ${pickName(c.track, lang)}` : ""}
+                          </span>
                         </span>
-                      </span>
-                      <span className="text-sm text-slate-600">
-                        {t(dict.dashboard.studentsCount, { count: c._count.enrollments })}
-                      </span>
+                        <span className="text-sm text-slate-600">
+                          {t(dict.dashboard.studentsCount, { count: c._count.enrollments })}
+                        </span>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -90,12 +96,23 @@ async function AdminDashboard({ ctx, lang, dict }: Props) {
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">{dict.dashboard.modules}</h2>
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {modules.map((m) => (
-            <li key={m} className="rounded-xl bg-white p-3 ring-1 ring-slate-200">
-              <p className="font-medium">{dict.modules[m]}</p>
-              <p className="text-xs text-slate-500">{dict.dashboard.comingSoon}</p>
-            </li>
-          ))}
+          {modules.map((m) => {
+            const href = MODULE_LINKS[m];
+            return (
+              <li key={m}>
+                {href ? (
+                  <Link href={`/${lang}/${href}`} className="block h-full rounded-xl bg-white p-3 ring-1 ring-blue-200 hover:bg-blue-50">
+                    <p className="font-medium text-blue-800">{dict.modules[m]}</p>
+                  </Link>
+                ) : (
+                  <div className="h-full rounded-xl bg-white p-3 ring-1 ring-slate-200">
+                    <p className="font-medium">{dict.modules[m]}</p>
+                    <p className="text-xs text-slate-500">{dict.dashboard.comingSoon}</p>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
     </>

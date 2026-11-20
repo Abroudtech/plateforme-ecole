@@ -9,7 +9,7 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | Étape | Contenu | État |
 |---|---|---|
 | 1. Fondation | Structure, base de données multi-établissement, connexion et rôles, français/arabe | ✅ |
-| 2. Élèves et classes | Ajouter, modifier, inscrire les élèves ; gérer les classes | à venir |
+| 2. Élèves et classes | Ajouter, modifier, inscrire les élèves ; gérer les classes ; parents et accès parents | ✅ |
 | 3. Notes et bulletins | Saisie des notes, moyennes, bulletins bilingues | à venir |
 | 4. Absences | Appel, justificatifs, alertes aux parents | à venir |
 | 5. Paiements | Frais de scolarité, échéances, relances des impayés | à venir |
