@@ -104,3 +104,15 @@ export function extractTitle(markdown: string, fallback: string): string {
   const title = line ? line.replace(/^#\s+/, "").replace(/[*_`]/g, "").trim() : "";
   return (title || fallback).slice(0, 160);
 }
+
+/** Demande de questions de défi (quiz) pour une classe. */
+export function quizPrompt(p: { levelFr: string; levelCode: string; subjectFr: string; topic: string; count: number; language: DocLanguage }) {
+  const hint = LEVEL_HINTS[p.levelCode] ?? "";
+  return [
+    `Niveau : ${p.levelFr}${hint ? ` (${hint})` : ""}`,
+    `Matière : ${p.subjectFr}`,
+    `Thème : ${p.topic}`,
+    `Prépare ${p.count} questions à choix multiples, de difficulté progressive.`,
+    LANGUAGE_RULE[p.language],
+  ].join("\n");
+}

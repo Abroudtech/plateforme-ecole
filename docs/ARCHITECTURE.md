@@ -252,3 +252,46 @@ enseignants, élèves (avec leur classe) et parents.
 
 L'écran montre d'abord un aperçu (rien n'est enregistré), puis importe les
 lignes correctes ; les lignes en erreur sont listées pour être corrigées.
+
+## 15. Espace enseignant et atelier IA (V2)
+
+- **Accès** : depuis la fiche d'un enseignant, la direction crée son accès
+  (identifiant = téléphone ou e-mail, mot de passe provisoire) et coche ses
+  classes (`TeacherAssignment`). Les classes de son emploi du temps sont
+  ajoutées automatiquement.
+- **Périmètre** (`src/lib/auth/scope.ts`) : un enseignant ne voit que ses
+  classes et leurs élèves. Chaque page de classe (`classes/[id]/layout.tsx`)
+  et chaque action (appel, notes, appréciations) vérifie ce périmètre. La
+  justification des absences, les paiements et les réglages restent à la
+  direction.
+- **Atelier IA** (`/atelier`) : fiche de leçon, série d'exercices ou examen par
+  critères (C1 à C4), pour un niveau, une matière et un thème. Les consignes
+  données à l'IA sont dans `src/lib/ai/prompt.ts` et `programme-primaire.ts`
+  (organisation du primaire tunisien, langue selon la matière). L'appel est
+  dans `src/lib/ai/generate.ts` (modèle `claude-opus-5-5`, repli automatique
+  du fournisseur en cas de refus). Le document est enregistré
+  (`TeachingResource`) et s'imprime avec l'en-tête de l'école.
+- **Réglages** : `ANTHROPIC_API_KEY` (sans clé, l'atelier affiche « pas encore
+  activé ») et `AI_MONTHLY_LIMIT` (documents par école et par mois, 300 par
+  défaut).
+
+## 16. Espace élève et espace de classe (V3)
+
+- **Accès élève** : depuis la fiche de l'élève, la direction crée un
+  identifiant « prenom.matricule » (`src/lib/student/username.ts`) et un mot
+  de passe provisoire. L'élève se connecte sur la même page que tout le monde.
+- **Mur de la classe** (`ClassPost`) : l'enseignant publie ; un élève peut
+  proposer un message, qui n'est visible par la classe qu'après validation de
+  l'enseignant. Les élèves ne peuvent réagir que par un émoji choisi dans une
+  courte liste : **aucune messagerie entre élèves**.
+- **Défis** (`Challenge`, `ChallengeAttempt`) : quiz à choix multiples créés
+  par l'enseignant, à la main ou proposés par l'IA puis relus. Une seule
+  tentative par élève ; les bonnes réponses ne sont envoyées au navigateur
+  qu'après la réponse. L'enseignant voit les résultats et les questions les
+  moins réussies.
+- **Jeux** (`src/lib/games`) : calcul éclair, tables de multiplication, lettre
+  arabe cachée, mot français. Questions fabriquées sur place, adaptées au
+  niveau. Cinq parties par jeu et par jour comptent pour le classement.
+- **Classement** : 2 points par bonne réponse à un défi, 1 point par bonne
+  réponse dans un jeu ; classement de la semaine et de l'année, par classe.
+  Les élèves ne voient des autres que le prénom et l'initiale du nom.

@@ -46,6 +46,8 @@ export const PERMISSIONS = {
   "ai.use": ["ADMIN", "TEACHER"],
   // Espace de classe (mur, défis, jeux) : l'enseignant anime, la direction supervise
   "classSpace.manage": ["ADMIN", "TEACHER"],
+  // Voir le mur et les défis d'une classe (chacun seulement ses classes)
+  "classSpace.read": ["ADMIN", "TEACHER", "STUDENT"],
   // Espace élève (V3) : défis, jeux, classement, mur de sa classe
   "student.space": ["STUDENT"],
   // Espace parent : voir uniquement ses propres enfants

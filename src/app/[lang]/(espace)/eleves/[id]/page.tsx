@@ -17,6 +17,7 @@ import { ButtonLink, Card, Field, PageHeader, Select } from "@/components/ui";
 import {
   addGuardian,
   createGuardianAccess,
+  createStudentAccess,
   setEnrollment,
   setStudentActive,
   unlinkGuardian,
@@ -106,6 +107,22 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
           renderLabel={(r) => dict.attendance.statuses[r.status]}
         />
       </Card>
+
+      {/* Accès de l'élève à son espace (défis, jeux, mur de la classe) */}
+      {canWrite && (
+        <Card title={dict.studentSpace.access}>
+          <p className="mb-3 text-sm text-slate-600">{student.userId ? dict.studentSpace.hasAccount : dict.studentSpace.noAccount}</p>
+          <ActionForm
+            action={createStudentAccess.bind(null, lang, student.id)}
+            labels={{
+              ...formLabels(dict, student.userId ? g.resetPassword : dict.studentSpace.createAccount),
+              credentials: { intro: dict.studentSpace.accountCreated, login: g.login, password: g.tempPassword },
+            }}
+            variant="secondary"
+            confirm={student.userId ? `${g.resetPassword} ?` : undefined}
+          />
+        </Card>
+      )}
 
       {/* Parents et tuteurs */}
       <Card title={g.title}>

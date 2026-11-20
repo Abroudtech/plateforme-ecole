@@ -117,6 +117,8 @@ model School {
   notifications      Notification[]
   annualRules        AnnualRule[]
   teachingResources  TeachingResource[]
+  challenges         Challenge[]
+  classPosts         ClassPost[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -126,6 +128,8 @@ model User {
   /// Connexion par e-mail ou par téléphone (les parents utilisent souvent le téléphone).
   email           String?   @unique
   phone           String?   @unique
+  /// Identifiant des élèves (V3), qui n'ont ni téléphone ni e-mail, par ex. « yasmine.2026001 ».
+  username        String?   @unique
   passwordHash    String
   firstName       String
   lastName        String
@@ -152,6 +156,9 @@ model User {
   /// Fiche enseignant reliée à ce compte (V2), une par école.
   teachers          Teacher[]
   teachingResources TeachingResource[]
+  classPosts        ClassPost[]
+  postReactions     PostReaction[]
+  challenges        Challenge[]
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -299,6 +306,9 @@ model ClassGroup {
   timetable          TimetableEntry[]
   announcements      Announcement[]
   teacherAssignments TeacherAssignment[]
+  posts              ClassPost[]
+  challenges         Challenge[]
+  gameScores         GameScore[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -318,6 +328,7 @@ model Subject {
   evaluationSchemes  EvaluationScheme[]
   timetable          TimetableEntry[]
   teachingResources  TeachingResource[]
+  challenges         Challenge[]
 
   @@unique([schoolId, code])
 }
@@ -364,17 +375,19 @@ model Student {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  school        School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  enrollments   Enrollment[]
-  guardians     StudentGuardian[]
-  grades        Grade[]
-  termComments  TermComment[]
-  attendance    AttendanceRecord[]
-  studentFees   StudentFee[]
-  payments      Payment[]
-  reminders     PaymentReminder[]
-  conversations Conversation[]
+  school            School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user              User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  enrollments       Enrollment[]
+  guardians         StudentGuardian[]
+  grades            Grade[]
+  termComments      TermComment[]
+  attendance        AttendanceRecord[]
+  studentFees       StudentFee[]
+  payments          Payment[]
+  reminders         PaymentReminder[]
+  conversations     Conversation[]
+  challengeAttempts ChallengeAttempt[]
+  gameScores        GameScore[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -982,4 +995,105 @@ model LoginAttempt {
   createdAt  DateTime @default(now())
 
   @@index([identifier, createdAt])
+}
+
+// -----------------------------------------------------------------------------
+// Espace de classe et espace élève (V3)
+// -----------------------------------------------------------------------------
+
+enum PostStatus {
+  /// Proposé par un élève, en attente de l'enseignant.
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+/// Mur de la classe. L'enseignant publie directement ; les messages des élèves
+/// n'apparaissent qu'après validation. Pas de messagerie entre élèves.
+model ClassPost {
+  id           String     @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  authorId     String
+  body         String
+  status       PostStatus @default(PUBLISHED)
+  isPinned     Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  reviewedAt   DateTime?
+
+  school     School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup     @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  author     User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions  PostReaction[]
+
+  @@index([classGroupId, status, createdAt])
+}
+
+/// Réaction (émoji choisi dans une courte liste) : une par personne et par message.
+model PostReaction {
+  postId    String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  post ClassPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+}
+
+/// Défi (quiz à choix multiples) proposé par l'enseignant à une classe.
+model Challenge {
+  id           String    @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  authorId     String
+  subjectId    String?
+  title        String
+  /// Questions : [{ q, choices: string[], answer: index }]
+  questions    Json
+  closesAt     DateTime?
+  createdAt    DateTime  @default(now())
+
+  school     School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup         @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  author     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  subject    Subject?           @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  attempts   ChallengeAttempt[]
+
+  @@index([classGroupId, createdAt])
+}
+
+/// Réponse d'un élève à un défi (une seule tentative).
+model ChallengeAttempt {
+  id          String   @id @default(cuid())
+  schoolId    String
+  challengeId String
+  studentId   String
+  answers     Json
+  score       Int
+  maxScore    Int
+  createdAt   DateTime @default(now())
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, studentId])
+}
+
+/// Partie d'un jeu éducatif (calcul, tables, lettres, mots).
+model GameScore {
+  id           String   @id @default(cuid())
+  schoolId     String
+  studentId    String
+  classGroupId String
+  game         String
+  score        Int
+  createdAt    DateTime @default(now())
+
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+
+  @@index([classGroupId, createdAt])
+  @@index([studentId, game, createdAt])
 }

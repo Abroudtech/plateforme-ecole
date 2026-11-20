@@ -9,8 +9,8 @@
   },
   "login": {
     "title": "Connexion",
-    "subtitle": "Connectez-vous avec votre e-mail ou votre numéro de téléphone.",
-    "identifier": "E-mail ou téléphone",
+    "subtitle": "Connectez-vous avec votre e-mail, votre téléphone ou votre identifiant élève.",
+    "identifier": "E-mail, téléphone ou identifiant élève",
     "password": "Mot de passe",
     "submit": "Se connecter",
     "submitting": "Connexion…",
@@ -67,9 +67,7 @@
     "comingSoon": "Bientôt",
     "myChildren": "Mes enfants",
     "noChildren": "Aucun enfant n'est encore relié à votre compte.",
-    "notEnrolled": "Pas encore inscrit cette année",
-    "teacherSoon": "L'espace enseignant arrive dans la version 2.",
-    "studentSoon": "L'espace élève arrive dans la version 3."
+    "notEnrolled": "Pas encore inscrit cette année"
   },
   "modules": {
     "students": "Élèves",
@@ -141,7 +139,11 @@
     "aiQuota": "Le nombre de documents de ce mois est atteint. Réessayez le mois prochain ou contactez la direction.",
     "aiRefused": "L'IA n'a pas pu préparer ce document. Reformulez le thème ou les consignes.",
     "aiBusy": "Le service est très demandé en ce moment. Réessayez dans une minute.",
-    "aiUnavailable": "Le service d'IA ne répond pas. Réessayez plus tard."
+    "aiUnavailable": "Le service d'IA ne répond pas. Réessayez plus tard.",
+    "tooManyPending": "Tu as déjà plusieurs messages en attente. Attends que ton enseignant les lise.",
+    "challengeInvalid": "Chaque question doit avoir un énoncé, au moins deux réponses et une bonne réponse cochée.",
+    "challengeClosed": "Ce défi est terminé.",
+    "challengeDone": "Tu as déjà répondu à ce défi."
   },
   "classes": {
     "title": "Classes",
@@ -797,5 +799,111 @@
     "print": "Imprimer",
     "delete": "Supprimer le document",
     "reviewNote": "Document préparé par l'IA : relisez-le et adaptez-le à votre classe avant de l'utiliser."
+  },
+  "studentSpace": {
+    "access": "Espace élève",
+    "hasAccount": "L'élève a accès à son espace : défis, jeux et mur de la classe.",
+    "noAccount": "Donnez à l'élève un accès à son espace : défis, jeux éducatifs et mur de sa classe. Il ne peut pas écrire aux autres élèves.",
+    "createAccount": "Créer l'accès élève",
+    "accountCreated": "Accès prêt. Remettez ces informations à l'élève (ou à ses parents) :"
+  },
+  "classSpace": {
+    "subtitleTeacher": "Mur de la classe, défis et classement. Les messages des élèves n'apparaissent qu'après votre validation.",
+    "subtitleStudent": "Les nouvelles de ta classe, tes défis et le classement.",
+    "noClasses": "Aucune classe ne vous est confiée cette année.",
+    "noClass": "Tu n'es inscrit dans aucune classe cette année. Parle-en à la direction.",
+    "tabs": {
+      "mur": "Mur",
+      "defis": "Défis",
+      "classement": "Classement"
+    },
+    "newPost": "Publier sur le mur",
+    "proposePost": "Écrire à la classe",
+    "studentPostHelp": "Ton message sera lu par ton enseignant avant d'être affiché à la classe.",
+    "publish": "Publier",
+    "send": "Envoyer à l'enseignant",
+    "postPlaceholder": "Une consigne, une bonne nouvelle, un rappel…",
+    "studentPlaceholder": "Partage une idée, une question sur la leçon…",
+    "toReview": "À valider",
+    "approve": "Valider",
+    "reject": "Refuser",
+    "waiting": "En attente de validation par l'enseignant",
+    "noPosts": "Rien sur le mur pour le moment.",
+    "pinned": "Épinglé",
+    "pin": "Épingler",
+    "unpin": "Désépingler",
+    "newChallenge": "Nouveau défi",
+    "createChallenge": "Créer le défi",
+    "challengeTitle": "Titre du défi",
+    "noSubject": "Sans matière",
+    "closesAt": "Dernier jour",
+    "question": "Question",
+    "choice": "Réponse",
+    "correctHint": "Cochez le rond de la bonne réponse.",
+    "addQuestion": "Ajouter une question",
+    "removeQuestion": "Retirer la question",
+    "ai": "Proposer des questions avec l'IA",
+    "aiCount": "Questions",
+    "aiGenerate": "Proposer",
+    "aiGenerating": "Préparation…",
+    "aiReview": "Questions proposées : relisez-les et corrigez-les si besoin avant de créer le défi.",
+    "challenges": "Défis de la classe",
+    "noChallenges": "Aucun défi pour le moment.",
+    "answered": "{count} / {total} élèves ont répondu",
+    "average": "réussite {pct} %",
+    "results": "Résultats",
+    "notAnswered": "pas encore répondu",
+    "questions": "Questions",
+    "goChallenges": "Voir mes défis",
+    "thisWeek": "Classement de la semaine",
+    "thisYear": "Classement de l'année",
+    "pointsRule": "Une bonne réponse à un défi rapporte 2 points ; une bonne réponse dans un jeu, 1 point.",
+    "noPoints": "Pas encore de points. Le premier défi ou le premier jeu lance le classement !",
+    "pts": "pts",
+    "challengesSubtitle": "Réponds aux défis de ton enseignant pour gagner des points.",
+    "todo": "À faire",
+    "nothingTodo": "Bravo, aucun défi en attente !",
+    "done": "Terminés",
+    "questionsShort": "questions",
+    "until": "jusqu'au",
+    "alreadyDone": "Tu as répondu à ce défi. Voici ta correction.",
+    "next": "Suivant",
+    "finish": "Terminer",
+    "sending": "Envoi…",
+    "result": "Ton score",
+    "todoCount": "{count} à faire",
+    "nothingTodoShort": "Tout est fait",
+    "playToEarn": "Gagne des points",
+    "myPoints": "Mes points de l'année",
+    "myRank": "{rank}e sur {total} dans ta classe",
+    "startPlaying": "Réponds à un défi ou joue pour gagner tes premiers points.",
+    "lastPost": "Dernier message du mur"
+  },
+  "games": {
+    "subtitle": "Chaque bonne réponse rapporte un point au classement de ta classe ({count} parties par jeu et par jour).",
+    "start": "Commencer",
+    "again": "Rejouer",
+    "score": "Ton score",
+    "counted": "points ajoutés au classement",
+    "notCounted": "Partie d'entraînement : tu as déjà gagné les points du jour pour ce jeu.",
+    "time": "temps",
+    "list": {
+      "calcul": {
+        "title": "Calcul éclair",
+        "text": "Additions, soustractions, multiplications… à ton niveau."
+      },
+      "tables": {
+        "title": "Tables de multiplication",
+        "text": "Retrouve vite le bon résultat."
+      },
+      "lettres": {
+        "title": "La lettre cachée",
+        "text": "Trouve la lettre arabe qui manque dans le mot."
+      },
+      "mots": {
+        "title": "Le bon mot",
+        "text": "Choisis le mot français qui va avec l'image."
+      }
+    }
   }
 }

@@ -20,8 +20,9 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { StudentDashboard } from "./student-dashboard";
 import { TeacherDashboard } from "./teacher-dashboard";
-import { Hero, IconBadge, Initials, Notice, Panel, TONES, type Tone } from "./dashboard-ui";
+import { Hero, IconBadge, Initials, Panel, TONES, type Tone } from "./dashboard-ui";
 import { getDirectorOverview } from "@/lib/data/director";
 import { Money } from "@/components/money";
 import { getCurrentYear } from "@/lib/data/school";
@@ -46,7 +47,7 @@ export default async function DashboardPage({ params }: PageProps<"/[lang]/table
   if (can(ctx.roles, "dashboard.admin")) return <AdminDashboard ctx={ctx} lang={lang} dict={dict} hello={hello} today={today} />;
   return (
     <div className="flex flex-col gap-6">
-      <Hero hello={hello} line={today} overlap={can(ctx.roles, "children.read") || can(ctx.roles, "teacher.space")} />
+      <Hero hello={hello} line={today} overlap={can(ctx.roles, "children.read") || can(ctx.roles, "teacher.space") || can(ctx.roles, "student.space")} />
       {can(ctx.roles, "teacher.space") && <TeacherDashboard ctx={ctx} lang={lang} dict={dict} />}
       {can(ctx.roles, "children.read") && !can(ctx.roles, "teacher.space") && <ParentDashboard ctx={ctx} lang={lang} dict={dict} />}
       {can(ctx.roles, "children.read") && can(ctx.roles, "teacher.space") && (
@@ -54,7 +55,7 @@ export default async function DashboardPage({ params }: PageProps<"/[lang]/table
           {dict.dashboard.myChildren} · {dict.messages.myMessages}
         </Link>
       )}
-      {ctx.roles.includes("STUDENT") && <Notice text={dict.dashboard.studentSoon} />}
+      {can(ctx.roles, "student.space") && <StudentDashboard ctx={ctx} lang={lang} dict={dict} />}
     </div>
   );
 }

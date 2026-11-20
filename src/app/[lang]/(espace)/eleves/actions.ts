@@ -12,6 +12,7 @@ import { getCurrentYear } from "@/lib/data/school";
 import { nextStudentNumber } from "@/lib/data/students";
 import { FormError, optionalText, requiredText } from "@/lib/forms";
 import { normalizePhone } from "@/lib/phone";
+import { studentUsername } from "@/lib/student/username";
 
 // ---------------------------------------------------------------------------
 // Schémas de validation
@@ -330,5 +331,54 @@ export async function createGuardianAccess(lang: string, guardianId: string, _pr
       ok: true,
       credentials: { login: guardian.phone ? guardian.phone.replace(/^\+216/, "") : guardian.email!, password },
     };
+  });
+}
+
+/**
+ * Accès de l'élève à son espace (défis, jeux, mur de la classe). L'élève se
+ * connecte avec un identifiant « prenom.matricule » et un mot de passe provisoire.
+ */
+export async function createStudentAccess(lang: string, studentId: string, _prev: FormState, _fd: FormData) {
+  return runAction(lang, "students.write", async (ctx) => {
+    const schoolId = ctx.school.id;
+    const student = await db.student.findFirst({ where: { id: studentId, schoolId } });
+    if (!student) throw new FormError("notFound");
+
+    const password = generateTempPassword();
+    const passwordHash = await hashPassword(password);
+
+    const username = await db.$transaction(async (tx) => {
+      if (student.userId) {
+        const user = await tx.user.update({ where: { id: student.userId }, data: { passwordHash, isActive: true } });
+        await tx.session.deleteMany({ where: { userId: user.id } });
+        await tx.membership.upsert({
+          where: { userId_schoolId_role: { userId: user.id, schoolId, role: "STUDENT" } },
+          update: { isActive: true },
+          create: { userId: user.id, schoolId, role: "STUDENT" },
+        });
+        return user.username;
+      }
+      let name = "";
+      for (let attempt = 0; attempt < 20; attempt++) {
+        name = studentUsername(student.firstName, student.studentNumber, attempt);
+        if (!(await tx.user.findUnique({ where: { username: name } }))) break;
+      }
+      const user = await tx.user.create({
+        data: {
+          username: name,
+          passwordHash,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          firstNameAr: student.firstNameAr,
+          lastNameAr: student.lastNameAr,
+          preferredLocale: ctx.school.defaultLocale,
+          memberships: { create: { schoolId, role: "STUDENT" } },
+        },
+      });
+      await tx.student.update({ where: { id: student.id }, data: { userId: user.id } });
+      return name;
+    });
+
+    return { ok: true, credentials: { login: username ?? "", password } };
   });
 }
