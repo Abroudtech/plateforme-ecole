@@ -9,6 +9,8 @@ import { requirePermission } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { computeClassReport, getTerms, pickTerm } from "@/lib/data/grades";
+import { computeClassAnnual } from "@/lib/data/annual";
+import { formulaText } from "@/lib/grades/annual";
 import { round2 } from "@/lib/grades/compute";
 import { ActionForm } from "@/components/action-form";
 import { Card, PageHeader } from "@/components/ui";
@@ -25,9 +27,71 @@ export default async function ClassReportsPage({ params, searchParams }: PagePro
   if (!cls) notFound();
 
   const terms = await getTerms(ctx.school.id, cls.academicYearId, cls.gradeLevel.cycle);
-  const term = pickTerm(terms, typeof sp.trimestre === "string" ? sp.trimestre : undefined);
+  const isAnnual = sp.trimestre === "annuel";
+  const term = isAnnual ? null : pickTerm(terms, typeof sp.trimestre === "string" ? sp.trimestre : undefined);
   const report = term ? await computeClassReport(ctx.school.id, cls.id, term.id) : null;
   const r = dict.reportCards;
+  const tabTerms = [...terms, { id: "annuel", nameFr: dict.reportCards.annualTab, nameAr: dict.reportCards.annualTab }];
+  if (isAnnual) {
+    const annual = await computeClassAnnual(ctx.school.id, cls.id);
+    const order = annual ? [...annual.students].sort((a, b) => (annual.ranks.get(a.id) ?? 1e9) - (annual.ranks.get(b.id) ?? 1e9)) : [];
+    return (
+      <div className="flex flex-col gap-4">
+        <PageHeader title={lang === "ar" && cls.nameAr ? cls.nameAr : cls.name} subtitle={r.title} back={{ href: `/${lang}/classes`, label: dict.classes.title }} />
+        <ClassTabs lang={lang} classId={cls.id} dict={dict} active="reports" />
+        <TermTabs terms={tabTerms} activeId="annuel" lang={lang} hrefFor={(tid) => `/${lang}/classes/${cls.id}/bulletins?trimestre=${tid}`} />
+        {!annual ? (
+          <Card><p className="text-slate-600">{dict.grades.noTerms}</p></Card>
+        ) : (
+          <Card>
+            <p className="mb-1 text-sm text-slate-600" dir="ltr">{t(r.formula, { formula: formulaText(annual.rule.termWeights), pass: annual.rule.passMark })}</p>
+            <p className="mb-3 text-xs text-slate-500">{r.annualPublishHint}</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs text-slate-500">
+                    <th className="py-2 text-start font-medium">{r.rank}</th>
+                    <th className="py-2 text-start font-medium">{r.student}</th>
+                    {annual.terms.map((tm, i) => (
+                      <th key={tm.id} className="px-1 py-2 text-center font-medium">T{i + 1}</th>
+                    ))}
+                    <th className="py-2 text-end font-medium">{r.annual}</th>
+                    <th className="py-2 ps-2 text-end font-medium">{r.decision}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.map((s) => {
+                    const a = annual.annual.get(s.id)!;
+                    const d = annual.decisions.get(s.id)!;
+                    return (
+                      <tr key={s.id} className="border-b border-slate-100">
+                        <td className="py-2.5 text-slate-500">{annual.ranks.get(s.id) ?? "—"}</td>
+                        <td className="py-2.5">
+                          <Link href={`/${lang}/eleves/${s.id}/bulletin?trimestre=annuel`} className="font-medium text-blue-700 hover:underline">
+                            {personName(s, lang)}
+                          </Link>
+                        </td>
+                        {annual.termGenerals.get(s.id)!.map((v, i) => (
+                          <td key={i} className="px-1 py-2.5 text-center text-slate-600" dir="ltr">{v == null ? "—" : round2(v).toFixed(2)}</td>
+                        ))}
+                        <td className="py-2.5 text-end font-semibold" dir="ltr">
+                          {a.average == null ? "—" : round2(a.average).toFixed(2)}{!a.complete && a.average != null ? "*" : ""}
+                        </td>
+                        <td className={`py-2.5 ps-2 text-end text-xs font-medium ${d === "PASS" ? "text-green-700" : d === "FAIL" ? "text-red-700" : "text-slate-500"}`}>
+                          {dict.decisions[d]}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {order.some((s) => !annual.annual.get(s.id)!.complete) && <p className="mt-2 text-xs text-slate-500">* {r.provisional}</p>}
+          </Card>
+        )}
+      </div>
+    );
+  }
   const dateFmt = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { dateStyle: "long" });
 
   // Élèves triés par rang (ceux sans moyenne à la fin).
@@ -44,7 +108,7 @@ export default async function ClassReportsPage({ params, searchParams }: PagePro
         <Card><p className="text-slate-600">{dict.grades.noTerms}</p></Card>
       ) : (
         <>
-          <TermTabs terms={terms} activeId={term.id} lang={lang} hrefFor={(tid) => `/${lang}/classes/${cls.id}/bulletins?trimestre=${tid}`} />
+          <TermTabs terms={tabTerms} activeId={term.id} lang={lang} hrefFor={(tid) => `/${lang}/classes/${cls.id}/bulletins?trimestre=${tid}`} />
 
           <Card>
             <p className={`mb-3 text-sm ${report.publication ? "text-green-700" : "text-amber-700"}`}>

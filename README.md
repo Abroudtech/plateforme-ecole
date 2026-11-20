@@ -17,8 +17,12 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | 7. Paiements | Frais par niveau, services optionnels, réductions, encaissements et reçus bilingues, suivi des impayés, relances WhatsApp et lettre, consultation parents | ✅ |
 | 8. Messagerie | Conversations école ↔ parents, annonces (école, niveau, classe), alertes SMS automatiques (absence, bulletin, message) | ✅ |
 
+Également disponibles : moyenne annuelle et bulletin annuel, tableau de bord
+du directeur, paramètres de l'école et de l'équipe, changement de mot de passe.
+
 Le fonctionnement général est expliqué simplement dans
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+**Mise en ligne** : voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 
 ## Technologies
 
@@ -54,3 +58,4 @@ Comptes de démonstration (mot de passe `Demo2026!`) :
 | `npm run lint` / `npm run typecheck` | Vérifications du code |
 | `npm run db:migrate` | Créer une évolution de la base après modification du schéma |
 | `npm run db:studio` | Explorer la base dans le navigateur |
+| `npm run ecole:creer` | Créer une vraie école et son premier compte (mise en ligne) |

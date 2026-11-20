@@ -44,6 +44,8 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
               { href: "emplois-du-temps", label: dict.nav.timetables },
               ...(can(ctx.roles, "payments.read") ? [{ href: "paiements", label: dict.nav.payments }] : []),
               ...(can(ctx.roles, "messages.school") ? [{ href: "messages", label: dict.nav.messages }] : []),
+              ...(can(ctx.roles, "settings.write") ? [{ href: "parametres", label: dict.nav.settings }] : []),
+              { href: "mon-compte", label: dict.account.title },
             ].map((item) => (
               <Link key={item.href} href={`/${lang}/${item.href}`} className="shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 hover:bg-slate-100">
                 {item.label}

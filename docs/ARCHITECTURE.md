@@ -207,3 +207,23 @@ Le **bulletin** affiche une colonne par type de note.
   chaque alerte est envoyée en HTTP ; sinon elle est enregistrée comme « simulée ». Chaque alerte
   est tracée (envoyée, simulée, échec), et les échecs peuvent être renvoyés.
   WhatsApp est prévu dans le modèle (`channel`), à brancher avec un fournisseur WhatsApp Business.
+
+## 13. Moyenne annuelle, tableau de bord, sécurité et mise en ligne
+
+- **Moyenne annuelle** (`src/lib/grades/annual.ts`, testé) : moyenne des trimestres pondérée
+  par cycle (`AnnualRule`). Par défaut, (T1 + 2×T2 + 2×T3) / 5 au collège et au lycée, et les trois
+  trimestres à poids égal au primaire. La moyenne d'admission est de 10. Tout se règle dans
+  **Paramètres**. La décision affichée est une *proposition* : le conseil de classe tranche.
+  Le bulletin annuel est visible par les parents quand le dernier trimestre est publié.
+- **Tableau de bord du directeur** (`src/lib/data/director.ts`) : la journée (absents, appels
+  faits), les choses à faire (appels manquants, bulletins non publiés, impayés, messages), les
+  moyennes de chaque classe, les élèves les plus absents et les encaissements.
+- **Comptes** : chacun change son mot de passe dans « Compte » (les autres appareils sont alors
+  déconnectés). La direction gère son équipe dans **Paramètres**.
+- **Connexion** : après 5 échecs en 15 minutes pour un même identifiant, la connexion est bloquée
+  15 minutes (`LoginAttempt`).
+- **En-têtes de sécurité** et cookie de session `Secure` en production (`next.config.ts`).
+- **Mise en ligne** : `Dockerfile` (cibles `app` et `outils`), `deploy/docker-compose.yml`
+  (base, migrations, site, HTTPS automatique avec Caddy), `deploy/sauvegarde.sh`,
+  `/api/sante` pour la surveillance. Création d'une vraie école : `npm run ecole:creer`
+  (`scripts/creer-ecole.ts`). Guide pas à pas : [DEPLOIEMENT.md](DEPLOIEMENT.md).

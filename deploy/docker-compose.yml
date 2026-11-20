@@ -1,0 +1,54 @@
+# Mise en ligne sur un serveur (VPS) avec Docker.
+# Voir docs/DEPLOIEMENT.md. Depuis ce dossier :
+#   cp .env.exemple .env   (puis remplir)
+#   docker compose up -d --build
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ecole
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?mot de passe de la base manquant}
+      POSTGRES_DB: ecole
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecole"]
+      interval: 5s
+      retries: 20
+
+  # Met la base à jour (migrations) avant chaque démarrage du site.
+  migrate:
+    build: { context: .., target: outils }
+    environment:
+      DATABASE_URL: postgresql://ecole:${DB_PASSWORD}@db:5432/ecole
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  app:
+    build: { context: .., target: app }
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://ecole:${DB_PASSWORD}@db:5432/ecole
+      SMS_API_URL: ${SMS_API_URL:-}
+      SMS_API_TOKEN: ${SMS_API_TOKEN:-}
+      SMS_SENDER: ${SMS_SENDER:-}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  # HTTPS automatique (certificat Let's Encrypt) pour votre nom de domaine.
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAINE: ${DOMAINE:?nom de domaine manquant}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [app]
+
+volumes:
+  db-data:
+  caddy-data:

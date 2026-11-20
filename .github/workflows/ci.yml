@@ -36,3 +36,11 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # Vérifie que l'image de mise en ligne (Dockerfile) se construit.
+  image-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --target outils -t plateforme-ecole-outils .
+      - run: docker build --target app -t plateforme-ecole .
