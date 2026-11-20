@@ -11,7 +11,7 @@
  * Ce fichier ne dépend ni de la base ni de l'interface : il est testé à part.
  */
 
-export type ScoreInput = { score: number | null; absent: boolean; maxScore: number; weight: number };
+export type ScoreInput = { score: number | null; absent: boolean; maxScore: number; weight: number; kind?: string };
 
 /** Arrondi à 2 décimales (affichage des bulletins). */
 export function round2(n: number): number {
@@ -64,4 +64,29 @@ export function stats(values: (number | null)[]) {
     max: Math.max(...v),
     min: Math.min(...v),
   };
+}
+
+/**
+ * Moyenne d'une matière selon la structure d'évaluation (oral, contrôle,
+ * synthèse...) :
+ * 1. moyenne de chaque type de note (s'il y a deux contrôles, on fait leur moyenne) ;
+ * 2. moyenne des types, pondérée par le poids de chaque type dans la structure.
+ * Un type absent de la structure compte avec le poids 1.
+ */
+export function subjectAverageByKind(scores: ScoreInput[], kindWeights: Record<string, number>): number | null {
+  const byKind = new Map<string, ScoreInput[]>();
+  for (const s of scores) {
+    const k = s.kind ?? "OTHER";
+    byKind.set(k, [...(byKind.get(k) ?? []), s]);
+  }
+  let total = 0;
+  let weights = 0;
+  for (const [kind, list] of byKind) {
+    const avg = subjectAverage(list);
+    const w = kindWeights[kind] ?? 1;
+    if (avg === null || w <= 0) continue;
+    total += avg * w;
+    weights += w;
+  }
+  return weights > 0 ? total / weights : null;
 }

@@ -106,6 +106,11 @@ export function Bulletin({
             <tr className="border-b-2 border-slate-300 align-bottom text-xs text-slate-500">
               <th className="py-2 pe-2 font-medium"><Bi {...L("subject")} /></th>
               <th className="px-2 py-2 text-center font-medium"><Bi {...L("coefficient")} /></th>
+              {report.usedKinds.map((k) => (
+                <th key={k} className="px-1 py-2 text-center font-medium">
+                  <Bi fr={fr.grades.kindsShort[k]} ar={ar.grades.kindsShort[k]} />
+                </th>
+              ))}
               <th className="px-2 py-2 text-center font-medium"><Bi {...L("average")} /></th>
               <th className="py-2 ps-2 text-center font-medium"><Bi {...L("classAverage")} /></th>
             </tr>
@@ -117,6 +122,11 @@ export function Bulletin({
                   <Bi fr={row.subject.nameFr} ar={row.subject.nameAr} />
                 </td>
                 <td className="px-2 py-2 text-center">{row.coefficient}</td>
+                {report.usedKinds.map((k) => (
+                  <td key={k} className="px-1 py-2 text-center text-slate-700">
+                    {row.scheme.some((i) => i.kind === k) ? fmt(row.kindAverages.get(studentId)?.get(k)) : ""}
+                  </td>
+                ))}
                 <td className="px-2 py-2 text-center font-semibold">{fmt(row.averages.get(studentId))}</td>
                 <td className="py-2 ps-2 text-center text-slate-600">{fmt(row.classStats?.mean)}</td>
               </tr>

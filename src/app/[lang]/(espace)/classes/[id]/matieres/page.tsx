@@ -9,6 +9,8 @@ import { can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { getClass } from "@/lib/data/classes";
 import { getClassCurriculum } from "@/lib/data/grades";
+import { loadSchemeResolver } from "@/lib/grades/scheme";
+import Link from "next/link";
 import { ActionForm } from "@/components/action-form";
 import { Card, Input, PageHeader } from "@/components/ui";
 import { ClassTabs } from "../../class-tabs";
@@ -26,6 +28,7 @@ export default async function CurriculumPage({ params }: PageProps<"/[lang]/clas
     getClassCurriculum(ctx.school.id, cls),
   ]);
   const coefs = new Map(curriculum.map((c) => [c.subjectId, Number(c.coefficient)]));
+  const schemeFor = await loadSchemeResolver(db, ctx.school.id, cls);
   const canWrite = can(ctx.roles, "classes.write");
   const levelLabel = `${pickName(cls.gradeLevel, lang)}${cls.track ? ` · ${pickName(cls.track, lang)}` : ""}`;
 
@@ -50,7 +53,14 @@ export default async function CurriculumPage({ params }: PageProps<"/[lang]/clas
           <ul className="divide-y divide-slate-100">
             {subjects.map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-3 py-2">
-                <span className={coefs.has(s.id) ? "font-medium" : "text-slate-500"}>{pickName(s, lang)}</span>
+                <span className="min-w-0">
+                  <span className={coefs.has(s.id) ? "font-medium" : "text-slate-500"}>{pickName(s, lang)}</span>
+                  {coefs.has(s.id) && (
+                    <Link href={`/${lang}/classes/${cls.id}/structure?matiere=${s.id}`} className="block text-xs text-blue-700 hover:underline">
+                      {schemeFor(s.id).items.map((i) => `${dict.grades.kindsShort[i.kind]} ×${i.weight}`).join(" · ")}
+                    </Link>
+                  )}
+                </span>
                 <div className="w-24">
                   <Input
                     name={`coef_${s.id}`}

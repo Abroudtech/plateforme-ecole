@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { parseForm, runAction } from "@/lib/actions";
 import { FormError, optionalText } from "@/lib/forms";
 import { applyDefaultCurriculum } from "@/lib/setup/curriculum";
+import { loadSchemeResolver } from "@/lib/grades/scheme";
 
 /** Lit un nombre saisi au clavier ("12,5" ou "12.5"). Vide → null. */
 function parseNumber(raw: FormDataEntryValue | null): number | null {
@@ -178,6 +179,105 @@ export async function setPublication(lang: string, classId: string, termId: stri
     } else {
       await db.reportCardPublication.deleteMany({ where: { classGroupId: cls.id, termId } });
     }
+    refresh();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Structure des notes (oral, contrôle, synthèse...)
+// ---------------------------------------------------------------------------
+
+const KINDS = ["ORAL", "CONTROL", "SYNTHESIS", "PRACTICAL", "OTHER"] as const;
+
+/** Endroit où la règle s'applique, à partir d'une classe de référence. */
+async function schemeScope(schoolId: string, classId: string, scope: string, subjectId: string | null) {
+  const cls = await findClass(schoolId, classId);
+  if (subjectId && !(await db.subject.findFirst({ where: { id: subjectId, schoolId } }))) throw new FormError("invalid");
+  if (scope === "class") return { schoolId, classGroupId: cls.id, gradeLevelId: null, trackId: null, subjectId };
+  if (scope === "level") return { schoolId, classGroupId: null, gradeLevelId: cls.gradeLevelId, trackId: cls.trackId, subjectId };
+  if (scope === "school") return { schoolId, classGroupId: null, gradeLevelId: null, trackId: null, subjectId: null };
+  throw new FormError("invalid");
+}
+
+/** Enregistre une structure (champs "use_<type>" et "weight_<type>"). */
+export async function saveScheme(lang: string, classId: string, subjectId: string | null, _prev: FormState, formData: FormData) {
+  return runAction(lang, "classes.write", async (ctx) => {
+    const where = await schemeScope(ctx.school.id, classId, String(formData.get("scope") ?? ""), subjectId);
+    const items = KINDS.filter((k) => formData.get(`use_${k}`) === "on").map((kind) => {
+      const weight = parseNumber(formData.get(`weight_${kind}`)) ?? 1;
+      if (weight <= 0 || weight > 10) throw new FormError("invalid");
+      return { kind, weight };
+    });
+    if (items.length === 0) throw new FormError("noKind");
+
+    await db.$transaction(async (tx) => {
+      const existing = await tx.evaluationScheme.findFirst({ where });
+      const scheme = existing ?? (await tx.evaluationScheme.create({ data: where }));
+      await tx.evaluationSchemeItem.deleteMany({ where: { schemeId: scheme.id } });
+      await tx.evaluationSchemeItem.createMany({ data: items.map((i) => ({ ...i, schemeId: scheme.id })) });
+    });
+    refresh();
+  });
+}
+
+/** Supprime la règle à un endroit (la règle plus générale reprend la main). */
+export async function deleteScheme(lang: string, schemeId: string, _prev: FormState, _fd: FormData) {
+  return runAction(lang, "classes.write", async (ctx) => {
+    await db.evaluationScheme.deleteMany({ where: { id: schemeId, schoolId: ctx.school.id } });
+    refresh();
+  });
+}
+
+/**
+ * Enregistre la grille de notes d'une matière : un champ "g_<type>_<élève>"
+ * par case. "abs" (ou "a", "غ") = absent. Les évaluations de chaque type sont
+ * créées automatiquement si besoin.
+ */
+export async function saveGradeGrid(lang: string, classId: string, termId: string, subjectId: string, _prev: FormState, formData: FormData) {
+  return runAction(lang, "grades.write", async (ctx) => {
+    const schoolId = ctx.school.id;
+    const cls = await db.classGroup.findFirst({
+      where: { schoolId, id: classId },
+      include: { enrollments: { where: { status: "ACTIVE" } } },
+    });
+    if (!cls) throw new FormError("notFound");
+    const term = await db.term.findFirst({ where: { id: termId, schoolId, academicYearId: cls.academicYearId } });
+    const taught = await db.curriculumSubject.findFirst({
+      where: { schoolId, gradeLevelId: cls.gradeLevelId, trackId: cls.trackId, subjectId },
+    });
+    if (!term || !taught) throw new FormError("invalid");
+
+    const scheme = (await loadSchemeResolver(db, schoolId, cls))(subjectId);
+
+    // Lecture et contrôle de toutes les cases avant d'écrire quoi que ce soit.
+    const cells = scheme.items.flatMap(({ kind }) =>
+      cls.enrollments.map(({ studentId }) => {
+        const raw = String(formData.get(`g_${kind}_${studentId}`) ?? "").trim().toLowerCase();
+        const absent = ["abs", "a", "غ"].includes(raw);
+        const score = absent ? null : parseNumber(raw);
+        if (score !== null && (score < 0 || score > 20)) throw new FormError("scoreRange");
+        return { kind, studentId, score, absent };
+      }),
+    );
+
+    await db.$transaction(async (tx) => {
+      for (const { kind, weight } of scheme.items) {
+        const existing = await tx.assessment.findFirst({
+          where: { schoolId, classGroupId: cls.id, termId: term.id, subjectId, kind },
+          orderBy: { createdAt: "asc" },
+        });
+        const assessment =
+          existing ??
+          (await tx.assessment.create({ data: { schoolId, classGroupId: cls.id, termId: term.id, subjectId, kind, weight } }));
+        for (const c of cells.filter((x) => x.kind === kind)) {
+          await tx.grade.upsert({
+            where: { assessmentId_studentId: { assessmentId: assessment.id, studentId: c.studentId } },
+            update: { score: c.score, absent: c.absent },
+            create: { schoolId, assessmentId: assessment.id, studentId: c.studentId, score: c.score, absent: c.absent },
+          });
+        }
+      }
+    });
     refresh();
   });
 }
