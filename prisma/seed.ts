@@ -266,6 +266,37 @@ async function main() {
     }
   }
 
+  // Paiements : frais de l'année, quelques encaissements (Adam a un impayé).
+  if ((await db.fee.count({ where: { schoolId, academicYearId: year.id } })) === 0) {
+    const d = (iso: string) => new Date(`${iso}T00:00:00Z`);
+    const feeDefs = [
+      { name: "Frais d'inscription", nameAr: "معلوم الترسيم", amountMillimes: 300_000, dueDate: d("2026-09-15") },
+      { name: "Scolarité 1er trimestre", nameAr: "معاليم الثلاثي الأول", amountMillimes: 1_200_000, dueDate: d("2026-09-30") },
+      { name: "Scolarité 2e trimestre", nameAr: "معاليم الثلاثي الثاني", amountMillimes: 1_200_000, dueDate: d("2027-01-05") },
+      { name: "Scolarité 3e trimestre", nameAr: "معاليم الثلاثي الثالث", amountMillimes: 1_200_000, dueDate: d("2027-03-30") },
+      { name: "Cantine 1er trimestre", nameAr: "المطعم - الثلاثي الأول", amountMillimes: 350_000, dueDate: d("2026-10-01"), isOptional: true },
+    ];
+    const fees = [];
+    for (const f of feeDefs) fees.push(await db.fee.create({ data: { schoolId, academicYearId: year.id, ...f } }));
+    const byNumber = async (n: string) => (await db.student.findUniqueOrThrow({ where: { schoolId_studentNumber: { schoolId, studentNumber: n } } })).id;
+    const yasmine = await byNumber("2026-001");
+    await db.studentFee.create({ data: { schoolId, studentId: yasmine, feeId: fees[4].id } });
+    const payments: [string, number, string, "CASH" | "CHECK" | "TRANSFER", string | null][] = [
+      ["2026-001", 1_500_000, "2026-09-10", "CHECK", "4512 3378"],
+      ["2026-001", 350_000, "2026-10-01", "CASH", null],
+      ["2026-002", 300_000, "2026-09-12", "CASH", null],
+      ["2026-003", 1_500_000, "2026-09-14", "TRANSFER", "VIR-0921"],
+      ["2026-004", 900_000, "2026-09-20", "CASH", null],
+      ["2026-005", 1_500_000, "2026-09-15", "CASH", null],
+    ];
+    let receipt = 1;
+    for (const [n, amountMillimes, paidAt, method, reference] of payments) {
+      await db.payment.create({
+        data: { schoolId, academicYearId: year.id, studentId: await byNumber(n), receiptNumber: receipt++, amountMillimes, method, reference, paidAt: d(paidAt), createdById: admin.id },
+      });
+    }
+  }
+
   console.log("✔ Données de démonstration prêtes.");
   console.log(`  Administration : admin@demo.tn / ${PASSWORD}`);
   console.log(`  Parent         : 22 000 000 (ou parent@demo.tn) / ${PASSWORD}`);

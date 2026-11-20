@@ -104,6 +104,10 @@ model School {
   teachers           Teacher[]
   rooms              Room[]
   timetable          TimetableEntry[]
+  fees               Fee[]
+  studentFees        StudentFee[]
+  payments           Payment[]
+  paymentReminders   PaymentReminder[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -126,11 +130,13 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  memberships Membership[]
-  sessions    Session[]
-  guardians   Guardian[]
+  memberships      Membership[]
+  sessions         Session[]
+  guardians        Guardian[]
+  paymentsRecorded Payment[]
+  remindersSent    PaymentReminder[]
   /// Compte élève (V3), relié à la fiche élève.
-  student     Student?
+  student          Student?
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -184,6 +190,8 @@ model AcademicYear {
   terms       Term[]
   classGroups ClassGroup[]
   enrollments Enrollment[]
+  fees        Fee[]
+  payments    Payment[]
 
   @@unique([schoolId, label])
 }
@@ -227,6 +235,7 @@ model GradeLevel {
   classGroups        ClassGroup[]
   curriculumSubjects CurriculumSubject[]
   evaluationSchemes  EvaluationScheme[]
+  fees               Fee[]
 
   @@unique([schoolId, code])
   @@index([schoolId, cycle])
@@ -342,6 +351,9 @@ model Student {
   grades       Grade[]
   termComments TermComment[]
   attendance   AttendanceRecord[]
+  studentFees  StudentFee[]
+  payments     Payment[]
+  reminders    PaymentReminder[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -640,4 +652,114 @@ model TimetableEntry {
   @@index([schoolId, dayOfWeek])
   @@index([classGroupId])
   @@index([teacherId])
+}
+
+// -----------------------------------------------------------------------------
+// Paiements des familles (étape 7)
+// Les montants sont stockés en millimes (1 DT = 1000 millimes) pour éviter
+// les erreurs d'arrondi.
+// -----------------------------------------------------------------------------
+
+/// Un frais de l'année : inscription, scolarité du 1er trimestre, cantine…
+/// Obligatoire : dû par tous les élèves du niveau (ou de toute l'école).
+/// Optionnel (cantine, transport…) : dû seulement par les élèves inscrits à ce service.
+model Fee {
+  id             String   @id @default(cuid())
+  schoolId       String
+  academicYearId String
+  /// null = tous les niveaux
+  gradeLevelId   String?
+  name           String
+  nameAr         String?
+  amountMillimes Int
+  dueDate        DateTime @db.Date
+  isOptional     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  gradeLevel   GradeLevel?  @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
+  students     StudentFee[]
+
+  @@index([schoolId, academicYearId])
+}
+
+/// Lien élève ↔ frais : inscription à un service optionnel, ou montant
+/// personnalisé (réduction fratrie, bourse, exonération = 0).
+model StudentFee {
+  id             String  @id @default(cuid())
+  schoolId       String
+  studentId      String
+  feeId          String
+  /// null = montant normal du frais
+  amountMillimes Int?
+  note           String?
+
+  school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fee     Fee     @relation(fields: [feeId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, feeId])
+  @@index([schoolId])
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  TRANSFER
+  CARD
+  OTHER
+}
+
+/// Un encaissement. Il n'est jamais supprimé : on l'annule (le numéro de reçu
+/// reste réservé, pour la comptabilité).
+model Payment {
+  id             String        @id @default(cuid())
+  schoolId       String
+  studentId      String
+  /// Année scolaire à laquelle le paiement est imputé.
+  academicYearId String
+  receiptNumber  Int
+  amountMillimes Int
+  method         PaymentMethod
+  reference      String?
+  note           String?
+  paidAt         DateTime      @db.Date
+  createdById    String?
+  createdAt      DateTime      @default(now())
+  cancelledAt    DateTime?
+  cancelReason   String?
+
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([schoolId, receiptNumber])
+  @@index([schoolId, studentId])
+  @@index([schoolId, paidAt])
+}
+
+enum ReminderChannel {
+  LETTER
+  WHATSAPP
+  SMS
+  CALL
+}
+
+/// Trace des relances d'impayés envoyées aux familles.
+model PaymentReminder {
+  id             String          @id @default(cuid())
+  schoolId       String
+  studentId      String
+  channel        ReminderChannel
+  amountMillimes Int
+  createdById    String?
+  createdAt      DateTime        @default(now())
+
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, studentId])
 }

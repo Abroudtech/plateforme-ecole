@@ -56,7 +56,12 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
         back={{ href: `/${lang}/eleves`, label: dict.students.title }}
         action={
           enrollment ? (
-            <ButtonLink href={`/${lang}/eleves/${student.id}/bulletin`}>{dict.reportCards.view}</ButtonLink>
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href={`/${lang}/eleves/${student.id}/bulletin`}>{dict.reportCards.view}</ButtonLink>
+              {can(ctx.roles, "payments.read") && (
+                <ButtonLink href={`/${lang}/eleves/${student.id}/paiements`}>{dict.payments.myPayments}</ButtonLink>
+              )}
+            </div>
           ) : undefined
         }
       />

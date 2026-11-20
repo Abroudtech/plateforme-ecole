@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSchoolAccounts } from "@/lib/data/payments";
 import type { Cycle } from "@prisma/client";
 import type { Locale } from "@/i18n/config";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
@@ -13,7 +14,7 @@ import { parseISODate, todayISO } from "@/lib/dates";
 const CYCLES: Cycle[] = ["PRIMARY", "MIDDLE", "SECONDARY"];
 
 /** Modules déjà disponibles (les autres affichent "Bientôt"). */
-const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes", attendance: "absences", timetable: "emplois-du-temps", teachers: "enseignants" };
+const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes", attendance: "absences", payments: "paiements", timetable: "emplois-du-temps", teachers: "enseignants" };
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
@@ -39,6 +40,9 @@ type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; 
 
 async function AdminDashboard({ ctx, lang, dict }: Props) {
   const { year, studentCount, levelCount, classes } = await getAdminOverview(ctx.school.id);
+  const overdueCount = year
+    ? (await getSchoolAccounts(ctx.school.id, year.id, todayISO())).filter((r) => r.account.overdue > 0).length
+    : 0;
   const absentToday = await countAbsences(ctx.school.id, parseISODate(todayISO())!);
   const cycles = CYCLES.filter((c) => ctx.school.cycles.includes(c));
   const modules = ["students", "classes", "grades", "reportCards", "attendance", "timetable", "teachers", "payments", "messages"] as const;
@@ -56,12 +60,15 @@ async function AdminDashboard({ ctx, lang, dict }: Props) {
         )}
       </p>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Stat label={dict.dashboard.students} value={studentCount} />
         <Stat label={dict.dashboard.classes} value={classes.length} />
         <Stat label={dict.dashboard.levels} value={levelCount} />
         <Link href={`/${lang}/absences`}>
           <Stat label={dict.attendance.todayCount} value={absentToday} />
+        </Link>
+        <Link href={`/${lang}/paiements`}>
+          <Stat label={dict.payments.overdue} value={overdueCount} />
         </Link>
       </section>
 
@@ -165,6 +172,9 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
                       {dict.reportCards.myBulletins}
+                    </Link>
+                    <Link href={`/${lang}/eleves/${child.id}/paiements`} className="inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
+                      {dict.payments.myPayments}
                     </Link>
                     <Link href={`/${lang}/eleves/${child.id}/emploi-du-temps`} className="inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
                       {dict.timetable.myTimetable}
