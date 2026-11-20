@@ -15,7 +15,7 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | 5. Structure des notes | Oral, contrôle, synthèse configurables par matière, niveau et classe ; saisie en tableau | ✅ |
 | 6. Emplois du temps | Enseignants et salles, emploi du temps par classe et par enseignant, détection des conflits, consultation parents | ✅ |
 | 7. Paiements | Frais par niveau, services optionnels, réductions, encaissements et reçus bilingues, suivi des impayés, relances WhatsApp et lettre, consultation parents | ✅ |
-| 8. Messagerie | École ↔ parents, notifications | à venir |
+| 8. Messagerie | Conversations école ↔ parents, annonces (école, niveau, classe), alertes SMS automatiques (absence, bulletin, message) | ✅ |
 
 Le fonctionnement général est expliqué simplement dans
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

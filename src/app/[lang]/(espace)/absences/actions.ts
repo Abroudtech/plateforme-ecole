@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { runAction } from "@/lib/actions";
 import { parseISODate } from "@/lib/dates";
 import { FormError } from "@/lib/forms";
+import { t } from "@/i18n/format";
+import { alertGuardiansOf } from "@/lib/data/alerts";
 
 const PERIODS = ["MORNING", "AFTERNOON"] as const;
 
@@ -27,6 +29,7 @@ export async function saveRollCall(lang: string, classId: string, dateISO: strin
     if (!cls) throw new FormError("notFound");
     const existing = await db.attendanceRecord.findMany({ where: { schoolId, classGroupId: cls.id, date, period: p } });
     const byStudent = new Map(existing.map((r) => [r.studentId, r]));
+    const newlyMarked: { studentId: string; status: "ABSENT" | "LATE" }[] = [];
 
     await db.$transaction(async (tx) => {
       for (const { studentId } of cls.enrollments) {
@@ -35,6 +38,7 @@ export async function saveRollCall(lang: string, classId: string, dateISO: strin
         if (value === "PRESENT") {
           if (before) await tx.attendanceRecord.delete({ where: { id: before.id } });
         } else if (value === "ABSENT" || value === "LATE") {
+          if (!before || before.status !== value) newlyMarked.push({ studentId, status: value });
           if (!before) {
             await tx.attendanceRecord.create({ data: { schoolId, studentId, classGroupId: cls.id, date, period: p, status: value } });
           } else if (before.status !== value) {
@@ -50,6 +54,23 @@ export async function saveRollCall(lang: string, classId: string, dateISO: strin
         create: { schoolId, classGroupId: cls.id, date, period: p },
       });
     });
+
+    // Alerte SMS aux parents des élèves nouvellement notés absents ou en retard.
+    if (ctx.school.alertAbsence) {
+      for (const status of ["ABSENT", "LATE"] as const) {
+        await alertGuardiansOf(
+          ctx.school,
+          newlyMarked.filter((m) => m.status === status).map((m) => m.studentId),
+          "ABSENCE",
+          (d, lg, v) =>
+            t(status === "ABSENT" ? d.alerts.absence : d.alerts.late, {
+              ...v,
+              date: new Intl.DateTimeFormat(lg === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "long", timeZone: "UTC" }).format(date),
+              period: d.attendance.periods[p],
+            }),
+        );
+      }
+    }
     refresh();
   });
 }

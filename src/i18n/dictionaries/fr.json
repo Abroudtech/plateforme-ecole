@@ -29,7 +29,8 @@
     "attendance": "Absences",
     "teachers": "Enseignants",
     "timetables": "Emplois du temps",
-    "payments": "Paiements"
+    "payments": "Paiements",
+    "messages": "Messagerie"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -114,7 +115,9 @@
     "dateFuture": "La date ne peut pas être dans le futur.",
     "checkNumber": "Indiquez le numéro du chèque.",
     "nothingOverdue": "Rien n'est en retard pour cet élève.",
-    "noGuardianPhone": "Aucun numéro de téléphone pour le parent principal."
+    "noGuardianPhone": "Aucun numéro de téléphone pour le parent principal.",
+    "noGuardian": "Cet élève n'a pas de parent enregistré.",
+    "audienceMissing": "Choisissez le niveau ou la classe."
   },
   "classes": {
     "title": "Classes",
@@ -469,5 +472,70 @@
     "today": "Aujourd'hui",
     "myPayments": "Paiements",
     "parentIntro": "Frais de l'année, paiements reçus et reste à payer."
+  },
+  "messages": {
+    "title": "Messagerie",
+    "inbox": "Conversations",
+    "new": "Nouvelle conversation",
+    "subject": "Objet",
+    "child": "Enfant concerné",
+    "body": "Message",
+    "send": "Envoyer",
+    "reply": "Répondre",
+    "none": "Aucune conversation pour le moment.",
+    "unread": "Non lu",
+    "school": "École",
+    "you": "Vous",
+    "student": "Élève",
+    "withParent": "Avec {parent}",
+    "about": "Au sujet de {student}",
+    "parentWrites": "Écrire à l'école",
+    "newHint": "Le message est envoyé au parent principal de l'élève. Il est prévenu par SMS.",
+    "announcements": "Annonces",
+    "newAnnouncement": "Nouvelle annonce",
+    "annTitle": "Titre",
+    "audience": "Destinataires",
+    "audiences": {
+      "SCHOOL": "Toute l'école",
+      "LEVEL": "Un niveau",
+      "CLASS": "Une classe"
+    },
+    "level": "Niveau",
+    "class": "Classe",
+    "sendAlert": "Prévenir aussi les parents par SMS",
+    "noAnnouncements": "Aucune annonce.",
+    "deleteAnnouncement": "Supprimer l'annonce",
+    "publish": "Publier",
+    "alerts": "Alertes SMS",
+    "alertsIntro": "Messages courts envoyés automatiquement au parent principal.",
+    "alertSettings": "Envoyer une alerte quand…",
+    "alertAbsence": "un élève est absent ou en retard",
+    "alertReportCard": "un bulletin est publié",
+    "alertMessage": "l'école écrit à un parent",
+    "noAlerts": "Aucune alerte envoyée pour le moment.",
+    "retry": "Renvoyer les alertes en échec",
+    "simulatedHint": "Aucun fournisseur SMS n'est encore branché : les alertes sont préparées et enregistrées ici, sans être envoyées. Il suffira de brancher un fournisseur pour qu'elles partent.",
+    "statuses": {
+      "PENDING": "En attente",
+      "SENT": "Envoyé",
+      "SIMULATED": "Simulé",
+      "FAILED": "Échec"
+    },
+    "kinds": {
+      "ABSENCE": "Absence",
+      "REPORT_CARD": "Bulletin",
+      "ANNOUNCEMENT": "Annonce",
+      "MESSAGE": "Message",
+      "PAYMENT": "Paiement"
+    },
+    "myMessages": "Messages",
+    "latestAnnouncements": "Dernières annonces"
+  },
+  "alerts": {
+    "absence": "{school} : {student} a été noté(e) absent(e) le {date} ({period}).",
+    "late": "{school} : {student} est arrivé(e) en retard le {date} ({period}).",
+    "reportCard": "{school} : le bulletin de {student} ({term}) est disponible sur l'espace parents.",
+    "message": "{school} : vous avez reçu un nouveau message de l'école. Lisez-le sur l'espace parents.",
+    "announcement": "{school} : {title}. Plus d'informations sur l'espace parents."
   }
 }

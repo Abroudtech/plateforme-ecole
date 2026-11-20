@@ -72,21 +72,25 @@ enum EnrollmentStatus {
 
 /// Un établissement (une école cliente de la plateforme).
 model School {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  nameFr        String
-  nameAr        String
-  city          String?
-  address       String?
-  phone         String?
-  email         String?
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  nameFr          String
+  nameAr          String
+  city            String?
+  address         String?
+  phone           String?
+  email           String?
   /// Cycles proposés par l'école (une école peut avoir primaire + collège + lycée).
-  cycles        Cycle[]
-  defaultLocale Locale   @default(fr)
-  currency      String   @default("TND")
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  cycles          Cycle[]
+  defaultLocale   Locale   @default(fr)
+  currency        String   @default("TND")
+  /// Alertes automatiques aux parents (SMS) : absence, bulletin publié, nouveau message.
+  alertAbsence    Boolean  @default(true)
+  alertReportCard Boolean  @default(true)
+  alertMessage    Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   memberships        Membership[]
   academicYears      AcademicYear[]
@@ -108,6 +112,9 @@ model School {
   studentFees        StudentFee[]
   payments           Payment[]
   paymentReminders   PaymentReminder[]
+  conversations      Conversation[]
+  announcements      Announcement[]
+  notifications      Notification[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -130,13 +137,16 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  memberships      Membership[]
-  sessions         Session[]
-  guardians        Guardian[]
-  paymentsRecorded Payment[]
-  remindersSent    PaymentReminder[]
+  memberships       Membership[]
+  sessions          Session[]
+  guardians         Guardian[]
+  paymentsRecorded  Payment[]
+  remindersSent     PaymentReminder[]
   /// Compte élève (V3), relié à la fiche élève.
-  student          Student?
+  student           Student?
+  messages          Message[]
+  conversationReads ConversationRead[]
+  announcements     Announcement[]
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -236,6 +246,7 @@ model GradeLevel {
   curriculumSubjects CurriculumSubject[]
   evaluationSchemes  EvaluationScheme[]
   fees               Fee[]
+  announcements      Announcement[]
 
   @@unique([schoolId, code])
   @@index([schoolId, cycle])
@@ -280,6 +291,7 @@ model ClassGroup {
   rollCalls         RollCall[]
   evaluationSchemes EvaluationScheme[]
   timetable         TimetableEntry[]
+  announcements     Announcement[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -344,16 +356,17 @@ model Student {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  school       School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user         User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  enrollments  Enrollment[]
-  guardians    StudentGuardian[]
-  grades       Grade[]
-  termComments TermComment[]
-  attendance   AttendanceRecord[]
-  studentFees  StudentFee[]
-  payments     Payment[]
-  reminders    PaymentReminder[]
+  school        School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  enrollments   Enrollment[]
+  guardians     StudentGuardian[]
+  grades        Grade[]
+  termComments  TermComment[]
+  attendance    AttendanceRecord[]
+  studentFees   StudentFee[]
+  payments      Payment[]
+  reminders     PaymentReminder[]
+  conversations Conversation[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -375,9 +388,11 @@ model Guardian {
   userId      String?
   createdAt   DateTime @default(now())
 
-  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user     User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
-  students StudentGuardian[]
+  school        School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user          User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  students      StudentGuardian[]
+  conversations Conversation[]
+  notifications Notification[]
 
   @@unique([schoolId, userId])
   @@index([schoolId])
@@ -762,4 +777,126 @@ model PaymentReminder {
   createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([schoolId, studentId])
+}
+
+// -----------------------------------------------------------------------------
+// Messagerie (étape 8)
+// -----------------------------------------------------------------------------
+
+/// Conversation entre l'école et un parent (au sujet d'un enfant, en général).
+model Conversation {
+  id            String   @id @default(cuid())
+  schoolId      String
+  guardianId    String
+  studentId     String?
+  subject       String
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  school   School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  guardian Guardian           @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+  student  Student?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  messages Message[]
+  reads    ConversationRead[]
+
+  @@index([schoolId, lastMessageAt])
+  @@index([guardianId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  authorId       String?
+  /// Vrai si le message vient de l'école (administration, plus tard enseignants).
+  fromSchool     Boolean
+  body           String   @db.Text
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  author       User?        @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+}
+
+/// Jusqu'où chaque personne a lu une conversation (pour les « non lus »).
+model ConversationRead {
+  conversationId String
+  userId         String
+  lastReadAt     DateTime
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+}
+
+enum AnnouncementAudience {
+  SCHOOL
+  LEVEL
+  CLASS
+}
+
+/// Annonce de l'école aux familles : toute l'école, un niveau ou une classe.
+model Announcement {
+  id           String               @id @default(cuid())
+  schoolId     String
+  title        String
+  body         String               @db.Text
+  audience     AnnouncementAudience
+  gradeLevelId String?
+  classGroupId String?
+  /// Prévenir aussi les parents par SMS.
+  sendAlert    Boolean              @default(false)
+  createdById  String?
+  createdAt    DateTime             @default(now())
+
+  school     School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  gradeLevel GradeLevel? @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup? @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  createdBy  User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, createdAt])
+}
+
+enum NotificationKind {
+  ABSENCE
+  REPORT_CARD
+  ANNOUNCEMENT
+  MESSAGE
+  PAYMENT
+}
+
+enum NotificationChannel {
+  SMS
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  /// Aucun fournisseur SMS configuré : le message est seulement enregistré.
+  SIMULATED
+  FAILED
+}
+
+/// File d'envoi des alertes (SMS aujourd'hui, WhatsApp plus tard).
+model Notification {
+  id         String              @id @default(cuid())
+  schoolId   String
+  guardianId String?
+  kind       NotificationKind
+  channel    NotificationChannel @default(SMS)
+  toPhone    String
+  body       String              @db.Text
+  status     NotificationStatus  @default(PENDING)
+  error      String?
+  attempts   Int                 @default(0)
+  createdAt  DateTime            @default(now())
+  sentAt     DateTime?
+
+  school   School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  guardian Guardian? @relation(fields: [guardianId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, createdAt])
+  @@index([status])
 }

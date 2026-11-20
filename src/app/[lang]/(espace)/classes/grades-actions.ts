@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { FormState } from "@/components/action-form";
 import { db } from "@/lib/db";
+import { t } from "@/i18n/format";
+import { alertGuardiansOf } from "@/lib/data/alerts";
 import { parseForm, runAction } from "@/lib/actions";
 import { FormError, optionalText } from "@/lib/forms";
 import { applyDefaultCurriculum } from "@/lib/setup/curriculum";
@@ -171,11 +173,19 @@ export async function setPublication(lang: string, classId: string, termId: stri
     const term = await db.term.findFirst({ where: { id: termId, schoolId, academicYearId: cls.academicYearId } });
     if (!term) throw new FormError("notFound");
     if (publish) {
+      const already = await db.reportCardPublication.findUnique({ where: { classGroupId_termId: { classGroupId: cls.id, termId } } });
       await db.reportCardPublication.upsert({
         where: { classGroupId_termId: { classGroupId: cls.id, termId } },
         update: { publishedAt: new Date() },
         create: { schoolId, classGroupId: cls.id, termId },
       });
+      // Première publication : on prévient les parents par SMS.
+      if (!already && ctx.school.alertReportCard) {
+        const enrolled = await db.enrollment.findMany({ where: { schoolId, classGroupId: cls.id, status: "ACTIVE" }, select: { studentId: true } });
+        await alertGuardiansOf(ctx.school, enrolled.map((e) => e.studentId), "REPORT_CARD", (d, lg, v) =>
+          t(d.alerts.reportCard, { ...v, term: lg === "ar" ? term.nameAr : term.nameFr }),
+        );
+      }
     } else {
       await db.reportCardPublication.deleteMany({ where: { classGroupId: cls.id, termId } });
     }

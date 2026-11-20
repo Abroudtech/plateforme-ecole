@@ -191,3 +191,19 @@ Le **bulletin** affiche une colonne par type de note.
   `/paiements/encaissements` (journal de caisse), `/paiements/recus/[id]`,
   `/eleves/[id]/paiements` (compte de l'élève ; lecture seule pour les parents) et
   `/eleves/[id]/paiements/relance`.
+
+## 12. Messagerie et alertes (étape 8)
+
+- **Conversations** (`Conversation`, `Message`) entre l'école et un parent (`Guardian`), au sujet
+  d'un enfant. L'administration voit toutes les conversations ; un parent seulement les siennes.
+  `ConversationRead` retient jusqu'où chacun a lu, pour afficher les « non lus ».
+- **Annonces** (`Announcement`) pour toute l'école, un niveau ou une classe. Un parent ne voit que
+  celles qui concernent ses enfants.
+- **Alertes SMS** (`Notification`) au contact principal de l'élève, dans la langue de son compte :
+  absence ou retard (à l'appel), première publication d'un bulletin, nouveau message de l'école,
+  annonce (si la case est cochée ; un seul SMS par parent). Chaque type d'alerte s'active ou se
+  désactive dans « Messagerie > Alertes SMS ».
+- **Envoi** (`src/lib/sms.ts`) : aucun fournisseur imposé. Avec `SMS_API_URL` (voir `.env.example`),
+  chaque alerte est envoyée en HTTP ; sinon elle est enregistrée comme « simulée ». Chaque alerte
+  est tracée (envoyée, simulée, échec), et les échecs peuvent être renvoyés.
+  WhatsApp est prévu dans le modèle (`channel`), à brancher avec un fournisseur WhatsApp Business.
