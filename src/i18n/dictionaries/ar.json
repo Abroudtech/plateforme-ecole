@@ -33,7 +33,9 @@
     "payments": "الخلاص",
     "messages": "المراسلات",
     "settings": "الإعدادات",
-    "import": "استيراد"
+    "import": "استيراد",
+    "more": "المزيد",
+    "menu": "القائمة"
   },
   "roles": {
     "ADMIN": "الإدارة",
@@ -614,7 +616,17 @@
     "sinceStart": "منذ العودة المدرسية",
     "overdueAmount": "متأخّر",
     "quick": "وصول سريع",
-    "noSchoolDay": "الأحد: لا مناداة."
+    "noSchoolDay": "الأحد: لا مناداة.",
+    "rollCallsChip": "{done} من {total} نداءات أُنجزت اليوم",
+    "classesCount": "{count} أقسام",
+    "ofDue": "من المبلغ المستحق إلى اليوم",
+    "unreadShort": "غير مقروءة",
+    "late": "منها {count} تأخير",
+    "collected": "المقبوض",
+    "averages": "معدلات الأقسام · {term}",
+    "details": "التفاصيل",
+    "seeAll": "عرض الكل",
+    "paidOf": "{paid} مقبوضة من {due}"
   },
   "account": {
     "title": "حسابي",

@@ -23,7 +23,7 @@ export function LoginForm({ lang, labels }: { lang: string; labels: Labels }) {
           autoComplete="username"
           required
           dir="auto"
-          className="rounded-lg border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+          className="rounded-xl border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-gold-500 focus:ring-3 focus:ring-gold-200/70"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
@@ -33,7 +33,7 @@ export function LoginForm({ lang, labels }: { lang: string; labels: Labels }) {
           type="password"
           autoComplete="current-password"
           required
-          className="rounded-lg border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+          className="rounded-xl border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-gold-500 focus:ring-3 focus:ring-gold-200/70"
         />
       </label>
 
@@ -46,7 +46,7 @@ export function LoginForm({ lang, labels }: { lang: string; labels: Labels }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-blue-700 px-4 py-3 text-base font-semibold text-white hover:bg-blue-800 disabled:opacity-60"
+        className="rounded-xl bg-blue-900 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-800 disabled:opacity-60"
       >
         {pending ? labels.submitting : labels.submit}
       </button>

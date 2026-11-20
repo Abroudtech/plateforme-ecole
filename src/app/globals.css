@@ -1,19 +1,82 @@
 @import "tailwindcss";
 
+/*
+ * Identité visuelle « Plume d'or » : bleu nuit (encre) et doré (plume),
+ * sur un fond ivoire. Les nuances « blue » et « slate » de Tailwind sont
+ * redéfinies ici : toutes les pages prennent ces couleurs automatiquement.
+ * Pour changer de thème, il suffit de modifier ce fichier.
+ */
+
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f7f4ec;
+  --foreground: #14213d;
+}
+
+@theme {
+  /* Encre : couleur principale (boutons, liens, en-tête). */
+  --color-blue-50: #eef1f8;
+  --color-blue-100: #dde3f0;
+  --color-blue-200: #bac6e0;
+  --color-blue-300: #8fa1c8;
+  --color-blue-400: #5f78aa;
+  --color-blue-500: #3d5890;
+  --color-blue-600: #2a4277;
+  --color-blue-700: #1e3363;
+  --color-blue-800: #172849;
+  --color-blue-900: #14213d;
+  --color-blue-950: #0c1426;
+
+  /* Doré : accent (logo, éléments actifs, mises en avant). */
+  --color-gold-50: #fbf6e6;
+  --color-gold-100: #f6ebc4;
+  --color-gold-200: #eed98c;
+  --color-gold-300: #e3c35a;
+  --color-gold-400: #d4ae38;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a8851a;
+  --color-gold-700: #856814;
+  --color-gold-800: #634d10;
+  --color-gold-900: #43340b;
+
+  /* Gris chauds, qui s'accordent avec le fond ivoire ; texte foncé bleu nuit. */
+  --color-slate-50: #faf8f3;
+  --color-slate-100: #f1ece1;
+  --color-slate-200: #e6e0d2;
+  --color-slate-300: #d3cbba;
+  --color-slate-400: #a7a092;
+  --color-slate-500: #79746a;
+  --color-slate-600: #5d5a55;
+  --color-slate-700: #3b4560;
+  --color-slate-800: #252f4a;
+  --color-slate-900: #14213d;
+  --color-slate-950: #0c1426;
+
+  /* Polices : IBM Plex Sans Arabic (arabe et français), Fraunces pour les grands titres. */
+  --font-sans: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, Tahoma, Arial, sans-serif;
+  --font-display: "Fraunces", "IBM Plex Sans Arabic", Georgia, serif;
+
+  --shadow-card: 0 1px 2px rgb(20 33 61 / 0.05), 0 6px 20px rgb(20 33 61 / 0.05);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Polices système, avec une bonne prise en charge de l'arabe. */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", Tahoma, Arial, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* En arabe, les titres restent dans la police arabe (Fraunces n'a pas l'arabe). */
+:lang(ar) .font-display {
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
 }

@@ -5,7 +5,7 @@ import type { ComponentProps, ReactNode } from "react";
 // cohérent et adapté au téléphone (gros champs, gros boutons).
 
 const fieldClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200";
+  "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base outline-none transition focus:border-gold-500 focus:ring-3 focus:ring-gold-200/70";
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
@@ -29,21 +29,21 @@ export function Select(props: ComponentProps<"select">) {
 
 export function Button({ variant = "primary", ...props }: ComponentProps<"button"> & { variant?: "primary" | "secondary" | "danger" }) {
   const styles = {
-    primary: "bg-blue-700 text-white hover:bg-blue-800",
+    primary: "bg-blue-900 text-white shadow-sm hover:bg-blue-800",
     secondary: "border border-slate-300 bg-white hover:bg-slate-50",
     danger: "border border-red-300 bg-white text-red-700 hover:bg-red-50",
   }[variant];
   return (
     <button
       {...props}
-      className={`rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-60 ${styles} ${props.className ?? ""}`}
+      className={`rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-60 ${styles} ${props.className ?? ""}`}
     />
   );
 }
 
 export function ButtonLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="inline-block rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+    <Link href={href} className="inline-block rounded-xl bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
       {children}
     </Link>
   );
@@ -51,8 +51,8 @@ export function ButtonLink({ href, children }: { href: string; children: ReactNo
 
 export function Card({ title, children, className = "" }: { title?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl bg-white p-4 ring-1 ring-slate-200 ${className}`}>
-      {title && <h2 className="mb-3 text-lg font-semibold">{title}</h2>}
+    <section className={`rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/80 sm:p-5 ${className}`}>
+      {title && <h2 className="mb-3 text-lg font-bold text-blue-900">{title}</h2>}
       {children}
     </section>
   );
@@ -60,16 +60,16 @@ export function Card({ title, children, className = "" }: { title?: string; chil
 
 export function PageHeader({ title, subtitle, back, action }: { title: string; subtitle?: ReactNode; back?: { href: string; label: string }; action?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-2">
+    <div className="mb-5 flex flex-col gap-2">
       {back && (
-        <Link href={back.href} className="text-sm text-blue-700 hover:underline">
+        <Link href={back.href} className="w-fit text-sm font-medium text-slate-500 hover:text-blue-900">
           <span className="inline-block rtl:rotate-180">←</span> {back.label}
         </Link>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">{title}</h1>
-          {subtitle && <p className="text-slate-600">{subtitle}</p>}
+          <h1 className="font-display text-[1.7rem] leading-tight font-semibold text-blue-900">{title}</h1>
+          {subtitle && <p className="mt-0.5 text-slate-600">{subtitle}</p>}
         </div>
         {action}
       </div>

@@ -86,7 +86,7 @@ export function ImportForm({
 
       {!showPreview && !showDone && (
         <div>
-          <button type="submit" value="preview" disabled={pending} className="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+          <button type="submit" value="preview" disabled={pending} className="rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
             {pending ? labels.checking : labels.check}
           </button>
         </div>
@@ -162,7 +162,7 @@ export function ImportForm({
           {showPreview && (
             <div className="flex flex-wrap gap-2">
               {toWrite > 0 ? (
-                <button type="submit" value="commit" disabled={pending} className="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+                <button type="submit" value="commit" disabled={pending} className="rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
                   {pending && mode === "commit" ? labels.importing : labels.importNow}
                 </button>
               ) : (

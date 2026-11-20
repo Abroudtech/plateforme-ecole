@@ -1,6 +1,25 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
+import {
+  BookOpen,
+  CalendarCheck,
+  CalendarDays,
+  ChevronRight,
+  CircleCheck,
+  ClipboardCheck,
+  FileSpreadsheet,
+  FileText,
+  GraduationCap,
+  Megaphone,
+  MessageSquare,
+  Settings,
+  UserRound,
+  Users,
+  UserX,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import { getDirectorOverview } from "@/lib/data/director";
-import { formatMoney } from "@/lib/payments";
 import { Money } from "@/components/money";
 import { getCurrentYear } from "@/lib/data/school";
 import { countUnread, getGuardianForUser, listAnnouncementsFor, parentScope } from "@/lib/data/messages";
@@ -13,22 +32,18 @@ import { can } from "@/lib/auth/permissions";
 import { getParentChildren } from "@/lib/data/school";
 import { getStudentAttendance } from "@/lib/data/attendance";
 
-/** Modules déjà disponibles (les autres affichent "Bientôt"). */
-const MODULE_LINKS: Partial<Record<string, string>> = { students: "eleves", classes: "classes", grades: "classes", reportCards: "classes", attendance: "absences", payments: "paiements", messages: "messages", timetable: "emplois-du-temps", teachers: "enseignants" };
-
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
   const lang = rawLang as Locale;
   const dict = await getDictionary(lang);
   const ctx = await requireContext(lang);
+  const today = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Tunis" }).format(new Date());
+  const hello = t(dict.dashboard.hello, { name: personName(ctx.user, lang) });
 
+  if (can(ctx.roles, "dashboard.admin")) return <AdminDashboard ctx={ctx} lang={lang} dict={dict} hello={hello} today={today} />;
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-bold">
-        {t(dict.dashboard.hello, { name: personName(ctx.user, lang) })}
-      </h1>
-
-      {can(ctx.roles, "dashboard.admin") && <AdminDashboard ctx={ctx} lang={lang} dict={dict} />}
+    <div className="flex flex-col gap-6">
+      <Hero hello={hello} line={today} overlap={can(ctx.roles, "children.read")} />
       {can(ctx.roles, "children.read") && <ParentDashboard ctx={ctx} lang={lang} dict={dict} />}
       {ctx.roles.includes("TEACHER") && <Notice text={dict.dashboard.teacherSoon} />}
       {ctx.roles.includes("STUDENT") && <Notice text={dict.dashboard.studentSoon} />}
@@ -38,185 +53,255 @@ export default async function DashboardPage({ params }: PageProps<"/[lang]/table
 
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
-async function AdminDashboard({ ctx, lang, dict }: Props) {
+/** Bandeau bleu nuit d'accueil, dans le prolongement de l'en-tête sur téléphone. */
+function Hero({ hello, line, chip, overlap }: { hello: string; line: ReactNode; chip?: ReactNode; overlap?: boolean }) {
+  return (
+    <section
+      className={`relative -mx-4 -mt-6 overflow-hidden rounded-b-[28px] bg-blue-900 px-5 pt-4 text-white md:mx-0 md:mt-0 md:rounded-3xl md:px-8 md:pt-8 ${overlap ? "pb-20 md:pb-24" : "pb-8"}`}
+    >
+      <div aria-hidden className="pointer-events-none absolute -end-16 -top-10 h-56 w-56 rounded-full bg-gold-500/10" />
+      <div aria-hidden className="pointer-events-none absolute end-24 top-24 h-24 w-24 rounded-full bg-gold-500/10" />
+      <h1 className="relative font-display text-[1.9rem] leading-tight font-semibold md:text-4xl">{hello}</h1>
+      <p className="relative mt-1 text-white/75 first-letter:uppercase">{line}</p>
+      {chip && <div className="relative mt-4">{chip}</div>}
+    </section>
+  );
+}
+
+async function AdminDashboard({ ctx, lang, dict, hello, today }: Props & { hello: string; today: string }) {
   const o = await getDirectorOverview(ctx.school.id, ctx.user.id);
   const d = dict.director;
   const termName = o.currentTerm ? (lang === "ar" ? o.currentTerm.nameAr : o.currentTerm.nameFr) : "";
-  const modules = ["students", "classes", "grades", "reportCards", "attendance", "timetable", "teachers", "payments", "messages"] as const;
   const className = (c: { name: string; nameAr: string | null }) => (lang === "ar" && c.nameAr ? c.nameAr : c.name);
+  const rate = o.money.rateToDate;
   const todo = [
     o.classesWithoutRollCall.length > 0 && {
       href: `/${lang}/absences`,
+      icon: CalendarCheck,
+      tone: "red",
       text: t(d.todoRollCall, { count: o.classesWithoutRollCall.length }),
       detail: o.classesWithoutRollCall.map(className).join(", "),
     },
+    o.money.overdueCount > 0 && { href: `/${lang}/paiements`, icon: Wallet, tone: "gold", text: t(d.todoOverdue, { count: o.money.overdueCount }), detail: null, amount: o.money.overdue },
     o.unpublished.length > 0 && {
       href: `/${lang}/classes/${o.unpublished[0].id}/bulletins`,
+      icon: FileText,
+      tone: "blue",
       text: t(d.todoReports, { count: o.unpublished.length, term: termName }),
       detail: o.unpublished.map(className).join(", "),
     },
-    o.money.overdueCount > 0 && { href: `/${lang}/paiements`, text: t(d.todoOverdue, { count: o.money.overdueCount }), detail: null, amount: o.money.overdue },
-    o.unread > 0 && { href: `/${lang}/messages`, text: t(d.todoMessages, { count: o.unread }), detail: null },
-  ].filter(Boolean) as { href: string; text: string; detail: string | null; amount?: number }[];
+    o.unread > 0 && { href: `/${lang}/messages`, icon: MessageSquare, tone: "green", text: t(d.todoMessages, { count: o.unread }), detail: null },
+  ].filter(Boolean) as { href: string; icon: LucideIcon; tone: Tone; text: string; detail: string | null; amount?: number }[];
+
+  const line = (
+    <>
+      {today}
+      {o.year && (
+        <>
+          {" · "}
+          <bdi dir="ltr">{o.year.label}</bdi>
+        </>
+      )}
+      {termName && ` · ${termName}`}
+    </>
+  );
+  const chip = o.isSchoolDay && o.classCount > 0 && (
+    <Link
+      href={`/${lang}/absences`}
+      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold ${o.rollCallsDone < o.classCount ? "bg-gold-500/20 text-gold-200" : "bg-emerald-400/15 text-emerald-200"}`}
+    >
+      <ClipboardCheck size={16} aria-hidden />
+      {t(d.rollCallsChip, { done: o.rollCallsDone, total: o.classCount })}
+    </Link>
+  );
 
   return (
-    <>
-      <p className="-mt-6 text-slate-600">
-        {o.year ? (
-          <>
-            {t(dict.dashboard.currentYear, { year: "" })}
-            <bdi dir="ltr">{o.year.label}</bdi>
-            {termName && ` · ${termName}`}
-          </>
-        ) : (
-          dict.dashboard.noCurrentYear
-        )}
-      </p>
+    <div className="flex flex-col gap-5">
+      <Hero hello={hello} line={o.year ? line : <>{today} · {dict.dashboard.noCurrentYear}</>} chip={chip} overlap />
+
+      <section className="relative -mt-[4.25rem] grid grid-cols-2 gap-3 md:-mt-20 md:grid-cols-4 md:px-4">
+        <Kpi href={`/${lang}/eleves`} icon={Users} tone="blue" label={dict.dashboard.students} value={String(o.studentCount)} sub={t(d.classesCount, { count: o.classCount })} />
+        <Kpi href={`/${lang}/absences`} icon={UserX} tone="red" label={d.absentToday} value={String(o.absentToday)} sub={o.lateToday ? t(d.late, { count: o.lateToday }) : d.today} />
+        <Kpi href={`/${lang}/paiements`} icon={Wallet} tone="gold" label={d.collected} value={rate == null ? "—" : `${Math.round(rate * 100)} %`} sub={d.ofDue} />
+        <Kpi href={`/${lang}/messages`} icon={MessageSquare} tone="green" label={dict.nav.messages} value={String(o.unread)} sub={d.unreadShort} />
+      </section>
 
       {o.studentCount === 0 && (
-        <Link href={`/${lang}/importer`} className="block rounded-2xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-200 hover:bg-blue-100">
-          <span className="font-semibold">{dict.importer.shortcut}</span> · {dict.importer.tip}
+        <Link href={`/${lang}/importer`} className="flex items-center gap-3 rounded-2xl bg-gold-50 p-4 text-sm text-gold-900 ring-1 ring-gold-200 hover:bg-gold-100">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gold-500 text-blue-900"><FileSpreadsheet size={20} aria-hidden /></span>
+          <span><span className="block font-semibold">{dict.importer.shortcut}</span>{dict.importer.tip}</span>
         </Link>
       )}
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Tile label={dict.dashboard.students} value={String(o.studentCount)} href={`/${lang}/eleves`} />
-        <Tile label={d.absentToday} value={String(o.absentToday)} sub={o.lateToday ? `${o.lateToday} ${d.lateToday.toLowerCase()}` : undefined} href={`/${lang}/absences`} />
-        <Tile label={d.rollCalls} value={o.isSchoolDay ? `${o.rollCallsDone} / ${o.classCount}` : "—"} href={`/${lang}/absences`} tone={o.isSchoolDay && o.rollCallsDone < o.classCount ? "warn" : undefined} />
-        <Tile label={d.collectionRate} value={o.money.rateToDate == null ? "—" : `${Math.round(o.money.rateToDate * 100)} %`} href={`/${lang}/paiements`} />
-        <Tile label={d.overdueAmount} value={formatMoney(o.money.overdue, lang)} href={`/${lang}/paiements`} tone={o.money.overdue > 0 ? "bad" : undefined} small />
-        <Tile label={d.unread} value={String(o.unread)} href={`/${lang}/messages`} tone={o.unread > 0 ? "warn" : undefined} />
-      </section>
-
-      <section className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-        <h2 className="mb-3 text-lg font-semibold">{d.todo}</h2>
-        {todo.length === 0 ? (
-          <p className="text-sm text-green-700">{d.allGood}</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {todo.map((x) => (
-              <li key={x.text}>
-                <Link href={x.href} className="flex items-start justify-between gap-3 rounded-lg bg-amber-50 px-3 py-2.5 ring-1 ring-amber-200 hover:bg-amber-100">
-                  <span className="min-w-0">
-                    <span className="font-medium text-amber-900">{x.text}</span>
-                    {x.detail && <span className="block truncate text-sm text-amber-800">{x.detail}</span>}
-                  </span>
-                  {x.amount != null && <Money value={x.amount} lang={lang} className="shrink-0 font-semibold text-red-700" />}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {!o.isSchoolDay && <p className="mt-2 text-xs text-slate-500">{d.noSchoolDay}</p>}
-      </section>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-          <h2 className="mb-3 text-lg font-semibold">{t(d.results, { term: termName })}</h2>
-          {o.results.length === 0 ? (
-            <p className="text-sm text-slate-500">{d.noResults}</p>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+        <Panel title={d.todo} className="lg:col-span-3">
+          {todo.length === 0 ? (
+            <p className="flex items-center gap-2 text-sm font-medium text-emerald-700"><CircleCheck size={18} aria-hidden /> {d.allGood}</p>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {o.results.map((r) => (
-                <li key={r.cls.id}>
-                  <Link href={`/${lang}/classes/${r.cls.id}/bulletins`} className="block hover:opacity-80">
-                    <div className="flex items-baseline justify-between gap-2 text-sm">
-                      <span className="font-medium">{className(r.cls)}</span>
-                      <span className="text-slate-600">
-                        <bdi dir="ltr" className="font-semibold text-slate-900">{r.mean.toFixed(2)}</bdi>
-                        {r.below > 0 && <span className="ms-2 text-red-700">{t(d.below, { count: r.below })}</span>}
-                      </span>
-                    </div>
-                    <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100" dir="ltr">
-                      <div className={`h-full rounded-full ${r.mean >= 10 ? "bg-blue-600" : "bg-red-500"}`} style={{ width: `${Math.min(100, (r.mean / 20) * 100)}%` }} />
-                    </div>
+            <ul className="divide-y divide-slate-100">
+              {todo.map((x) => (
+                <li key={x.text}>
+                  <Link href={x.href} className="group flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                    <IconBadge icon={x.icon} tone={x.tone} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold leading-snug">{x.text}</span>
+                      {x.detail && <span className="block truncate text-sm text-slate-500">{x.detail}</span>}
+                      {x.amount != null && <Money value={x.amount} lang={lang} className="block text-sm font-medium text-red-700" />}
+                    </span>
+                    <ChevronRight size={18} className="shrink-0 text-slate-400 transition group-hover:text-blue-900 rtl:rotate-180" aria-hidden />
                   </Link>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+          {!o.isSchoolDay && <p className="mt-3 text-xs text-slate-500">{d.noSchoolDay}</p>}
+        </Panel>
 
-        <section className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-          <h2 className="mb-1 text-lg font-semibold">{d.absences30}</h2>
-          <p className="mb-3 text-sm text-slate-600">{t(d.absencesTotal, { total: o.absences30.total, unjustified: o.absences30.unjustified })}</p>
-          {o.absences30.mostAbsent.length > 0 && (
+        <Panel title={d.money} className="lg:col-span-2">
+          <div className="flex items-center gap-5">
+            <Ring value={rate} />
+            <dl className="flex flex-col gap-2 text-sm">
+              <div><dt className="text-slate-500">{d.thisMonth}</dt><dd className="text-lg font-bold"><Money value={o.money.month} lang={lang} /></dd></div>
+              <div><dt className="text-slate-500">{d.sinceStart}</dt><dd className="text-lg font-bold"><Money value={o.money.year} lang={lang} /></dd></div>
+            </dl>
+          </div>
+          {o.money.overdue > 0 && (
+            <Link href={`/${lang}/paiements`} className="mt-4 flex items-center justify-between rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">
+              <span>{d.overdueAmount}</span>
+              <Money value={o.money.overdue} lang={lang} className="font-bold" />
+            </Link>
+          )}
+        </Panel>
+
+        <Panel title={termName ? t(d.averages, { term: termName }) : t(d.results, { term: "" })} className="lg:col-span-3">
+          {o.results.length === 0 ? (
+            <p className="text-sm text-slate-500">{d.noResults}</p>
+          ) : (
             <>
-              <h3 className="mb-2 text-sm font-medium text-slate-500">{d.mostAbsent}</h3>
-              <ul className="flex flex-col gap-1.5">
-                {o.absences30.mostAbsent.map((a) => (
-                  <li key={a.student.id}>
-                    <Link href={`/${lang}/eleves/${a.student.id}`} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm hover:bg-blue-50">
-                      <span>
-                        <span className="font-medium">{personName(a.student, lang)}</span>
-                        <span className="text-slate-500"> · {className(a.cls)}</span>
-                      </span>
-                      <span className={a.unjustified > 0 ? "text-red-700" : "text-slate-600"}>{t(d.halfDays, { total: a.total, unjustified: a.unjustified })}</span>
-                    </Link>
-                  </li>
+              <div className="flex h-44 items-end gap-2 overflow-x-auto pt-6 pb-1" dir="ltr">
+                {o.results.map((r) => (
+                  <Link key={r.cls.id} href={`/${lang}/classes/${r.cls.id}/bulletins`} className="group flex h-full min-w-10 flex-1 flex-col items-center justify-end gap-1" title={r.below > 0 ? t(d.below, { count: r.below }) : undefined}>
+                    <span className="text-[11px] font-bold tabular-nums">{r.mean.toFixed(1).replace(".", lang === "fr" ? "," : ".")}</span>
+                    <span
+                      className={`w-full max-w-14 rounded-t-lg rounded-b-sm transition group-hover:opacity-80 ${r.mean >= 12 ? "bg-blue-900" : r.mean >= 10 ? "bg-blue-500" : "bg-gold-500"}`}
+                      style={{ height: `${Math.max(6, (r.mean / 20) * 100)}%` }}
+                    />
+                    <span className="max-w-full truncate text-xs font-semibold text-slate-500">{className(r.cls)}</span>
+                  </Link>
                 ))}
-              </ul>
+              </div>
+              {o.results.some((r) => r.below > 0) && (
+                <p className="mt-3 text-xs text-slate-500">
+                  {o.results.filter((r) => r.below > 0).map((r) => `${className(r.cls)} : ${t(d.below, { count: r.below })}`).join(" · ")}
+                </p>
+              )}
             </>
           )}
-        </section>
+        </Panel>
 
-        <section className="rounded-2xl bg-white p-4 ring-1 ring-slate-200 lg:col-span-2">
-          <h2 className="mb-3 text-lg font-semibold">{d.money}</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <MoneyTile label={d.thisMonth} value={o.money.month} lang={lang} />
-            <MoneyTile label={d.sinceStart} value={o.money.year} lang={lang} />
-            <MoneyTile label={dict.payments.totalDue} value={o.money.due} lang={lang} />
-            <MoneyTile label={d.overdueAmount} value={o.money.overdue} lang={lang} bad={o.money.overdue > 0} />
-          </div>
-          {o.money.due > 0 && (
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100" dir="ltr">
-              <div className="h-full rounded-full bg-green-600" style={{ width: `${Math.round((o.money.paid / o.money.due) * 100)}%` }} />
-            </div>
+        <Panel title={d.absences30} className="lg:col-span-2">
+          <p className="mb-3 text-sm text-slate-600">{t(d.absencesTotal, { total: o.absences30.total, unjustified: o.absences30.unjustified })}</p>
+          {o.absences30.mostAbsent.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {o.absences30.mostAbsent.map((a) => (
+                <li key={a.student.id}>
+                  <Link href={`/${lang}/eleves/${a.student.id}`} className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2 text-sm hover:bg-gold-50">
+                    <Initials name={personName(a.student, lang)} />
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="font-semibold">{personName(a.student, lang)}</span>
+                      <span className="text-slate-500"> · {className(a.cls)}</span>
+                    </span>
+                    <span className={`shrink-0 text-xs ${a.unjustified > 0 ? "font-semibold text-red-700" : "text-slate-500"}`}>{t(d.halfDays, { total: a.total, unjustified: a.unjustified })}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           )}
-        </section>
+        </Panel>
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{d.quick}</h2>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {modules.map((m) => (
-            <li key={m}>
-              <Link href={`/${lang}/${MODULE_LINKS[m]}`} className="block h-full rounded-xl bg-white p-3 ring-1 ring-blue-200 hover:bg-blue-50">
-                <p className="font-medium text-blue-800">{dict.modules[m]}</p>
+        <h2 className="text-lg font-bold text-blue-900">{d.quick}</h2>
+        <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+          {QUICK.map(({ key, href, icon: Icon }) => (
+            <li key={key}>
+              <Link href={`/${lang}/${href}`} className="flex h-full flex-col items-center gap-2 rounded-2xl bg-white p-3 text-center shadow-card ring-1 ring-slate-200/80 hover:ring-gold-400">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-900"><Icon size={20} aria-hidden /></span>
+                <span className="text-xs font-semibold leading-tight">{key === "settings" ? dict.nav.settings : dict.modules[key]}</span>
               </Link>
             </li>
           ))}
-          <li>
-            <Link href={`/${lang}/parametres`} className="block h-full rounded-xl bg-white p-3 ring-1 ring-blue-200 hover:bg-blue-50">
-              <p className="font-medium text-blue-800">{dict.nav.settings}</p>
-            </Link>
-          </li>
         </ul>
       </section>
-    </>
+    </div>
   );
 }
 
-function Tile({ label, value, sub, href, tone, small }: { label: string; value: string; sub?: string; href: string; tone?: "warn" | "bad"; small?: boolean }) {
-  const color = tone === "bad" ? "text-red-700" : tone === "warn" ? "text-amber-700" : "text-slate-900";
+const QUICK = [
+  { key: "students", href: "eleves", icon: Users },
+  { key: "classes", href: "classes", icon: BookOpen },
+  { key: "attendance", href: "absences", icon: CalendarCheck },
+  { key: "timetable", href: "emplois-du-temps", icon: CalendarDays },
+  { key: "teachers", href: "enseignants", icon: GraduationCap },
+  { key: "payments", href: "paiements", icon: Wallet },
+  { key: "messages", href: "messages", icon: MessageSquare },
+  { key: "reportCards", href: "classes", icon: FileText },
+  { key: "settings", href: "parametres", icon: Settings },
+] as const;
+
+type Tone = "blue" | "red" | "gold" | "green";
+const TONES: Record<Tone, string> = {
+  blue: "bg-blue-50 text-blue-900",
+  red: "bg-red-50 text-red-700",
+  gold: "bg-gold-100 text-gold-800",
+  green: "bg-emerald-50 text-emerald-700",
+};
+
+function IconBadge({ icon: Icon, tone }: { icon: LucideIcon; tone: Tone }) {
   return (
-    <Link href={href} className="rounded-2xl bg-white p-3 ring-1 ring-slate-200 hover:bg-slate-50">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className={`mt-1 font-bold tabular-nums ${small ? "text-base" : "text-2xl"} ${color}`}>
-        <bdi dir="ltr">{value}</bdi>
-      </p>
-      {sub && <p className="text-xs text-slate-500">{sub}</p>}
+    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${TONES[tone]}`}>
+      <Icon size={19} aria-hidden />
+    </span>
+  );
+}
+
+function Kpi({ href, icon: Icon, tone, label, value, sub }: { href: string; icon: LucideIcon; tone: Tone; label: string; value: string; sub?: string }) {
+  return (
+    <Link href={href} className="rounded-2xl bg-white p-3.5 shadow-card ring-1 ring-slate-200/80 transition hover:ring-gold-400 sm:p-4">
+      <span className="flex items-center gap-2 text-sm font-medium text-slate-500">
+        <span className={`grid h-8 w-8 place-items-center rounded-lg ${TONES[tone]}`}><Icon size={16} aria-hidden /></span>
+        <span className="truncate">{label}</span>
+      </span>
+      <span className="mt-2 block text-[1.7rem] leading-none font-bold tracking-tight tabular-nums"><bdi dir="ltr">{value}</bdi></span>
+      {sub && <span className="mt-1.5 block truncate text-xs text-slate-500">{sub}</span>}
     </Link>
   );
 }
 
-function MoneyTile({ label, value, lang, bad }: { label: string; value: number; lang: Locale; bad?: boolean }) {
+function Panel({ title, children, className = "" }: { title: string; children: ReactNode; className?: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className={`mt-1 font-semibold ${bad ? "text-red-700" : ""}`}><Money value={value} lang={lang} /></p>
+    <section className={`rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/80 sm:p-5 ${className}`}>
+      <h2 className="mb-3 text-base font-bold text-blue-900">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+/** Anneau de progression (taux d'encaissement). */
+function Ring({ value }: { value: number | null }) {
+  const pct = value == null ? 0 : Math.round(Math.min(1, value) * 100);
+  return (
+    <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(var(--color-blue-900) 0 ${pct}%, var(--color-slate-100) ${pct}% 100%)` }}>
+      <div className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-white text-lg font-bold">
+        <bdi dir="ltr">{value == null ? "—" : `${pct}%`}</bdi>
+      </div>
     </div>
   );
+}
+
+function Initials({ name }: { name: string }) {
+  const letters = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("");
+  return <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue-900 text-xs font-bold text-gold-300">{letters}</span>;
 }
 
 async function ParentDashboard({ ctx, lang, dict }: Props) {
@@ -234,21 +319,21 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
     : [0, []];
   return (
     <>
-    <section className="mb-6 grid grid-cols-3 gap-3">
-      <Link href={`/${lang}/messages`} className="rounded-xl bg-white p-4 ring-1 ring-blue-200 hover:bg-blue-50">
-        <p className="font-medium text-blue-800">{dict.messages.myMessages}</p>
-        {unread > 0 && <p className="mt-1 inline-block rounded-full bg-blue-700 px-2 py-0.5 text-xs font-semibold text-white">{unread} · {dict.messages.unread}</p>}
-      </Link>
-      <Link href={`/${lang}/annonces`} className="rounded-xl bg-white p-4 ring-1 ring-blue-200 hover:bg-blue-50">
-        <p className="font-medium text-blue-800">{dict.messages.announcements}</p>
-        {announcements[0] && <p className="mt-1 line-clamp-2 text-sm text-slate-600" dir="auto">{announcements[0].title}</p>}
-      </Link>
-      <Link href={`/${lang}/mon-compte`} className="rounded-xl bg-white p-4 ring-1 ring-blue-200 hover:bg-blue-50">
-        <p className="font-medium text-blue-800">{dict.account.title}</p>
-      </Link>
+    <section className="relative -mt-12 grid grid-cols-3 gap-3 md:-mt-10 md:px-4">
+      {[
+        { href: `/${lang}/messages`, icon: MessageSquare, tone: "green" as Tone, label: dict.messages.myMessages, extra: unread > 0 ? `${unread} · ${dict.messages.unread}` : null },
+        { href: `/${lang}/annonces`, icon: Megaphone, tone: "gold" as Tone, label: dict.messages.announcements, extra: announcements[0]?.title ?? null },
+        { href: `/${lang}/mon-compte`, icon: UserRound, tone: "blue" as Tone, label: dict.account.title, extra: null },
+      ].map((c) => (
+        <Link key={c.href} href={c.href} className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-card ring-1 ring-slate-200/80 hover:ring-gold-400">
+          <IconBadge icon={c.icon} tone={c.tone} />
+          <span className="text-sm font-semibold leading-tight">{c.label}</span>
+          {c.extra && <span className="line-clamp-2 text-xs text-slate-500" dir="auto">{c.extra}</span>}
+        </Link>
+      ))}
     </section>
     <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">{dict.dashboard.myChildren}</h2>
+      <h2 className="text-lg font-bold text-blue-900">{dict.dashboard.myChildren}</h2>
       {children.length === 0 ? (
         <p className="text-slate-600">{dict.dashboard.noChildren}</p>
       ) : (
@@ -256,14 +341,19 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
           {children.map((child) => {
             const enrollment = child.enrollments[0];
             return (
-              <li key={child.id} className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <p className="text-lg font-semibold">{personName(child, lang)}</p>
+              <li key={child.id} className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/80">
+                <div className="flex items-center gap-3">
+                  <Initials name={personName(child, lang)} />
+                  <div className="min-w-0">
+                <p className="text-lg font-bold leading-tight">{personName(child, lang)}</p>
                 <p className="text-sm text-slate-600">
                   {enrollment
                     ? `${pickName(enrollment.classGroup.gradeLevel, lang)} · ${lang === "ar" && enrollment.classGroup.nameAr ? enrollment.classGroup.nameAr : enrollment.classGroup.name}`
                     : dict.dashboard.notEnrolled}
                 </p>
-                <p className="mt-2 text-sm text-slate-600">
+                  </div>
+                </div>
+                <p className="mt-3 text-sm text-slate-600">
                   {dict.attendance.title} : {t(dict.attendance.summary, attendance.get(child.id)!.summary)}
                 </p>
                 {attendance.get(child.id)!.records.length > 0 && (
@@ -279,13 +369,13 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                 )}
                 {enrollment && (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
+                    <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.reportCards.myBulletins}
                     </Link>
-                    <Link href={`/${lang}/eleves/${child.id}/paiements`} className="inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
+                    <Link href={`/${lang}/eleves/${child.id}/paiements`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.payments.myPayments}
                     </Link>
-                    <Link href={`/${lang}/eleves/${child.id}/emploi-du-temps`} className="inline-block rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100">
+                    <Link href={`/${lang}/eleves/${child.id}/emploi-du-temps`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.timetable.myTimetable}
                     </Link>
                   </div>
@@ -302,5 +392,5 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
 
 
 function Notice({ text }: { text: string }) {
-  return <p className="rounded-xl bg-blue-50 p-4 text-blue-900">{text}</p>;
+  return <p className="rounded-2xl bg-gold-50 p-4 text-gold-900 ring-1 ring-gold-200">{text}</p>;
 }

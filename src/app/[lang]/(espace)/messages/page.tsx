@@ -79,7 +79,7 @@ export default async function MessagesPage({ params, searchParams }: PageProps<"
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1 text-xs text-slate-500">
                     {c.last && fmt.format(c.last.createdAt)}
-                    {c.unread && <span className="rounded-full bg-blue-700 px-2 py-0.5 font-semibold text-white">{m.unread}</span>}
+                    {c.unread && <span className="rounded-full bg-blue-900 px-2 py-0.5 font-semibold text-white">{m.unread}</span>}
                   </span>
                 </Link>
               </li>
