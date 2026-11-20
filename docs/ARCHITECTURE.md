@@ -73,3 +73,18 @@ src/lib/data/            Les lectures de la base, toujours filtrées par école
 src/lib/setup/           Le référentiel scolaire tunisien
 tests/                   Les tests automatiques
 ```
+
+## 6. Élèves, classes et parents (étape 2)
+
+- **Classes** : créées pour l'année en cours, avec un niveau, une filière (lycée)
+  et une capacité. Une classe ne peut être supprimée que si aucun élève n'y a
+  jamais été inscrit.
+- **Élèves** : le matricule est généré automatiquement (`2026-001`, `2026-002`...)
+  si on le laisse vide. Retirer un élève ne supprime rien : il disparaît des
+  listes, mais son historique (notes, paiements à venir) est conservé.
+- **Parents** : si un parent est saisi avec un téléphone ou un e-mail déjà connu
+  de l'école (frères et sœurs), la fiche existante est réutilisée, pas dupliquée.
+- **Accès parent** : depuis la fiche de l'élève, la direction crée l'accès en un
+  clic. Un mot de passe provisoire s'affiche **une seule fois**, à communiquer au
+  parent ; il se connecte ensuite avec son numéro de téléphone. Par sécurité, ce
+  bouton ne modifie jamais le mot de passe d'un compte du personnel.
