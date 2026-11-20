@@ -13,7 +13,7 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | 3. Notes et bulletins | Matières et coefficients, saisie des notes, moyennes et rang, bulletins bilingues publiés aux parents | ✅ |
 | 4. Absences | Appel matin/après-midi, absents du jour, justification, suivi parent | ✅ |
 | 5. Structure des notes | Oral, contrôle, synthèse configurables par matière, niveau et classe ; saisie en tableau | ✅ |
-| 6. Emplois du temps | Emploi du temps par classe, consultable par les parents | à venir |
+| 6. Emplois du temps | Enseignants et salles, emploi du temps par classe et par enseignant, détection des conflits, consultation parents | ✅ |
 | 7. Paiements | Frais de scolarité, échéances, relances des impayés | à venir |
 | 8. Messagerie | École ↔ parents, notifications | à venir |
 

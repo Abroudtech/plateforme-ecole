@@ -224,6 +224,48 @@ async function main() {
     create: { schoolId, studentId: adam.id, classGroupId: classes["9B1"], date: new Date("2026-11-10"), period: "MORNING", status: "ABSENT", justified: true, reason: "Certificat médical" },
   });
 
+  // Emplois du temps : quelques enseignants, salles et cours en 6A et 7B1.
+  if ((await db.teacher.count({ where: { schoolId } })) === 0) {
+    const teacherDefs = [
+      { key: "ar", firstName: "Mounir", lastName: "Trabelsi", firstNameAr: "منير", lastNameAr: "الطرابلسي", phone: "+21698111222" },
+      { key: "fr", firstName: "Leila", lastName: "Mansour", firstNameAr: "ليلى", lastNameAr: "منصور" },
+      { key: "math", firstName: "Karim", lastName: "Jaziri", firstNameAr: "كريم", lastNameAr: "الجزيري" },
+      { key: "en", firstName: "Sarra", lastName: "Hamdi", firstNameAr: "سارة", lastNameAr: "الحامدي" },
+    ];
+    const teacher: Record<string, string> = {};
+    for (const { key, ...data } of teacherDefs) teacher[key] = (await db.teacher.create({ data: { schoolId, ...data } })).id;
+    const room: Record<string, string> = {};
+    for (const [name, capacity] of [["Salle 1", 30], ["Salle 2", 30], ["Labo", 24]] as const) {
+      room[name] = (await db.room.create({ data: { schoolId, name, capacity } })).id;
+    }
+    const subjectId = async (code: string) => (await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code } } })).id;
+    const h = (t: string) => { const [a, b] = t.split(":").map(Number); return a * 60 + b; };
+    // [classe, jour, début, fin, matière, enseignant, salle]
+    const slots: [string, number, string, string, string, string, string][] = [
+      ["6A", 1, "08:00", "10:00", "AR", "ar", "Salle 1"],
+      ["6A", 1, "10:15", "12:00", "MATH", "math", "Salle 1"],
+      ["6A", 2, "08:00", "10:00", "FR", "fr", "Salle 1"],
+      ["6A", 2, "10:15", "11:15", "EN", "en", "Salle 1"],
+      ["6A", 3, "08:00", "10:00", "MATH", "math", "Salle 1"],
+      ["6A", 4, "08:00", "10:00", "AR", "ar", "Salle 1"],
+      ["6A", 4, "14:00", "15:00", "EVEIL", "fr", "Labo"],
+      ["6A", 5, "08:00", "09:00", "FR", "fr", "Salle 1"],
+      ["7B1", 1, "08:00", "10:00", "MATH", "math", "Salle 2"],
+      ["7B1", 2, "08:00", "10:00", "AR", "ar", "Salle 2"],
+      ["7B1", 3, "10:15", "12:00", "FR", "fr", "Salle 2"],
+    ];
+    for (const [cls, dayOfWeek, start, end, code, t, r] of slots) {
+      await db.timetableEntry.create({
+        data: { schoolId, classGroupId: classes[cls], dayOfWeek, startMinute: h(start), endMinute: h(end), subjectId: await subjectId(code), teacherId: teacher[t], roomId: room[r] },
+      });
+    }
+    // Heures prévues au programme de 6e (pour comparer avec l'emploi du temps).
+    const p6 = await db.gradeLevel.findFirstOrThrow({ where: { schoolId, code: "P6" } });
+    for (const [code, hours] of [["AR", 5], ["FR", 4], ["MATH", 5], ["EVEIL", 2], ["EN", 1.5]] as const) {
+      await db.curriculumSubject.updateMany({ where: { schoolId, gradeLevelId: p6.id, trackId: null, subjectId: await subjectId(code) }, data: { hoursPerWeek: hours } });
+    }
+  }
+
   console.log("✔ Données de démonstration prêtes.");
   console.log(`  Administration : admin@demo.tn / ${PASSWORD}`);
   console.log(`  Parent         : 22 000 000 (ou parent@demo.tn) / ${PASSWORD}`);

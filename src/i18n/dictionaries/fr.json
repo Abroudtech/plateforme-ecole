@@ -26,7 +26,9 @@
     "students": "Élèves",
     "classes": "Classes",
     "back": "Retour",
-    "attendance": "Absences"
+    "attendance": "Absences",
+    "teachers": "Enseignants",
+    "timetables": "Emplois du temps"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -64,7 +66,9 @@
     "reportCards": "Bulletins",
     "attendance": "Absences",
     "payments": "Paiements",
-    "messages": "Messagerie"
+    "messages": "Messagerie",
+    "timetable": "Emplois du temps",
+    "teachers": "Enseignants"
   },
   "errors": {
     "notFound": "Page introuvable.",
@@ -98,7 +102,12 @@
     "accountConflict": "Ce téléphone ou cet e-mail appartient déjà à un compte du personnel ; l'accès ne peut pas être modifié ici.",
     "phoneInvalid": "Numéro de téléphone invalide.",
     "scoreRange": "Une note est en dehors du barème (entre 0 et la note maximale).",
-    "noKind": "Cochez au moins un type de note."
+    "noKind": "Cochez au moins un type de note.",
+    "timeInvalid": "Heure invalide (format 08:30). La fin doit être après le début.",
+    "conflictClass": "Cette classe a déjà un cours à ce moment-là.",
+    "conflictTeacher": "Cet enseignant a déjà un cours à ce moment-là ({detail}).",
+    "conflictRoom": "Cette salle est déjà occupée à ce moment-là ({detail}).",
+    "duplicateRoom": "Une salle porte déjà ce nom."
   },
   "classes": {
     "title": "Classes",
@@ -308,5 +317,50 @@
     "resetHint": "La matière reprendra alors la règle plus générale.",
     "edit": "Modifier",
     "noneSelected": "Cochez au moins un type de note."
+  },
+  "timetable": {
+    "title": "Emploi du temps",
+    "days": {
+      "1": "Lundi",
+      "2": "Mardi",
+      "3": "Mercredi",
+      "4": "Jeudi",
+      "5": "Vendredi",
+      "6": "Samedi"
+    },
+    "day": "Jour",
+    "start": "Début",
+    "end": "Fin",
+    "subject": "Matière",
+    "teacher": "Enseignant",
+    "room": "Salle",
+    "none": "Aucun",
+    "addEntry": "Ajouter un cours",
+    "empty": "Pas de cours.",
+    "remove": "Retirer ce cours",
+    "hours": "Heures prévues par semaine",
+    "hoursOf": "{done} / {planned}",
+    "duration": "{h} h {m}",
+    "durationHours": "{h} h",
+    "noTeacher": "Sans enseignant",
+    "classes": "Emplois du temps des classes",
+    "myTimetable": "Emploi du temps"
+  },
+  "teachers": {
+    "title": "Enseignants",
+    "add": "Nouvel enseignant",
+    "none": "Aucun enseignant enregistré.",
+    "timetable": "Emploi du temps de l'enseignant",
+    "hoursWeek": "{hours} par semaine",
+    "deactivate": "Désactiver",
+    "reactivate": "Réactiver",
+    "inactive": "Inactif"
+  },
+  "rooms": {
+    "title": "Salles",
+    "add": "Nouvelle salle",
+    "name": "Nom de la salle",
+    "none": "Aucune salle enregistrée.",
+    "capacity": "Places"
   }
 }
