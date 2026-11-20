@@ -44,7 +44,7 @@ export default async function ConversationPage({ params }: PageProps<"/[lang]/me
             : personName(conv.guardian, lang);
           return (
             <li key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 ${mine ? "bg-blue-700 text-white" : "bg-white ring-1 ring-slate-200"}`}>
+              <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 ${mine ? "bg-blue-900 text-white" : "bg-white ring-1 ring-slate-200"}`}>
                 <p className={`text-xs ${mine ? "text-blue-100" : "text-slate-500"}`}>
                   {mine ? m.you : who} · {fmt.format(msg.createdAt)}
                 </p>

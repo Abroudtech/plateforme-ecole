@@ -89,7 +89,7 @@ export default async function PaymentsPage({ params, searchParams }: PageProps<"
             <Link
               key={key}
               href={href(v)}
-              className={`rounded-full px-3 py-1.5 ${filter === key ? "bg-blue-700 text-white" : "bg-slate-100 hover:bg-slate-200"}`}
+              className={`rounded-full px-3 py-1.5 ${filter === key ? "bg-blue-900 text-white" : "bg-slate-100 hover:bg-slate-200"}`}
             >
               {label}
             </Link>

@@ -33,7 +33,9 @@
     "payments": "Paiements",
     "messages": "Messagerie",
     "settings": "Paramètres",
-    "import": "Importer"
+    "import": "Importer",
+    "more": "Plus",
+    "menu": "Menu"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -614,7 +616,17 @@
     "sinceStart": "Depuis la rentrée",
     "overdueAmount": "En retard",
     "quick": "Accès rapides",
-    "noSchoolDay": "Dimanche : pas d'appel attendu."
+    "noSchoolDay": "Dimanche : pas d'appel attendu.",
+    "rollCallsChip": "{done} appels sur {total} faits aujourd'hui",
+    "classesCount": "{count} classes",
+    "ofDue": "du montant dû à ce jour",
+    "unreadShort": "non lus",
+    "late": "dont {count} retard(s)",
+    "collected": "Encaissé",
+    "averages": "Moyennes par classe · {term}",
+    "details": "Détails",
+    "seeAll": "Tout voir",
+    "paidOf": "{paid} encaissés sur {due}"
   },
   "account": {
     "title": "Mon compte",

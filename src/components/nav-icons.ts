@@ -1,0 +1,34 @@
+// Icônes du menu, partagées entre les pages serveur et la navigation (client).
+import {
+  BookOpen,
+  CalendarCheck,
+  CalendarDays,
+  GraduationCap,
+  House,
+  LayoutGrid,
+  Megaphone,
+  MessageSquare,
+  Settings,
+  UserRound,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+
+/** Icônes disponibles pour la navigation (passées par leur nom depuis le serveur). */
+export const NAV_ICONS = {
+  home: House,
+  students: Users,
+  classes: BookOpen,
+  attendance: CalendarCheck,
+  timetable: CalendarDays,
+  teachers: GraduationCap,
+  payments: Wallet,
+  messages: MessageSquare,
+  announcements: Megaphone,
+  settings: Settings,
+  account: UserRound,
+  more: LayoutGrid,
+} satisfies Record<string, LucideIcon>;
+
+export type NavItem = { href: string; label: string; icon: keyof typeof NAV_ICONS };

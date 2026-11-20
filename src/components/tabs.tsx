@@ -10,7 +10,7 @@ export function Tabs({ items, active }: { items: { href: string; label: string; 
           href={item.href}
           aria-current={item.key === active ? "page" : undefined}
           className={`shrink-0 rounded-full px-3 py-1.5 ${
-            item.key === active ? "bg-blue-700 text-white" : "bg-white ring-1 ring-slate-200 hover:bg-slate-50"
+            item.key === active ? "bg-blue-900 text-white" : "bg-white ring-1 ring-slate-200 hover:bg-slate-50"
           }`}
         >
           {item.label}

@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, localeDirection, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import "@fontsource/ibm-plex-sans-arabic/400.css";
+import "@fontsource/ibm-plex-sans-arabic/500.css";
+import "@fontsource/ibm-plex-sans-arabic/600.css";
+import "@fontsource/ibm-plex-sans-arabic/700.css";
+import "@fontsource/fraunces/600.css";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -17,7 +22,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1d4ed8",
+  themeColor: "#14213d",
 };
 
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {

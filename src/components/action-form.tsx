@@ -47,7 +47,7 @@ export function ActionForm({
     if (state?.ok && resetOnSuccess) formRef.current?.reset();
   }, [state, resetOnSuccess]);
   const styles = {
-    primary: "bg-blue-700 text-white hover:bg-blue-800",
+    primary: "bg-blue-900 text-white shadow-sm hover:bg-blue-800",
     secondary: "border border-slate-300 bg-white hover:bg-slate-50",
     danger: "border border-red-300 bg-white text-red-700 hover:bg-red-50",
   }[variant];
@@ -89,7 +89,7 @@ export function ActionForm({
         <button
           type="submit"
           disabled={pending}
-          className={`rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-60 ${styles}`}
+          className={`rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-60 ${styles}`}
         >
           {pending ? labels.pending : labels.submit}
         </button>

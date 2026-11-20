@@ -47,7 +47,7 @@ export default async function PaymentsJournalPage({ params, searchParams }: Page
             <Field label={p.to}>
               <Input name="au" type="date" defaultValue={toStr} />
             </Field>
-            <button className="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white">{p.show}</button>
+            <button className="rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white">{p.show}</button>
             <Link href={`/${lang}/paiements/encaissements`} className="py-2.5 text-sm text-blue-700">{p.today}</Link>
           </form>
         </Card>
