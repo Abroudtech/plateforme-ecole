@@ -34,6 +34,8 @@ services:
       SMS_API_URL: ${SMS_API_URL:-}
       SMS_API_TOKEN: ${SMS_API_TOKEN:-}
       SMS_SENDER: ${SMS_SENDER:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_MONTHLY_LIMIT: ${AI_MONTHLY_LIMIT:-300}
     depends_on:
       migrate: { condition: service_completed_successfully }
 

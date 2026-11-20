@@ -1,5 +1,6 @@
 "use server";
 
+import { assertClassAccess, hasStudentAccess } from "@/lib/auth/scope";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -85,6 +86,7 @@ const assessmentSchema = z.object({
 export async function createAssessment(lang: string, classId: string, termId: string, _prev: FormState, formData: FormData) {
   return runAction(lang, "grades.write", async (ctx, l) => {
     const schoolId = ctx.school.id;
+    await assertClassAccess(ctx, classId);
     const cls = await findClass(schoolId, classId);
     const data = parseForm(assessmentSchema, formData);
     // Le trimestre doit être de la même année que la classe ; la matière doit être au programme.
@@ -103,6 +105,7 @@ export async function deleteAssessment(lang: string, assessmentId: string, _prev
   return runAction(lang, "grades.write", async (ctx, l) => {
     const a = await db.assessment.findFirst({ where: { id: assessmentId, schoolId: ctx.school.id } });
     if (!a) throw new FormError("notFound");
+    await assertClassAccess(ctx, a.classGroupId);
     await db.assessment.delete({ where: { id: a.id } });
     redirect(`/${l}/classes/${a.classGroupId}/notes?trimestre=${a.termId}`);
   });
@@ -117,6 +120,7 @@ export async function saveGrades(lang: string, assessmentId: string, _prev: Form
       include: { classGroup: { include: { enrollments: { where: { status: "ACTIVE" } } } } },
     });
     if (!a) throw new FormError("notFound");
+    await assertClassAccess(ctx, a.classGroupId);
     const max = Number(a.maxScore);
 
     const rows = a.classGroup.enrollments.map(({ studentId }) => {
@@ -151,6 +155,7 @@ export async function saveTermComment(lang: string, studentId: string, termId: s
       db.term.findFirst({ where: { id: termId, schoolId } }),
     ]);
     if (!student || !term) throw new FormError("notFound");
+    if (!(await hasStudentAccess(ctx, student.id))) throw new FormError("forbidden");
     const comment = String(formData.get("comment") ?? "").trim().slice(0, 1000);
     if (!comment) {
       await db.termComment.deleteMany({ where: { studentId, termId } });
@@ -251,6 +256,7 @@ export async function saveGradeGrid(lang: string, classId: string, termId: strin
       include: { enrollments: { where: { status: "ACTIVE" } } },
     });
     if (!cls) throw new FormError("notFound");
+    await assertClassAccess(ctx, cls.id);
     const term = await db.term.findFirst({ where: { id: termId, schoolId, academicYearId: cls.academicYearId } });
     const taught = await db.curriculumSubject.findFirst({
       where: { schoolId, gradeLevelId: cls.gradeLevelId, trackId: cls.trackId, subjectId },

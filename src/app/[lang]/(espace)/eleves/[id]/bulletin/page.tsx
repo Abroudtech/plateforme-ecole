@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { hasStudentAccess } from "@/lib/auth/scope";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { formLabels } from "@/i18n/form-labels";
@@ -28,7 +29,7 @@ export default async function StudentBulletinPage({ params, searchParams }: Page
   const ctx = await requireContext(lang);
   const schoolId = ctx.school.id;
 
-  const isStaff = can(ctx.roles, "grades.read");
+  const isStaff = can(ctx.roles, "grades.read") && (await hasStudentAccess(ctx, id));
   if (!isStaff && !(can(ctx.roles, "children.read") && (await isGuardianOf(schoolId, ctx.user.id, id)))) {
     redirect(`/${lang}/acces-refuse`);
   }

@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
 import { normalizePhone } from "@/lib/phone";
+import { looksLikeUsername } from "@/lib/student/username";
 import { isLocale } from "@/i18n/config";
 
 export type LoginState = { error?: "invalid" | "missingFields" | "noAccess" | "tooMany" } | undefined;
@@ -31,12 +32,15 @@ export async function login(lang: string, _prev: LoginState, formData: FormData)
   if (!parsed.success) return { error: "missingFields" };
 
   const { identifier, password } = parsed.data;
-  const where = identifier.includes("@")
+  // E-mail, identifiant élève (« prenom.matricule ») ou téléphone.
+  const where: { email: string } | { username: string } | { phone: string } = identifier.includes("@")
     ? { email: identifier.toLowerCase() }
-    : { phone: normalizePhone(identifier) ?? identifier };
+    : looksLikeUsername(identifier)
+      ? { username: identifier.trim().toLowerCase() }
+      : { phone: normalizePhone(identifier) ?? identifier };
 
   // Trop d'échecs récents pour cet identifiant : on bloque 15 minutes.
-  const key = ("email" in where ? where.email : where.phone) ?? identifier;
+  const key = Object.values(where)[0] ?? identifier;
   const failures = await db.loginAttempt.count({
     where: { identifier: key, success: false, createdAt: { gte: new Date(Date.now() - WINDOW_MS) } },
   });

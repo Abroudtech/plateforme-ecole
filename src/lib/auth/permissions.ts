@@ -17,11 +17,13 @@ export const PERMISSIONS = {
   "classes.write": ["ADMIN"],
   // Notes et bulletins (V1 : saisie par l'administration ; V2 : par les enseignants)
   "grades.read": ["ADMIN", "TEACHER"],
-  "grades.write": ["ADMIN"],
+  "grades.write": ["ADMIN", "TEACHER"],
   "reportCards.publish": ["ADMIN"],
   // Absences
   "attendance.read": ["ADMIN", "TEACHER"],
-  "attendance.write": ["ADMIN"],
+  "attendance.write": ["ADMIN", "TEACHER"],
+  // Justifier une absence (certificat, mot des parents) : administration
+  "attendance.justify": ["ADMIN"],
   // Paiements des familles
   "payments.read": ["ADMIN"],
   "payments.write": ["ADMIN"],
@@ -39,6 +41,15 @@ export const PERMISSIONS = {
   "settings.write": ["ADMIN"],
   // Import en masse depuis Excel (classes, enseignants, élèves, parents...)
   "import.write": ["ADMIN"],
+  // Espace enseignant (V2) et atelier pédagogique avec l'IA
+  "teacher.space": ["TEACHER"],
+  "ai.use": ["ADMIN", "TEACHER"],
+  // Espace de classe (mur, défis, jeux) : l'enseignant anime, la direction supervise
+  "classSpace.manage": ["ADMIN", "TEACHER"],
+  // Voir le mur et les défis d'une classe (chacun seulement ses classes)
+  "classSpace.read": ["ADMIN", "TEACHER", "STUDENT"],
+  // Espace élève (V3) : défis, jeux, classement, mur de sa classe
+  "student.space": ["STUDENT"],
   // Espace parent : voir uniquement ses propres enfants
   "children.read": ["PARENT"],
 } as const satisfies Record<string, readonly Role[]>;

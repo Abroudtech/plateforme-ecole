@@ -23,6 +23,10 @@ export function Input(props: ComponentProps<"input">) {
   return <input dir="auto" {...props} className={fieldClass} />;
 }
 
+export function Textarea(props: ComponentProps<"textarea">) {
+  return <textarea dir="auto" rows={3} {...props} className={fieldClass} />;
+}
+
 export function Select(props: ComponentProps<"select">) {
   return <select {...props} className={fieldClass} />;
 }

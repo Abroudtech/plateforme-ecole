@@ -27,3 +27,6 @@ services:
           property: connectionString
       # SMS : à ajouter plus tard dans l'onglet « Environment » du service
       # (SMS_API_URL, SMS_API_TOKEN, SMS_SENDER).
+      # Atelier IA : clé à saisir dans le tableau de bord Render.
+      - key: ANTHROPIC_API_KEY
+        sync: false

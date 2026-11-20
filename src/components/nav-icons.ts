@@ -8,6 +8,10 @@ import {
   LayoutGrid,
   Megaphone,
   MessageSquare,
+  Newspaper,
+  Puzzle,
+  Sparkles,
+  Trophy,
   Settings,
   UserRound,
   Users,
@@ -29,6 +33,10 @@ export const NAV_ICONS = {
   settings: Settings,
   account: UserRound,
   more: LayoutGrid,
+  workshop: Sparkles,
+  classSpace: Newspaper,
+  challenges: Trophy,
+  games: Puzzle,
 } satisfies Record<string, LucideIcon>;
 
 export type NavItem = { href: string; label: string; icon: keyof typeof NAV_ICONS };

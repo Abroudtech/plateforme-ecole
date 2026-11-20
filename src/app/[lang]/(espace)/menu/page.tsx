@@ -16,8 +16,14 @@ export default async function MenuPage({ params }: PageProps<"/[lang]/menu">) {
   const ctx = await requireContext(lang);
   const items = navFor(ctx.roles, lang, dict).all.filter((i) => !i.href.endsWith("/tableau-de-bord"));
   const extra = [
-    ...(can(ctx.roles, "timetable.read") ? [{ href: `/${lang}/enseignants`, label: dict.nav.teachers, Icon: NAV_ICONS.teachers }, { href: `/${lang}/salles`, label: dict.rooms.title, Icon: School }] : []),
+    ...(can(ctx.roles, "staff.write") ? [{ href: `/${lang}/enseignants`, label: dict.nav.teachers, Icon: NAV_ICONS.teachers }, { href: `/${lang}/salles`, label: dict.rooms.title, Icon: School }] : []),
     ...(can(ctx.roles, "announcements.write") ? [{ href: `/${lang}/annonces`, label: dict.messages.announcements, Icon: NAV_ICONS.announcements }] : []),
+    ...(can(ctx.roles, "dashboard.admin")
+      ? [
+          { href: `/${lang}/atelier`, label: dict.nav.workshop, Icon: NAV_ICONS.workshop },
+          { href: `/${lang}/espace-classe`, label: dict.nav.classSpace, Icon: NAV_ICONS.classSpace },
+        ]
+      : []),
     ...(can(ctx.roles, "import.write") ? [{ href: `/${lang}/importer`, label: dict.importer.title, Icon: FileSpreadsheet }] : []),
   ];
   const tiles = [...items.map((i) => ({ href: i.href, label: i.label, Icon: NAV_ICONS[i.icon] })), ...extra];

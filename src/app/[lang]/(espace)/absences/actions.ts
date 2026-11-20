@@ -1,5 +1,6 @@
 "use server";
 
+import { assertClassAccess } from "@/lib/auth/scope";
 import { refresh } from "next/cache";
 import type { FormState } from "@/components/action-form";
 import { db } from "@/lib/db";
@@ -21,6 +22,7 @@ export async function saveRollCall(lang: string, classId: string, dateISO: strin
     const date = parseISODate(dateISO);
     const p = PERIODS.find((x) => x === period);
     if (!date || !p) throw new FormError("invalid");
+    await assertClassAccess(ctx, classId);
 
     const cls = await db.classGroup.findFirst({
       where: { schoolId, id: classId },
@@ -77,7 +79,7 @@ export async function saveRollCall(lang: string, classId: string, dateISO: strin
 
 /** Justifie (ou non) une absence ou un retard, avec un motif. */
 export async function setJustification(lang: string, recordId: string, justified: boolean, _prev: FormState, formData: FormData) {
-  return runAction(lang, "attendance.write", async (ctx) => {
+  return runAction(lang, "attendance.justify", async (ctx) => {
     const record = await db.attendanceRecord.findFirst({ where: { id: recordId, schoolId: ctx.school.id } });
     if (!record) throw new FormError("notFound");
     const reason = String(formData.get("reason") ?? "").trim().slice(0, 200) || null;
