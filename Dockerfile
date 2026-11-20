@@ -21,7 +21,8 @@ CMD ["npx", "prisma", "migrate", "deploy"]
 FROM deps AS build
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+# Le dossier "public" peut être vide (et donc absent du dépôt).
+RUN mkdir -p public && npm run build
 
 FROM base AS app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
