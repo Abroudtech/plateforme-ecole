@@ -8,6 +8,49 @@ Tout le nécessaire est déjà prêt dans le dossier [`deploy/`](../deploy) :
 le serveur web, la base de données, le certificat HTTPS automatique et la
 sauvegarde quotidienne.
 
+Deux façons de faire :
+
+- **Hébergement géré Render (recommandé si l'école n'a pas d'informaticien)** :
+  aucun serveur à entretenir, sauvegardes et HTTPS automatiques, environ 13 $
+  par mois. Voir la section [0](#0-hébergement-géré-render-recommandé).
+- **Serveur loué (VPS)** : moins cher (6 à 15 € par mois) mais demande une
+  personne technique pour l'installation et l'entretien. Sections 1 à 3.
+
+---
+
+## 0. Hébergement géré Render (recommandé)
+
+Tout est décrit dans le fichier [`render.yaml`](../render.yaml) : le site
+(offre Starter, 7 $/mois) et la base PostgreSQL (offre Basic 256 Mo, 6 $/mois),
+tous deux à Francfort. La base est mise à jour automatiquement à chaque
+démarrage, et chaque fusion sur `main` met le site à jour tout seul.
+
+1. Créer un compte sur [render.com](https://render.com) avec son compte GitHub,
+   et ajouter un moyen de paiement.
+2. **New > Blueprint**, choisir le dépôt `plateforme-ecole`, puis **Apply**.
+   La base et le site se créent (5 à 10 minutes la première fois).
+3. Adresse du site : dans le service `ecole`, **Settings > Custom Domains >
+   Add**, saisir par exemple `ecole.mondomaine.com`. Render indique une cible
+   du type `ecole-xxxx.onrender.com`. Dans le DNS du domaine (par exemple le
+   centre d'administration Microsoft 365 > Paramètres > Domaines > DNS),
+   ajouter un enregistrement **CNAME** : nom `ecole`, valeur cette cible. Ne
+   pas toucher aux enregistrements MX, TXT ou autodiscover de la messagerie.
+   Le certificat HTTPS arrive tout seul quelques minutes après.
+4. Créer l'école et le premier compte (une seule fois) : dans le service
+   `ecole`, onglet **Shell**, coller la commande de la section 2, étape 5,
+   **sans** la partie `docker compose run --rm` ni `migrate`, c'est-à-dire :
+   ```bash
+   ECOLE_NOM_FR="École Les Oliviers" ECOLE_NOM_AR="مدرسة الزياتين" \
+   ECOLE_VILLE="Sfax" ECOLE_CYCLES="PRIMARY,MIDDLE,SECONDARY" ANNEE="2026-2027" \
+   ADMIN_EMAIL="direction@ecole.tn" ADMIN_PRENOM="Prénom" ADMIN_NOM="Nom" \
+   npm run ecole:creer
+   ```
+5. Sauvegardes : Render garde de quoi revenir à n'importe quel moment des
+   3 derniers jours (base `ecole-base` > **Recovery**). Pour garder une copie
+   chez soi, utiliser **Export** de temps en temps.
+6. SMS (plus tard) : service `ecole` > **Environment**, ajouter
+   `SMS_API_URL`, `SMS_API_TOKEN` et `SMS_SENDER`.
+
 ---
 
 ## 1. Ce qu'il faut avoir (à faire par l'école)
