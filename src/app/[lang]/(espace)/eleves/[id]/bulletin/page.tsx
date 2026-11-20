@@ -7,6 +7,8 @@ import { requireContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { computeClassReport, getStudentClass, getTerms, isGuardianOf, pickTerm } from "@/lib/data/grades";
 import { getCurrentYear } from "@/lib/data/school";
+import { computeClassAnnual } from "@/lib/data/annual";
+import { AnnualBulletin } from "@/components/report/annual-bulletin";
 import { ActionForm } from "@/components/action-form";
 import { Bulletin } from "@/components/report/bulletin";
 import { PrintButton } from "@/components/print-button";
@@ -35,6 +37,33 @@ export default async function StudentBulletinPage({ params, searchParams }: Page
   const enrollment = year ? await getStudentClass(schoolId, id, year.id) : null;
   if (!enrollment) notFound();
   const terms = await getTerms(schoolId, year!.id, enrollment.classGroup.gradeLevel.cycle);
+  const tabTerms = [...terms, { id: "annuel", nameFr: dict.reportCards.annualTab, nameAr: dict.reportCards.annualTab }];
+  if (sp.trimestre === "annuel") {
+    const annual = await computeClassAnnual(schoolId, enrollment.classGroupId);
+    const st = annual?.students.find((s) => s.id === id);
+    const canSee = !!annual && !!st && (isStaff || annual.published);
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="print:hidden">
+          <PageHeader
+            title={dict.reportCards.annualTitle}
+            subtitle={st ? personName(st, lang) : undefined}
+            back={isStaff ? { href: `/${lang}/eleves/${id}`, label: dict.nav.back } : { href: `/${lang}/tableau-de-bord`, label: dict.nav.dashboard }}
+            action={canSee ? <PrintButton label={dict.reportCards.print} /> : undefined}
+          />
+          <TermTabs terms={tabTerms} activeId="annuel" lang={lang} hrefFor={(tid) => `/${lang}/eleves/${id}/bulletin?trimestre=${tid}`} />
+          {isStaff && annual && !annual.published && (
+            <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{dict.reportCards.annualPublishHint}</p>
+          )}
+        </div>
+        {canSee ? (
+          <AnnualBulletin data={annual!} studentId={id} school={ctx.school} fr={fr} ar={ar} />
+        ) : (
+          <Card><p className="text-slate-600">{dict.reportCards.annualNotAvailable}</p></Card>
+        )}
+      </div>
+    );
+  }
   const term = pickTerm(terms, typeof sp.trimestre === "string" ? sp.trimestre : undefined);
   const report = term ? await computeClassReport(schoolId, enrollment.classGroupId, term.id) : null;
   const student = report?.students.find((s) => s.id === id);
@@ -50,7 +79,7 @@ export default async function StudentBulletinPage({ params, searchParams }: Page
           action={visible ? <PrintButton label={dict.reportCards.print} /> : undefined}
         />
         {term && (
-          <TermTabs terms={terms} activeId={term.id} lang={lang} hrefFor={(tid) => `/${lang}/eleves/${id}/bulletin?trimestre=${tid}`} />
+          <TermTabs terms={tabTerms} activeId={term.id} lang={lang} hrefFor={(tid) => `/${lang}/eleves/${id}/bulletin?trimestre=${tid}`} />
         )}
         {isStaff && report && !report.publication && (
           <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{dict.reportCards.notPublished}</p>

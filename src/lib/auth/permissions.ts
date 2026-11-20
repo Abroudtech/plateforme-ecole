@@ -35,6 +35,8 @@ export const PERMISSIONS = {
   "messages.school": ["ADMIN"],
   "announcements.write": ["ADMIN"],
   "alerts.manage": ["ADMIN"],
+  // Paramètres de l'école (nom, adresse, calcul de la moyenne annuelle)
+  "settings.write": ["ADMIN"],
   // Espace parent : voir uniquement ses propres enfants
   "children.read": ["PARENT"],
 } as const satisfies Record<string, readonly Role[]>;

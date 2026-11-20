@@ -9,7 +9,10 @@ import { createSession } from "@/lib/auth/session";
 import { normalizePhone } from "@/lib/phone";
 import { isLocale } from "@/i18n/config";
 
-export type LoginState = { error?: "invalid" | "missingFields" | "noAccess" } | undefined;
+export type LoginState = { error?: "invalid" | "missingFields" | "noAccess" | "tooMany" } | undefined;
+
+const MAX_FAILURES = 5;
+const WINDOW_MS = 15 * 60 * 1000;
 
 const schema = z.object({
   identifier: z.string().trim().min(1),
@@ -32,13 +35,24 @@ export async function login(lang: string, _prev: LoginState, formData: FormData)
     ? { email: identifier.toLowerCase() }
     : { phone: normalizePhone(identifier) ?? identifier };
 
+  // Trop d'échecs récents pour cet identifiant : on bloque 15 minutes.
+  const key = ("email" in where ? where.email : where.phone) ?? identifier;
+  const failures = await db.loginAttempt.count({
+    where: { identifier: key, success: false, createdAt: { gte: new Date(Date.now() - WINDOW_MS) } },
+  });
+  if (failures >= MAX_FAILURES) return { error: "tooMany" };
+
   const user = await db.user.findUnique({
     where,
     include: { memberships: { where: { isActive: true, school: { isActive: true } } } },
   });
 
   const ok = await verifyPassword(password, user?.passwordHash ?? DUMMY_HASH);
-  if (!user || !ok || !user.isActive) return { error: "invalid" };
+  if (!user || !ok || !user.isActive) {
+    await db.loginAttempt.create({ data: { identifier: key, success: false } });
+    return { error: "invalid" };
+  }
+  await db.loginAttempt.deleteMany({ where: { identifier: key } });
   if (user.memberships.length === 0) return { error: "noAccess" };
 
   await createSession(user.id, user.memberships[0].schoolId, (await headers()).get("user-agent"));

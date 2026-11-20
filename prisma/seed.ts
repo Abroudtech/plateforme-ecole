@@ -9,6 +9,7 @@ import { PrismaClient, type Cycle } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { GRADE_LEVELS, SUBJECTS, TRACKS, TRIMESTERS } from "../src/lib/setup/tunisia";
 import { applyDefaultCurriculum } from "../src/lib/setup/curriculum";
+import { trimesterDates } from "../src/lib/setup/school";
 
 const db = new PrismaClient();
 const PASSWORD = process.env.SEED_PASSWORD ?? "Demo2026!";
@@ -67,7 +68,7 @@ async function main() {
   });
   if ((await db.term.count({ where: { academicYearId: year.id } })) === 0) {
     await db.term.createMany({
-      data: TRIMESTERS.map((t) => ({ schoolId, academicYearId: year.id, ...t })),
+      data: TRIMESTERS.map((t, i) => ({ schoolId, academicYearId: year.id, ...t, ...trimesterDates("2026-2027")[i] })),
     });
   }
 
@@ -214,6 +215,17 @@ async function main() {
       }
     }
     await db.reportCardPublication.create({ data: { schoolId, classGroupId: sixA, termId: t1.id } });
+
+    // 2e trimestre (non publié) : pour voir la moyenne annuelle provisoire.
+    const t2 = await db.term.findFirstOrThrow({ where: { academicYearId: year.id, order: 2 } });
+    const t2Scores: Record<string, [number, number, number]> = { AR: [17, 16, 17], FR: [15, 14, 15.5], MATH: [18, 18, 19], EVEIL: [14, 15, 15], EN: [14, 13, 14] };
+    for (const [code, [oral, control, synthesis]] of Object.entries(t2Scores)) {
+      const subject = await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code } } });
+      for (const [kind, score] of [["ORAL", oral], ["CONTROL", control], ["SYNTHESIS", synthesis]] as const) {
+        const a = await db.assessment.create({ data: { schoolId, classGroupId: sixA, subjectId: subject.id, termId: t2.id, kind } });
+        await db.grade.create({ data: { schoolId, assessmentId: a.id, studentId: yasmine.id, score } });
+      }
+    }
   }
 
   // Une absence de démonstration pour Adam (enfant du compte parent).

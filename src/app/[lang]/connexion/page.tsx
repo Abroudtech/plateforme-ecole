@@ -37,6 +37,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
             errors: {
               invalid: dict.login.invalid,
               missingFields: dict.login.missingFields,
+              tooMany: dict.login.tooMany,
               noAccess: dict.login.noAccess,
             },
           }}

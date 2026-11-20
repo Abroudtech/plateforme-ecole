@@ -115,6 +115,7 @@ model School {
   conversations      Conversation[]
   announcements      Announcement[]
   notifications      Notification[]
+  annualRules        AnnualRule[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -499,6 +500,20 @@ model TermComment {
   term    Term    @relation(fields: [termId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, termId])
+}
+
+/// Calcul de la moyenne annuelle d'un cycle : poids de chaque trimestre
+/// (par ex. 1, 2, 2) et moyenne d'admission. Modifiable par l'école.
+model AnnualRule {
+  id          String  @id @default(cuid())
+  schoolId    String
+  cycle       Cycle
+  termWeights Float[]
+  passMark    Float   @default(10)
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, cycle])
 }
 
 /// Publication des bulletins d'une classe pour un trimestre : tant qu'ils ne
@@ -899,4 +914,14 @@ model Notification {
 
   @@index([schoolId, createdAt])
   @@index([status])
+}
+
+/// Tentatives de connexion, pour bloquer quelques minutes après trop d'échecs.
+model LoginAttempt {
+  id         String   @id @default(cuid())
+  identifier String
+  success    Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, createdAt])
 }
