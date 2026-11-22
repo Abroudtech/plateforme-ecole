@@ -33,7 +33,14 @@ export default async function ClassPage({ params }: PageProps<"/[lang]/classes/[
         title={lang === "ar" && cls.nameAr ? cls.nameAr : cls.name}
         subtitle={`${dict.cycles[cls.gradeLevel.cycle]} · ${pickName(cls.gradeLevel, lang)}${cls.track ? ` · ${pickName(cls.track, lang)}` : ""} · ${ltr(cls.academicYear.label)}`}
         back={{ href: `/${lang}/classes`, label: dict.classes.title }}
-        action={canWrite ? <ButtonLink href={`/${lang}/eleves/nouveau?classe=${cls.id}`}>{dict.students.add}</ButtonLink> : undefined}
+        action={
+          canWrite ? (
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href={`/${lang}/eleves/nouveau?classe=${cls.id}`}>{dict.students.add}</ButtonLink>
+              {can(ctx.roles, "students.write") && <ButtonLink href={`/${lang}/classes/${cls.id}/acces-parents`}>{dict.bulkAccess.link}</ButtonLink>}
+            </div>
+          ) : undefined
+        }
       />
 
       <ClassTabs lang={lang} classId={cls.id} dict={dict} active="students" />

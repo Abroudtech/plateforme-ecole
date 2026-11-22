@@ -16,7 +16,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await params;
   const dict = await getDictionary(lang);
-  return { title: dict.app.name, description: dict.app.tagline };
+  return {
+    title: dict.app.name,
+    description: dict.app.tagline,
+    appleWebApp: { capable: true, title: dict.app.name, statusBarStyle: "black-translucent" },
+    icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
+  };
 }
 
 export const viewport = {

@@ -1,3 +1,7 @@
+import { db } from "@/lib/db";
+import { ActionForm } from "@/components/action-form";
+import { formLabels } from "@/i18n/form-labels";
+import { reviewAbsenceNote } from "./notes-actions";
 import Link from "next/link";
 import { scopeOf } from "@/lib/auth/scope";
 import type { Locale } from "@/i18n/config";
@@ -27,6 +31,16 @@ export default async function AbsencesPage({ params, searchParams }: PageProps<"
   const classes = overview.classes.filter((c) => !scope || scope.includes(c.id));
   const a = dict.attendance;
   const dateLabel = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { dateStyle: "full", timeZone: "UTC" }).format(date);
+  // Justificatifs envoyés par les parents, à valider par la direction.
+  const notes = can(ctx.roles, "attendance.justify")
+    ? (
+        await db.absenceNote.findMany({
+          where: { schoolId: ctx.school.id, status: "PENDING" },
+          select: { id: true, studentId: true, reason: true, recordIds: true, fileType: true, student: true },
+          orderBy: { createdAt: "asc" },
+        })
+      ).map((x) => ({ ...x, hasFile: !!x.fileType }))
+    : [];
   const todo = (["MORNING", "AFTERNOON"] as const).map((p) => ({ period: p, classes: classes.filter((c) => !done.has(`${c.id}:${p}`)) }));
 
   return (
@@ -39,6 +53,31 @@ export default async function AbsencesPage({ params, searchParams }: PageProps<"
         </div>
         <Button type="submit" variant="secondary">{a.show}</Button>
       </form>
+
+      {notes.length > 0 && (
+        <Card title={t(dict.absenceNotes.toReview, { count: notes.length })}>
+          <ul className="flex flex-col gap-3">
+            {notes.map((note) => (
+              <li key={note.id} className="rounded-xl bg-slate-50 p-3 text-sm">
+                <p>
+                  <Link href={`/${lang}/eleves/${note.studentId}`} className="font-semibold hover:text-blue-700">{personName(note.student, lang)}</Link>
+                  <span className="text-slate-500"> · {t(dict.absenceNotes.halfDays, { count: note.recordIds.length })}</span>
+                </p>
+                <p className="mt-1" dir="auto">« {note.reason} »</p>
+                {note.hasFile && (
+                  <a href={`/${lang}/justificatifs/${note.id}`} target="_blank" rel="noreferrer" className="mt-1 inline-block font-medium text-blue-800 underline">
+                    {dict.absenceNotes.viewFile}
+                  </a>
+                )}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <ActionForm action={reviewAbsenceNote.bind(null, lang, note.id, true)} labels={formLabels(dict, dict.absenceNotes.accept)} />
+                  <ActionForm action={reviewAbsenceNote.bind(null, lang, note.id, false)} labels={formLabels(dict, dict.absenceNotes.reject)} variant="secondary" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card title={t(a.dayList, { date: dateLabel })}>
         {records.length === 0 ? (

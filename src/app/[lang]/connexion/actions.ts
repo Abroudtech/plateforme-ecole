@@ -6,8 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { normalizePhone } from "@/lib/phone";
-import { looksLikeUsername } from "@/lib/student/username";
+import { identifierWhere } from "@/lib/auth/identifier";
 import { isLocale } from "@/i18n/config";
 
 export type LoginState = { error?: "invalid" | "missingFields" | "noAccess" | "tooMany" } | undefined;
@@ -33,11 +32,7 @@ export async function login(lang: string, _prev: LoginState, formData: FormData)
 
   const { identifier, password } = parsed.data;
   // E-mail, identifiant élève (« prenom.matricule ») ou téléphone.
-  const where: { email: string } | { username: string } | { phone: string } = identifier.includes("@")
-    ? { email: identifier.toLowerCase() }
-    : looksLikeUsername(identifier)
-      ? { username: identifier.trim().toLowerCase() }
-      : { phone: normalizePhone(identifier) ?? identifier };
+  const where = identifierWhere(identifier);
 
   // Trop d'échecs récents pour cet identifiant : on bloque 15 minutes.
   const key = Object.values(where)[0] ?? identifier;

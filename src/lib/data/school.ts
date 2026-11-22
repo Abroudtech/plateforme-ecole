@@ -53,3 +53,12 @@ export async function getParentChildren(schoolId: string, userId: string) {
   });
   return links.map((l) => ({ ...l.student, relationship: l.relationship }));
 }
+
+/** Demandes « mot de passe oublié » en attente, pour les comptes de cette école. */
+export function pendingResetRequests(schoolId: string) {
+  return db.passwordReset.findMany({
+    where: { kind: "SCHOOL", usedAt: null, expiresAt: { gt: new Date() }, user: { memberships: { some: { schoolId, isActive: true } } } },
+    include: { user: { include: { memberships: { where: { schoolId, isActive: true } } } } },
+    orderBy: { createdAt: "asc" },
+  });
+}

@@ -43,6 +43,13 @@ export default async function AlertsPage({ params }: PageProps<"/[lang]/messages
               {m[k]}
             </label>
           ))}
+          <label className="flex items-start gap-2 border-t border-slate-100 pt-3 text-sm">
+            <input type="checkbox" name="smsOnlyWithoutApp" defaultChecked={ctx.school.smsOnlyWithoutApp} className="mt-0.5 size-5 shrink-0" />
+            <span>
+              <span className="block font-medium">{dict.push.smsOnlyWithoutApp}</span>
+              <span className="text-slate-500">{dict.push.smsOnlyWithoutAppHint}</span>
+            </span>
+          </label>
         </ActionForm>
       </Card>
       <Card title={m.alerts}>

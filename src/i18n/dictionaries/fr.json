@@ -144,7 +144,10 @@
     "tooManyPending": "Tu as déjà plusieurs messages en attente. Attends que ton enseignant les lise.",
     "challengeInvalid": "Chaque question doit avoir un énoncé, au moins deux réponses et une bonne réponse cochée.",
     "challengeClosed": "Ce défi est terminé.",
-    "challengeDone": "Tu as déjà répondu à ce défi."
+    "challengeDone": "Tu as déjà répondu à ce défi.",
+    "noteMissing": "Choisissez au moins une absence et indiquez le motif.",
+    "fileTooBig": "Le fichier est trop lourd (3 Mo au maximum).",
+    "fileType": "Format non accepté : envoyez une photo ou un PDF."
   },
   "classes": {
     "title": "Classes",
@@ -979,5 +982,81 @@
       "encaissements": "Encaissements",
       "soldes": "Soldes des familles"
     }
+  },
+  "push": {
+    "title": "Alertes sur ce téléphone",
+    "intro": "Recevez une notification pour une absence, un message de l'école ou un bulletin publié. Gratuit, sans SMS.",
+    "enable": "Activer les notifications",
+    "disable": "Désactiver sur ce téléphone",
+    "enabled": "Les notifications sont activées sur ce téléphone.",
+    "denied": "Les notifications sont bloquées dans les réglages du navigateur de ce téléphone.",
+    "iphone": "Sur iPhone : touchez « Partager » puis « Sur l'écran d'accueil », ouvrez l'application depuis l'écran d'accueil, puis revenez ici.",
+    "install": "Installer l'application",
+    "smsOnlyWithoutApp": "Économiser les SMS : ne pas envoyer de SMS aux parents qui reçoivent déjà les notifications de l'application",
+    "smsOnlyWithoutAppHint": "Les autres parents continuent de recevoir les SMS."
+  },
+  "reset": {
+    "link": "Mot de passe oublié ?",
+    "title": "Mot de passe oublié",
+    "subtitle": "Indiquez votre e-mail, votre téléphone ou votre identifiant élève.",
+    "send": "Continuer",
+    "sending": "Envoi…",
+    "codeSent": "Si ce compte existe, un code à 6 chiffres vient d'être envoyé par SMS. Il est valable 15 minutes.",
+    "code": "Code reçu par SMS",
+    "save": "Enregistrer le nouveau mot de passe",
+    "schoolSent": "Votre demande a été transmise à l'école. La direction vous communiquera un nouveau mot de passe provisoire (par téléphone ou à l'accueil).",
+    "back": "Retour à la connexion",
+    "tooMany": "Trop de demandes. Réessayez dans une heure.",
+    "codeInvalid": "Code incorrect ou expiré.",
+    "done": "Mot de passe changé. Vous pouvez vous connecter.",
+    "smsText": "Votre code pour changer de mot de passe : {code} (valable {minutes} min). Ne le communiquez à personne.",
+    "requests": "Demandes de mot de passe",
+    "requestsIntro": "Ces personnes ont oublié leur mot de passe. Vérifiez leur identité (appel, accueil), puis donnez-leur un mot de passe provisoire.",
+    "none": "Aucune demande en attente.",
+    "give": "Donner un mot de passe provisoire",
+    "dismiss": "Ignorer",
+    "given": "Mot de passe provisoire à communiquer :",
+    "todo": "{count} demande(s) de mot de passe oublié"
+  },
+  "bulkAccess": {
+    "title": "Accès des parents de la classe",
+    "link": "Créer les accès des parents",
+    "explain": "Crée en une fois l'accès à l'application pour le parent principal de chaque élève qui n'en a pas encore. Les parents déjà inscrits ne sont pas modifiés. Les mots de passe provisoires s'affichent une seule fois : imprimez les fiches à remettre aux familles.",
+    "stats": "{students} élèves · {done} parent(s) sur {total} ont déjà un accès",
+    "submit": "Créer les accès manquants",
+    "sms": "Envoyer aussi l'identifiant et le mot de passe par SMS",
+    "smsUnavailable": "Envoi par SMS indisponible (aucun fournisseur SMS configuré)",
+    "print": "Imprimer les fiches",
+    "resultIntro": "Résultat : notez ou imprimez les mots de passe maintenant, ils ne seront plus affichés.",
+    "student": "Élève",
+    "guardian": "Parent",
+    "site": "Adresse",
+    "smsSent": "SMS envoyé",
+    "statuses": {
+      "created": "Accès créé",
+      "reset": "Nouveau mot de passe",
+      "linked": "Compte existant relié",
+      "exists": "Déjà inscrit",
+      "conflict": "Compte du personnel : à faire depuis la fiche",
+      "noContact": "Pas de téléphone ni d'e-mail"
+    },
+    "smsText": "{school} : votre accès à l'application de l'école. Adresse : {site} · Identifiant : {login} · Mot de passe provisoire : {password}"
+  },
+  "absenceNotes": {
+    "send": "Envoyer un justificatif",
+    "sent": "Justificatif envoyé à l'école.",
+    "which": "Absences concernées",
+    "reason": "Motif (par ex. maladie, rendez-vous médical)",
+    "file": "Photo du certificat ou du mot (facultatif)",
+    "fileHint": "Photo ou PDF, 3 Mo au maximum.",
+    "pending": "Justificatif en attente",
+    "notJustified": "Non justifiée",
+    "noAbsence": "Aucune absence ni retard. Bravo !",
+    "toReview": "Justificatifs envoyés par les parents ({count})",
+    "halfDays": "{count} demi-journée(s)",
+    "viewFile": "Voir la pièce jointe",
+    "accept": "Accepter (justifier)",
+    "reject": "Refuser",
+    "todo": "{count} justificatif(s) d'absence à valider"
   }
 }
