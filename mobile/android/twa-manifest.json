@@ -35,6 +35,7 @@
   "isMetaQuest": false,
   "fullScopeUrl": "https://ecole-5tdk.onrender.com/",
   "orientation": "default",
+  "minSdkVersion": 24,
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
