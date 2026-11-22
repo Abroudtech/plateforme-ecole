@@ -1,0 +1,15 @@
+{
+  "name": "plateforme-ecole-ios",
+  "private": true,
+  "description": "Application iPhone / iPad : affiche le site de la plateforme (voir ../README.md).",
+  "scripts": {
+    "sync": "cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.6.2",
+    "@capacitor/ios": "8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
+}

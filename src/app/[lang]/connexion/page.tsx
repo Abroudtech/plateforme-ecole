@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/config";
 import { getOptionalContext } from "@/lib/auth/context";
 import { LanguageSwitch } from "@/components/language-switch";
 import { BrandMark } from "@/components/brand";
+import { legal } from "@/lib/mobile/legal";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({ params, searchParams }: PageProps<"/[lang]/connexion">) {
@@ -55,6 +56,10 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
           {dict.reset.link}
         </a>
       </div>
+      <nav className="relative mt-5 flex gap-4 text-xs text-white/70">
+        <a href={`/${lang}/confidentialite`} className="underline hover:text-white">{legal[lang as Locale].privacyLink}</a>
+        <a href={`/${lang}/suppression-compte`} className="underline hover:text-white">{legal[lang as Locale].deletionLink}</a>
+      </nav>
     </main>
   );
 }

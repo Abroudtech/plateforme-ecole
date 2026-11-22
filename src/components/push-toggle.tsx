@@ -71,6 +71,9 @@ export function PushToggle({ publicKey, labels, compact = false }: { publicKey: 
   }
 
   if (state === "loading" || (compact && (state === "on" || state === "denied"))) return null;
+  // Application iPhone de l'App Store : les notifications du site n'y existent
+  // pas (elles arriveront avec les notifications natives), on n'affiche rien.
+  if (state === "unsupported" && typeof navigator !== "undefined" && navigator.userAgent.includes("PlateformeEcoleApp")) return null;
   // iPhone : les notifications ne marchent qu'une fois l'app ajoutée à l'écran d'accueil.
   const ios = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
 

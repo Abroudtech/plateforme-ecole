@@ -1,0 +1,8 @@
+node_modules/
+# Fichiers fabriqués par Bubblewrap (Android) : seul twa-manifest.json est gardé.
+android/*
+!android/twa-manifest.json
+# Une clé de signature ne doit jamais entrer dans le dépôt.
+*.keystore
+*.jks
+*.p8
