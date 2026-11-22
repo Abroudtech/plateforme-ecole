@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
+import { can } from "@/lib/auth/permissions";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { pickName } from "@/i18n/localized";
@@ -31,6 +32,16 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-2">
+            {can(ctx.roles, "students.read") && (
+              <Link
+                href={`/${lang}/recherche`}
+                title={dict.search.title}
+                aria-label={dict.search.title}
+                className="grid h-9 w-9 place-items-center rounded-xl bg-white/10 text-white hover:bg-white/20"
+              >
+                <Search size={17} aria-hidden />
+              </Link>
+            )}
             <LanguageSwitch lang={lang} label={dict.language.switchTo} className="border-white/25 text-white hover:bg-white/10" />
             <form action={logout.bind(null, lang)}>
               <button

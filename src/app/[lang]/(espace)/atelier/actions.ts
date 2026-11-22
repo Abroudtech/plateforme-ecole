@@ -4,15 +4,11 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/action-form";
 import { db } from "@/lib/db";
 import { parseForm, runAction } from "@/lib/actions";
-import { aiEnabled, generateResource, monthlyLimit } from "@/lib/ai/generate";
+import { aiEnabled, generateResource } from "@/lib/ai/generate";
+import { aiQuotaReached } from "@/lib/ai/quota";
 import { subjectLanguage } from "@/lib/ai/programme-primaire";
 import { extractTitle, resourceRequestSchema } from "@/lib/ai/prompt";
 import { FormError } from "@/lib/forms";
-
-/** Début du mois en cours (heure de Tunis, à quelques heures près). */
-function monthStart(now = new Date()) {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-}
 
 export async function createResource(lang: string, _prev: FormState, formData: FormData) {
   let id: string | null = null;
@@ -26,8 +22,7 @@ export async function createResource(lang: string, _prev: FormState, formData: F
     ]);
     if (!level || !subject) throw new FormError("invalid");
 
-    const used = await db.teachingResource.count({ where: { schoolId, createdAt: { gte: monthStart() } } });
-    if (used >= monthlyLimit()) throw new FormError("aiQuota");
+    if (await aiQuotaReached(schoolId)) throw new FormError("aiQuota");
 
     const language = subjectLanguage(subject);
     const result = await generateResource({

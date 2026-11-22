@@ -61,6 +61,7 @@ export default async function StudentPage({ params }: PageProps<"/[lang]/eleves/
           enrollment ? (
             <div className="flex flex-wrap gap-2">
               <ButtonLink href={`/${lang}/eleves/${student.id}/bulletin`}>{dict.reportCards.view}</ButtonLink>
+              <ButtonLink href={`/${lang}/eleves/${student.id}/notes`}>{dict.progress.myGrades}</ButtonLink>
               {can(ctx.roles, "payments.read") && (
                 <ButtonLink href={`/${lang}/eleves/${student.id}/paiements`}>{dict.payments.myPayments}</ButtonLink>
               )}

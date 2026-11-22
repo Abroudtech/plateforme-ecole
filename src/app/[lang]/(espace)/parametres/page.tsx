@@ -8,7 +8,7 @@ import { getAnnualRule } from "@/lib/data/annual";
 import { formulaText } from "@/lib/grades/annual";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, Input, PageHeader } from "@/components/ui";
-import { addAdmin, removeAdmin, resetAnnualRule, saveAnnualRule, saveSchoolInfo } from "./actions";
+import { addAdmin, removeAdmin, resetAnnualRule, saveAnnualRule, saveGradesVisibility, saveSchoolInfo } from "./actions";
 import { db } from "@/lib/db";
 import { personName } from "@/i18n/localized";
 
@@ -40,6 +40,18 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
             <Field label={st.phone} hint={dict.common.optional}><Input name="phone" type="tel" dir="ltr" defaultValue={school.phone ?? ""} /></Field>
             <Field label={st.email} hint={dict.common.optional}><Input name="email" type="email" dir="ltr" defaultValue={school.email ?? ""} /></Field>
           </div>
+        </ActionForm>
+      </Card>
+
+      <Card title={dict.progress.settingTitle}>
+        <ActionForm action={saveGradesVisibility.bind(null, lang)} labels={formLabels(dict, dict.common.save)}>
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" name="showGradesToParents" defaultChecked={school.showGradesToParents} className="mt-0.5 h-5 w-5 shrink-0" />
+            <span>
+              <span className="block font-medium">{dict.progress.settingLabel}</span>
+              <span className="text-slate-500">{dict.progress.settingHint}</span>
+            </span>
+          </label>
         </ActionForm>
       </Card>
 
@@ -76,6 +88,22 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
         <Link href={`/${lang}/importer`} className="inline-block rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">
           {dict.importer.shortcut}
         </Link>
+      </Card>
+
+      <Card title={dict.exports.title}>
+        <p className="mb-3 text-sm text-slate-600">{dict.exports.intro}</p>
+        <div className="flex flex-wrap gap-2">
+          {(["eleves", "absences", "encaissements", "soldes"] as const).map((type) => (
+            <a
+              key={type}
+              href={`/${lang}/exporter/${type}`}
+              download
+              className="inline-block rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
+            >
+              {dict.exports.sheets[type]}
+            </a>
+          ))}
+        </div>
       </Card>
 
       <Card title={st.team}>

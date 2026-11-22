@@ -11,6 +11,7 @@ import { requireContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { hasClassAccess } from "@/lib/auth/scope";
 import { aiEnabled, generateQuiz } from "@/lib/ai/generate";
+import { aiQuotaReached } from "@/lib/ai/quota";
 import { subjectLanguage } from "@/lib/ai/programme-primaire";
 import { quizPrompt } from "@/lib/ai/prompt";
 import { challengeQuestionsSchema, questionsFromForm, REACTIONS, scoreAnswers, type ChallengeQuestion } from "@/lib/challenges";
@@ -162,6 +163,9 @@ export async function suggestQuestions(
     db.subject.findFirst({ where: { id: p.data.subjectId, schoolId: ctx.school.id } }),
   ]);
   if (!cls || !subject) return { error: "invalid" };
+  // Les questions proposées comptent dans la limite mensuelle d'IA de l'école.
+  if (await aiQuotaReached(ctx.school.id)) return { error: "aiQuota" };
+  await db.aiRequest.create({ data: { schoolId: ctx.school.id, userId: ctx.user.id, kind: "challenge" } });
   const result = await generateQuiz(
     quizPrompt({
       levelFr: cls.gradeLevel.nameFr,

@@ -105,3 +105,26 @@ export async function getDirectorOverview(schoolId: string, userId: string) {
     },
   };
 }
+
+/** Étapes pour bien démarrer une nouvelle école (guide affiché sur l'accueil tant qu'il en reste). */
+export async function getSetupSteps(school: { id: string; address: string | null; phone: string | null }) {
+  const schoolId = school.id;
+  const year = await getCurrentYear(schoolId);
+  const yearId = year?.id ?? "__aucune__";
+  const [classes, enrolled, teachers, entries, fees, parents] = await Promise.all([
+    db.classGroup.count({ where: { schoolId, academicYearId: yearId } }),
+    db.enrollment.count({ where: { schoolId, academicYearId: yearId, status: "ACTIVE" } }),
+    db.teacher.count({ where: { schoolId, isActive: true } }),
+    db.timetableEntry.count({ where: { schoolId, classGroup: { academicYearId: yearId } } }),
+    db.fee.count({ where: { schoolId, academicYearId: yearId } }),
+    db.guardian.count({ where: { schoolId, userId: { not: null } } }),
+  ]);
+  return [
+    { key: "info", done: !!(school.address || school.phone), href: "parametres" },
+    { key: "import", done: classes > 0 && enrolled > 0, href: "importer" },
+    { key: "teachers", done: teachers > 0, href: "enseignants" },
+    { key: "timetable", done: entries > 0, href: "emplois-du-temps" },
+    { key: "fees", done: fees > 0, href: "paiements/frais" },
+    { key: "parents", done: parents > 0, href: "eleves" },
+  ] as const;
+}
