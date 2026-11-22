@@ -109,6 +109,7 @@
     "classNotEmpty": "Impossible de supprimer une classe qui contient des élèves.",
     "noYear": "Aucune année scolaire en cours. Créez-la d'abord.",
     "contactRequired": "Un téléphone ou un e-mail est nécessaire pour créer un accès.",
+    "accountLinked": "Cette personne a déjà un compte (dans un autre établissement). Il est maintenant relié à votre école : elle se connecte avec son mot de passe habituel.",
     "accountConflict": "Ce téléphone ou cet e-mail appartient déjà à un compte du personnel ; l'accès ne peut pas être modifié ici.",
     "phoneInvalid": "Numéro de téléphone invalide.",
     "scoreRange": "Une note est en dehors du barème (entre 0 et la note maximale).",

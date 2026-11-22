@@ -265,25 +265,39 @@ export async function saveGradeGrid(lang: string, classId: string, termId: strin
 
     const scheme = (await loadSchemeResolver(db, schoolId, cls))(subjectId);
 
+    // Évaluation qui alimente chaque colonne : la même que celle affichée dans
+    // la grille (même ordre que getAssessments), sinon elle sera créée.
+    const existing = new Map(
+      await Promise.all(
+        scheme.items.map(
+          async ({ kind }) =>
+            [
+              kind,
+              await db.assessment.findFirst({
+                where: { schoolId, classGroupId: cls.id, termId: term.id, subjectId, kind },
+                orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+              }),
+            ] as const,
+        ),
+      ),
+    );
+
     // Lecture et contrôle de toutes les cases avant d'écrire quoi que ce soit.
-    const cells = scheme.items.flatMap(({ kind }) =>
-      cls.enrollments.map(({ studentId }) => {
+    const cells = scheme.items.flatMap(({ kind }) => {
+      const max = Number(existing.get(kind)?.maxScore ?? 20);
+      return cls.enrollments.map(({ studentId }) => {
         const raw = String(formData.get(`g_${kind}_${studentId}`) ?? "").trim().toLowerCase();
         const absent = ["abs", "a", "غ"].includes(raw);
         const score = absent ? null : parseNumber(raw);
-        if (score !== null && (score < 0 || score > 20)) throw new FormError("scoreRange");
+        if (score !== null && (score < 0 || score > max)) throw new FormError("scoreRange");
         return { kind, studentId, score, absent };
-      }),
-    );
+      });
+    });
 
     await db.$transaction(async (tx) => {
       for (const { kind, weight } of scheme.items) {
-        const existing = await tx.assessment.findFirst({
-          where: { schoolId, classGroupId: cls.id, termId: term.id, subjectId, kind },
-          orderBy: { createdAt: "asc" },
-        });
         const assessment =
-          existing ??
+          existing.get(kind) ??
           (await tx.assessment.create({ data: { schoolId, classGroupId: cls.id, termId: term.id, subjectId, kind, weight } }));
         for (const c of cells.filter((x) => x.kind === kind)) {
           await tx.grade.upsert({

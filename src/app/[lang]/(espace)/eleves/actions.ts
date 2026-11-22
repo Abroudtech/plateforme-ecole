@@ -297,6 +297,21 @@ export async function createGuardianAccess(lang: string, guardianId: string, _pr
       throw new FormError("accountConflict");
     }
 
+    // Compte déjà utilisé dans un autre établissement : on le relie à l'école
+    // sans changer son mot de passe (sinon une école pourrait prendre la main
+    // sur un compte qui ne lui appartient pas).
+    if (user && user.memberships.some((m) => m.isActive && m.schoolId !== schoolId)) {
+      await db.$transaction([
+        db.guardian.update({ where: { id: guardian.id }, data: { userId: user.id } }),
+        db.membership.upsert({
+          where: { userId_schoolId_role: { userId: user.id, schoolId, role: "PARENT" } },
+          update: { isActive: true },
+          create: { userId: user.id, schoolId, role: "PARENT" },
+        }),
+      ]);
+      return { ok: true, notice: "accountLinked" };
+    }
+
     const password = generateTempPassword();
     const passwordHash = await hashPassword(password);
 
