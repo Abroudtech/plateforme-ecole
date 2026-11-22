@@ -450,6 +450,8 @@ model Enrollment {
   academicYearId String
   classGroupId   String
   status         EnrollmentStatus @default(ACTIVE)
+  /// Passage à l'année suivante : « LEAVE » = l'élève quitte l'école à la fin de cette année.
+  nextStep       String?
   enrolledAt     DateTime         @default(now())
 
   school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
