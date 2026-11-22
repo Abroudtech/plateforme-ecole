@@ -1,8 +1,8 @@
 {
   "packageId": "fr.abroudtech.ecole",
   "host": "ecole-5tdk.onrender.com",
-  "name": "Plateforme École",
-  "launcherName": "École",
+  "name": "Ma Plume",
+  "launcherName": "Ma Plume",
   "display": "standalone",
   "themeColor": "#14213D",
   "themeColorDark": "#14213D",

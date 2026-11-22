@@ -7,10 +7,10 @@ self.addEventListener("push", (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { title: "École", body: event.data ? event.data.text() : "" };
+    data = { title: "Ma Plume", body: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "École", {
+    self.registration.showNotification(data.title || "Ma Plume", {
       body: data.body || "",
       icon: "/icon-192.png",
       badge: "/icon-192.png",

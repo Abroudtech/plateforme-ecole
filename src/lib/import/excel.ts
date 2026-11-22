@@ -54,7 +54,7 @@ const GREY = "FFF1F5F9";
  */
 export async function buildTemplate(data: TemplateData): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Plateforme École";
+  wb.creator = "Ma Plume";
   wb.created = new Date();
 
   // --- Mode d'emploi -------------------------------------------------------

@@ -1,4 +1,4 @@
-# Plateforme École
+# Ma Plume — plateforme scolaire
 
 Plateforme de gestion scolaire pour les écoles privées tunisiennes :
 administration, parents, et plus tard enseignants et élèves.

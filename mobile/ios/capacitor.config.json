@@ -1,6 +1,6 @@
 {
   "appId": "fr.abroudtech.ecole",
-  "appName": "Plateforme École",
+  "appName": "Ma Plume",
   "webDir": "www",
   "server": {
     "url": "https://ecole-5tdk.onrender.com",
