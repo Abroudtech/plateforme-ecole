@@ -147,7 +147,11 @@
     "challengeDone": "Tu as déjà répondu à ce défi.",
     "noteMissing": "Choisissez au moins une absence et indiquez le motif.",
     "fileTooBig": "Le fichier est trop lourd (3 Mo au maximum).",
-    "fileType": "Format non accepté : envoyez une photo ou un PDF."
+    "fileType": "Format non accepté : envoyez une photo ou un PDF.",
+    "yearLabel": "Écrivez l'année sous la forme 2027-2028.",
+    "yearExists": "Cette année existe déjà.",
+    "yearInUse": "Impossible : des notes, absences ou paiements sont déjà enregistrés dans cette année.",
+    "noClassesNextYear": "La nouvelle année n'a aucune classe."
   },
   "classes": {
     "title": "Classes",
@@ -1058,5 +1062,41 @@
     "accept": "Accepter (justifier)",
     "reject": "Refuser",
     "todo": "{count} justificatif(s) d'absence à valider"
+  },
+  "rollover": {
+    "title": "Nouvelle année scolaire",
+    "link": "Préparer l'année suivante",
+    "linkIntro": "En fin d'année : créer l'année suivante, faire passer les élèves dans leur nouvelle classe, puis basculer.",
+    "current": "Année en cours : {year}",
+    "step1": "Préparer l'année suivante",
+    "step1Intro": "La nouvelle année reprend les trimestres (dates décalées d'un an), les mêmes classes et les frais. L'année en cours ne change pas : vous pouvez préparer la rentrée pendant que l'année se termine.",
+    "label": "Année",
+    "copyTeachers": "Garder les mêmes enseignants pour chaque classe",
+    "copyTimetable": "Reprendre les emplois du temps (à ajuster ensuite)",
+    "copyDiscounts": "Reprendre les réductions et services de chaque élève",
+    "prepare": "Préparer l'année",
+    "step2": "Classe de chaque élève en {year}",
+    "step2Intro": "Ouvrez chaque classe : la nouvelle classe est proposée selon la décision de fin d'année (admis → niveau suivant, non admis → même niveau). Vérifiez et enregistrez.",
+    "placedOf": "{placed}/{total} placés",
+    "deleteYear": "Supprimer l'année {year} préparée",
+    "step3": "Passer en {year}",
+    "step3Intro": "Le jour de la rentrée (ou quand tout est prêt), basculez : la nouvelle année devient l'année en cours pour tout le monde. Les élèves qui quittent l'école sont retirés des listes ; leur historique est conservé.",
+    "sumPlaced": "{placed} élève(s) sur {total} ont une classe l'an prochain",
+    "sumLeaving": "{count} élève(s) quittent l'école",
+    "sumUnplaced": "{count} élève(s) sans classe l'an prochain (ils resteront inscrits à l'école, sans classe)",
+    "switch": "Passer en {year}",
+    "switchConfirm": "Passer en {year} pour toute l'école ?",
+    "undoIntro": "Bascule faite par erreur ? Tant que rien n'a été saisi dans la nouvelle année, vous pouvez revenir en {year}.",
+    "undo": "Revenir en {year}",
+    "classIntro": "Choisissez la classe de l'an prochain. « Quitte l'école » : fin de scolarité ou départ.",
+    "average": "Moyenne annuelle",
+    "toDecide": "— à décider —",
+    "leave": "Quitte l'école",
+    "decisions": {
+      "PASS": "Admis",
+      "FAIL": "Non admis",
+      "PENDING": "Décision en attente"
+    },
+    "toCheck": "proposition à vérifier"
   }
 }
