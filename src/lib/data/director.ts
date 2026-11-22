@@ -33,7 +33,7 @@ export async function getDirectorOverview(schoolId: string, userId: string) {
       where: { schoolId, date: { gte: since }, status: "ABSENT" },
       select: { studentId: true, justified: true, student: true, classGroup: { select: { name: true, nameAr: true } } },
     }),
-    countUnread(schoolId, userId, null),
+    countUnread(schoolId, { userId, schoolSide: true, guardianId: null, teacherId: null }),
     year ? getSchoolAccounts(schoolId, year.id, today) : Promise.resolve([]),
     db.payment.aggregate({ where: { schoolId, cancelledAt: null, paidAt: { gte: monthStart } }, _sum: { amountMillimes: true } }),
     year

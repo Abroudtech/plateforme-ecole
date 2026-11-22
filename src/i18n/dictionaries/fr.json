@@ -151,7 +151,10 @@
     "yearLabel": "Écrivez l'année sous la forme 2027-2028.",
     "yearExists": "Cette année existe déjà.",
     "yearInUse": "Impossible : des notes, absences ou paiements sont déjà enregistrés dans cette année.",
-    "noClassesNextYear": "La nouvelle année n'a aucune classe."
+    "noClassesNextYear": "La nouvelle année n'a aucune classe.",
+    "wrongTeacher": "Cet enseignant ne fait pas cours à cet enfant.",
+    "homeworkEmpty": "Écrivez ce qui a été fait en classe ou le travail à faire.",
+    "dueBeforeDate": "La date « pour le » doit être après le jour de la séance."
   },
   "classes": {
     "title": "Classes",
@@ -581,7 +584,15 @@
       "PAYMENT": "Paiement"
     },
     "myMessages": "Messages",
-    "latestAnnouncements": "Dernières annonces"
+    "latestAnnouncements": "Dernières annonces",
+    "teacherOff": "La messagerie entre enseignants et parents est désactivée par la direction.",
+    "to": "À qui",
+    "teacherHint": "Le message est envoyé au parent principal de l'élève. La direction peut lire les échanges.",
+    "toHint": "Vous pouvez écrire à la direction ou à un enseignant de votre enfant. La direction peut lire les échanges avec les enseignants.",
+    "withTeacher": "avec {teacher}",
+    "settingTitle": "Messagerie avec les enseignants",
+    "settingLabel": "Les parents peuvent écrire aux enseignants de leurs enfants",
+    "settingHint": "Les enseignants peuvent aussi écrire aux parents de leurs élèves. Vous voyez toutes les conversations dans Messages."
   },
   "alerts": {
     "absence": "{school} : {student} a été noté(e) absent(e) le {date} ({period}).",
@@ -1098,5 +1109,45 @@
       "PENDING": "Décision en attente"
     },
     "toCheck": "proposition à vérifier"
+  },
+  "homework": {
+    "title": "Cahier de textes",
+    "tab": "Cahier de textes",
+    "add": "Noter la séance",
+    "edit": "Modifier la séance",
+    "editShort": "Modifier",
+    "date": "Jour de la séance",
+    "subject": "Matière",
+    "general": "Toutes matières",
+    "dueDate": "Pour le",
+    "dueHint": "Facultatif",
+    "lesson": "Fait en classe",
+    "lessonPlaceholder": "Ex. : Leçon 4, les fractions ; correction de l'exercice 2",
+    "task": "Travail à faire",
+    "taskPlaceholder": "Ex. : Exercices 3 et 4 page 52",
+    "resource": "Document joint (atelier)",
+    "resourceHint": "Les parents et les élèves pourront le lire.",
+    "visibleHint": "Visible tout de suite par les parents et les élèves de la classe.",
+    "none": "Rien n'a encore été noté.",
+    "confirmDelete": "Supprimer cette séance du cahier de textes ?",
+    "dueOn": "pour {date}",
+    "upcoming": "Travail à faire",
+    "noUpcoming": "Aucun travail à faire pour les prochains jours.",
+    "recent": "Séances des 3 dernières semaines",
+    "noClass": "Pas encore inscrit dans une classe cette année.",
+    "myHomework": "Devoirs",
+    "document": "Document"
+  },
+  "followup": {
+    "title": "Élèves à suivre",
+    "intro": "Repérés automatiquement chaque jour à partir des notes, des absences et des paiements.",
+    "none": "Aucun élève à signaler pour le moment.",
+    "seeAll": "Voir les {count} élèves",
+    "low": "Moyenne {average}",
+    "drop": "En baisse : {from} → {to}",
+    "absent": "{count} absences non justifiées (30 j)",
+    "unpaid": "Impayé : {amount}",
+    "rules": "Règles : moyenne du trimestre sous {average}, baisse d'au moins {drop} points par rapport au trimestre précédent, {absences} absences non justifiées ou plus sur 30 jours.",
+    "rulesMoney": "Règles : moyenne du trimestre sous {average}, baisse d'au moins {drop} points par rapport au trimestre précédent, {absences} absences non justifiées ou plus sur 30 jours, somme due depuis plus de {days} jours."
   }
 }

@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Newspaper, Puzzle, Trophy } from "lucide-react";
+import { Newspaper, NotebookPen, Puzzle, Trophy } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
 import { className } from "@/i18n/localized";
 import type { AppContext } from "@/lib/auth/context";
 import { leaderboard, studentOf, weekStart } from "@/lib/data/class-space";
+import { parseISODate, todayISO } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { Leaderboard } from "../espace-classe/leaderboard";
 import { IconBadge, Notice } from "./dashboard-ui";
@@ -19,20 +20,22 @@ export async function StudentDashboard({ ctx, lang, dict }: Props) {
   if (!student?.classGroup) return <Notice text={cs.noClass} />;
   const classId = student.classGroup.id;
   const now = new Date();
-  const [week, year, todo, lastPost] = await Promise.all([
+  const [week, year, todo, lastPost, homework] = await Promise.all([
     leaderboard(ctx.school.id, classId, weekStart()),
     leaderboard(ctx.school.id, classId),
     db.challenge.count({
       where: { schoolId: ctx.school.id, classGroupId: classId, attempts: { none: { studentId: student.id } }, OR: [{ closesAt: null }, { closesAt: { gt: now } }] },
     }),
     db.classPost.findFirst({ where: { classGroupId: classId, status: "PUBLISHED" }, orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }] }),
+    db.homework.count({ where: { schoolId: ctx.school.id, classGroupId: classId, task: { not: null }, dueDate: { gte: parseISODate(todayISO())! } } }),
   ]);
   const me = year.find((r) => r.student.id === student.id);
 
   return (
     <>
-      <section className="relative -mt-12 grid grid-cols-3 gap-3 md:-mt-10 md:px-4">
+      <section className="relative -mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 md:-mt-10 md:px-4">
         {[
+          { href: `/${lang}/devoirs`, icon: NotebookPen, tone: "blue" as const, label: dict.homework.myHomework, extra: homework ? t(cs.todoCount, { count: homework }) : cs.nothingTodoShort },
           { href: `/${lang}/defis`, icon: Trophy, tone: "gold" as const, label: dict.nav.challenges, extra: todo ? t(cs.todoCount, { count: todo }) : cs.nothingTodoShort },
           { href: `/${lang}/jeux`, icon: Puzzle, tone: "green" as const, label: dict.nav.games, extra: cs.playToEarn },
           { href: `/${lang}/espace-classe`, icon: Newspaper, tone: "blue" as const, label: className(student.classGroup, lang), extra: dict.nav.classSpace },

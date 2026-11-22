@@ -72,29 +72,31 @@ enum EnrollmentStatus {
 
 /// Un établissement (une école cliente de la plateforme).
 model School {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  nameFr          String
-  nameAr          String
-  city            String?
-  address         String?
-  phone           String?
-  email           String?
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  nameFr              String
+  nameAr              String
+  city                String?
+  address             String?
+  phone               String?
+  email               String?
   /// Cycles proposés par l'école (une école peut avoir primaire + collège + lycée).
-  cycles          Cycle[]
-  defaultLocale   Locale   @default(fr)
-  currency        String   @default("TND")
+  cycles              Cycle[]
+  defaultLocale       Locale   @default(fr)
+  currency            String   @default("TND")
   /// Alertes automatiques aux parents (SMS) : absence, bulletin publié, nouveau message.
-  alertAbsence    Boolean  @default(true)
-  alertReportCard Boolean  @default(true)
-  alertMessage    Boolean  @default(true)
+  alertAbsence        Boolean  @default(true)
+  alertReportCard     Boolean  @default(true)
+  alertMessage        Boolean  @default(true)
   /// Les parents voient les notes au fil du trimestre (sinon seulement le bulletin publié).
-  showGradesToParents Boolean @default(false)
+  showGradesToParents Boolean  @default(false)
+  /// Les parents peuvent écrire aux enseignants de leurs enfants (et inversement), sous le regard de la direction.
+  teacherMessaging    Boolean  @default(true)
   /// Pas de SMS pour un parent qui reçoit déjà les notifications de l'application (économie).
-  smsOnlyWithoutApp   Boolean @default(false)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  smsOnlyWithoutApp   Boolean  @default(false)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   memberships        Membership[]
   academicYears      AcademicYear[]
@@ -125,6 +127,7 @@ model School {
   classPosts         ClassPost[]
   aiRequests         AiRequest[]
   absenceNotes       AbsenceNote[]
+  homework           Homework[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -167,6 +170,7 @@ model User {
   challenges        Challenge[]
   passwordResets    PasswordReset[]
   pushSubscriptions PushSubscription[]
+  homework          Homework[]
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -317,6 +321,7 @@ model ClassGroup {
   posts              ClassPost[]
   challenges         Challenge[]
   gameScores         GameScore[]
+  homework           Homework[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -337,6 +342,7 @@ model Subject {
   timetable          TimetableEntry[]
   teachingResources  TeachingResource[]
   challenges         Challenge[]
+  homework           Homework[]
 
   @@unique([schoolId, code])
 }
@@ -672,10 +678,11 @@ model Teacher {
   userId      String?
   createdAt   DateTime @default(now())
 
-  school      School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
-  entries     TimetableEntry[]
-  assignments TeacherAssignment[]
+  school        School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  entries       TimetableEntry[]
+  assignments   TeacherAssignment[]
+  conversations Conversation[]
 
   @@unique([schoolId, userId])
   @@index([schoolId])
@@ -725,8 +732,40 @@ model TeachingResource {
   author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   gradeLevel GradeLevel @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
   subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  homework   Homework[]
 
   @@index([schoolId, authorId, createdAt])
+}
+
+/// Cahier de textes : ce qui a été fait en classe et le travail à faire.
+/// Visible par les parents et les élèves de la classe.
+model Homework {
+  id           String    @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  subjectId    String?
+  authorId     String?
+  /// Jour de la séance.
+  date         DateTime  @db.Date
+  /// Ce qui a été fait pendant la séance.
+  lesson       String?   @db.Text
+  /// Travail à faire (devoirs).
+  task         String?   @db.Text
+  /// Pour quand (facultatif).
+  dueDate      DateTime? @db.Date
+  /// Document de l'atelier joint (fiche, exercices), consultable en lecture.
+  resourceId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  school     School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup        @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  subject    Subject?          @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  author     User?             @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  resource   TeachingResource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  @@index([classGroupId, date])
+  @@index([schoolId, dueDate])
 }
 
 /// Salle de classe, laboratoire, terrain de sport...
@@ -886,6 +925,8 @@ model Conversation {
   schoolId      String
   guardianId    String
   studentId     String?
+  /// Enseignant concerné (null = conversation avec la direction). La direction voit toutes les conversations.
+  teacherId     String?
   subject       String
   lastMessageAt DateTime @default(now())
   createdAt     DateTime @default(now())
@@ -893,11 +934,13 @@ model Conversation {
   school   School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   guardian Guardian           @relation(fields: [guardianId], references: [id], onDelete: Cascade)
   student  Student?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  teacher  Teacher?           @relation(fields: [teacherId], references: [id], onDelete: SetNull)
   messages Message[]
   reads    ConversationRead[]
 
   @@index([schoolId, lastMessageAt])
   @@index([guardianId])
+  @@index([teacherId])
 }
 
 model Message {

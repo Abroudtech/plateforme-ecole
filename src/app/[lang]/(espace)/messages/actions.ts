@@ -3,13 +3,14 @@
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { School } from "@prisma/client";
 import type { FormState } from "@/components/action-form";
 import { t } from "@/i18n/format";
-import { can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { parseForm, runAction } from "@/lib/actions";
 import { alertGuardian, alertGuardiansOf, retryFailed } from "@/lib/data/alerts";
-import { getGuardianForUser } from "@/lib/data/messages";
+import { canSee, getGuardianForUser, isParentIn, messagingViewer, teachersOfStudents } from "@/lib/data/messages";
+import { hasStudentAccess } from "@/lib/auth/scope";
 import { getPrimaryGuardian } from "@/lib/data/payments";
 import { getCurrentYear } from "@/lib/data/school";
 import { FormError, requiredText } from "@/lib/forms";
@@ -19,15 +20,37 @@ import type { Locale } from "@/i18n/config";
 
 const body = z.string().trim().min(1).max(4000);
 
-function isLocaleLang(raw: string): Locale {
-  return raw === "ar" ? "ar" : "fr";
+type Conv = { id: string; subject: string; teacherId: string | null };
+
+/**
+ * Un parent a écrit : on prévient l'enseignant concerné, ou la direction
+ * (notification sur le téléphone).
+ */
+function notifyStaff(school: { id: string; nameFr: string; nameAr: string }, conv: Conv, lang: Locale) {
+  after(async () => {
+    const teacher = conv.teacherId ? await db.teacher.findUnique({ where: { id: conv.teacherId }, select: { userId: true } }) : null;
+    const ids = teacher?.userId ? [teacher.userId] : await schoolAdminIds(school.id);
+    await sendPush(ids, { title: lang === "ar" ? school.nameAr : school.nameFr, body: conv.subject, url: `/${lang}/messages/${conv.id}`, tag: conv.id });
+  });
 }
 
-/** Prévient la direction (notification sur le téléphone) qu'un parent a écrit. */
-function notifySchool(school: { id: string; nameFr: string; nameAr: string }, conversationId: string, subject: string, lang: Locale) {
-  after(async () => {
-    await sendPush(await schoolAdminIds(school.id), { title: lang === "ar" ? school.nameAr : school.nameFr, body: subject, url: `/${lang}/messages/${conversationId}`, tag: conversationId });
-  });
+/** L'école a écrit : alerte au parent ; si c'est la direction dans une conversation d'enseignant, l'enseignant est prévenu aussi. */
+async function notifyParent(
+  school: School,
+  guardianId: string,
+  conv: Conv,
+  authorId: string,
+  lang: Locale,
+) {
+  if (school.alertMessage) await alertGuardian(school, guardianId, "MESSAGE", (d, _lg, v) => t(d.alerts.message, v));
+  if (conv.teacherId) {
+    after(async () => {
+      const teacher = await db.teacher.findUnique({ where: { id: conv.teacherId! }, select: { userId: true } });
+      if (teacher?.userId && teacher.userId !== authorId) {
+        await sendPush([teacher.userId], { title: lang === "ar" ? school.nameAr : school.nameFr, body: conv.subject, url: `/${lang}/messages/${conv.id}`, tag: conv.id });
+      }
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -36,47 +59,59 @@ function notifySchool(school: { id: string; nameFr: string; nameAr: string }, co
 
 export async function startConversation(lang: string, _prev: FormState, formData: FormData) {
   return runAction(lang, "messages.send", async (ctx, l) => {
-    const data = parseForm(z.object({ studentId: z.string().min(1), subject: requiredText, body }), formData);
+    const data = parseForm(z.object({ studentId: z.string().min(1), subject: requiredText, body, to: z.string().optional() }), formData);
     const schoolId = ctx.school.id;
     const student = await db.student.findFirst({ where: { id: data.studentId, schoolId } });
     if (!student) throw new FormError("notFound");
+    const viewer = await messagingViewer(ctx);
 
-    const fromSchool = can(ctx.roles, "messages.school");
+    // Qui écrit : le parent (si c'est son enfant), sinon la direction ou l'enseignant.
+    const guardian = viewer.guardianId ? await getGuardianForUser(schoolId, ctx.user.id) : null;
+    const asParent = !!guardian && guardian.students.some((s) => s.studentId === student.id);
     let guardianId: string;
-    if (fromSchool) {
+    let teacherId: string | null = null;
+    if (asParent) {
+      guardianId = guardian!.id;
+      if (data.to && data.to !== "school") {
+        if (!ctx.school.teacherMessaging) throw new FormError("wrongTeacher");
+        const ok = (await teachersOfStudents(schoolId, [student.id])).some((x) => x.teacher.id === data.to);
+        if (!ok) throw new FormError("wrongTeacher");
+        teacherId = data.to;
+      }
+    } else if (viewer.schoolSide || (viewer.teacherId && (await hasStudentAccess(ctx, student.id)))) {
       const g = await getPrimaryGuardian(schoolId, student.id);
       if (!g) throw new FormError("noGuardian");
       guardianId = g.id;
+      teacherId = viewer.schoolSide ? null : viewer.teacherId;
     } else {
-      const g = await getGuardianForUser(schoolId, ctx.user.id);
-      if (!g || !g.students.some((s) => s.studentId === student.id)) throw new FormError("notFound");
-      guardianId = g.id;
+      throw new FormError("notFound");
     }
+    const fromSchool = !asParent;
     const conv = await db.conversation.create({
       data: {
         schoolId,
         guardianId,
+        teacherId,
         studentId: student.id,
         subject: data.subject,
         messages: { create: { authorId: ctx.user.id, fromSchool, body: data.body } },
         reads: { create: { userId: ctx.user.id, lastReadAt: new Date() } },
       },
     });
-    if (fromSchool && ctx.school.alertMessage) {
-      await alertGuardian(ctx.school, guardianId, "MESSAGE", (d, _lg, v) => t(d.alerts.message, v));
-    }
-    if (!fromSchool) notifySchool(ctx.school, conv.id, data.subject, l);
+    if (fromSchool) await notifyParent(ctx.school, guardianId, conv, ctx.user.id, l);
+    else notifyStaff(ctx.school, conv, l);
     redirect(`/${l}/messages/${conv.id}`);
   });
 }
 
 export async function replyMessage(lang: string, conversationId: string, _prev: FormState, formData: FormData) {
-  return runAction(lang, "messages.send", async (ctx) => {
+  return runAction(lang, "messages.send", async (ctx, l) => {
     const data = parseForm(z.object({ body }), formData);
-    const conv = await db.conversation.findFirst({ where: { id: conversationId, schoolId: ctx.school.id }, include: { guardian: true } });
+    const conv = await db.conversation.findFirst({ where: { id: conversationId, schoolId: ctx.school.id } });
     if (!conv) throw new FormError("notFound");
-    const fromSchool = can(ctx.roles, "messages.school");
-    if (!fromSchool && conv.guardian.userId !== ctx.user.id) throw new FormError("notFound");
+    const viewer = await messagingViewer(ctx);
+    if (!canSee(conv, viewer)) throw new FormError("notFound");
+    const fromSchool = !isParentIn(conv, viewer);
     const now = new Date();
     await db.$transaction([
       db.message.create({ data: { conversationId: conv.id, authorId: ctx.user.id, fromSchool, body: data.body, createdAt: now } }),
@@ -87,10 +122,8 @@ export async function replyMessage(lang: string, conversationId: string, _prev: 
         create: { conversationId: conv.id, userId: ctx.user.id, lastReadAt: now },
       }),
     ]);
-    if (fromSchool && ctx.school.alertMessage) {
-      await alertGuardian(ctx.school, conv.guardianId, "MESSAGE", (d, _lg, v) => t(d.alerts.message, v));
-    }
-    if (!fromSchool) notifySchool(ctx.school, conv.id, conv.subject, isLocaleLang(lang));
+    if (fromSchool) await notifyParent(ctx.school, conv.guardianId, conv, ctx.user.id, l);
+    else notifyStaff(ctx.school, conv, l);
     refresh();
   });
 }

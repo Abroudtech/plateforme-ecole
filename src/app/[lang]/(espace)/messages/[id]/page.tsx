@@ -5,8 +5,7 @@ import { formLabels } from "@/i18n/form-labels";
 import { t } from "@/i18n/format";
 import { personName } from "@/i18n/localized";
 import { requirePermission } from "@/lib/auth/context";
-import { can } from "@/lib/auth/permissions";
-import { getConversation, markRead } from "@/lib/data/messages";
+import { canSee, getConversation, isParentIn, markRead, messagingViewer } from "@/lib/data/messages";
 import { ActionForm } from "@/components/action-form";
 import { Card, PageHeader } from "@/components/ui";
 import { replyMessage } from "../actions";
@@ -19,8 +18,10 @@ export default async function ConversationPage({ params }: PageProps<"/[lang]/me
   const m = dict.messages;
   const conv = await getConversation(ctx.school.id, id);
   if (!conv) notFound();
-  const schoolSide = can(ctx.roles, "messages.school");
-  if (!schoolSide && conv.guardian.userId !== ctx.user.id) redirect(`/${lang}/acces-refuse`);
+  const viewer = await messagingViewer(ctx);
+  if (!canSee(conv, viewer)) redirect(`/${lang}/acces-refuse`);
+  const parentSide = isParentIn(conv, viewer);
+  const teacherName = conv.teacher ? personName(conv.teacher, lang) : null;
   await markRead(conv.id, ctx.user.id);
   const fmt = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Africa/Tunis" });
 
@@ -30,7 +31,9 @@ export default async function ConversationPage({ params }: PageProps<"/[lang]/me
         title={conv.subject}
         subtitle={
           <>
-            {schoolSide ? t(m.withParent, { parent: personName(conv.guardian, lang) }) : m.school}
+            {parentSide
+              ? teacherName ?? m.school
+              : t(m.withParent, { parent: personName(conv.guardian, lang) }) + (viewer.schoolSide && teacherName ? ` · ${teacherName}` : "")}
             {conv.student ? ` · ${t(m.about, { student: personName(conv.student, lang) })}` : ""}
           </>
         }
@@ -38,9 +41,14 @@ export default async function ConversationPage({ params }: PageProps<"/[lang]/me
       />
       <ol className="flex flex-col gap-3">
         {conv.messages.map((msg) => {
-          const mine = msg.fromSchool === schoolSide;
+          // Mes messages à droite ; côté parent, l'enseignant est nommé, la direction reste « École ».
+          const mine = msg.authorId === ctx.user.id;
           const who = msg.fromSchool
-            ? schoolSide && msg.author ? personName(msg.author, lang) : m.school
+            ? !parentSide && msg.author
+              ? personName(msg.author, lang)
+              : conv.teacher?.userId && msg.authorId === conv.teacher.userId
+                ? teacherName
+                : m.school
             : personName(conv.guardian, lang);
           return (
             <li key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>

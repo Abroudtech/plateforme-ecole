@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { CalendarCheck, CalendarDays, ChevronRight, ClipboardList, Newspaper, Sparkles, Users } from "lucide-react";
+import { Suspense } from "react";
+import { CalendarCheck, CalendarDays, ChevronRight, ClipboardList, MessageSquare, Newspaper, NotebookPen, Sparkles, Users } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
@@ -8,8 +9,10 @@ import type { AppContext } from "@/lib/auth/context";
 import { scopeOf, teacherOf } from "@/lib/auth/scope";
 import { currentPeriod, parseISODate, todayISO } from "@/lib/dates";
 import { db } from "@/lib/db";
+import { countUnread, messagingViewer } from "@/lib/data/messages";
 import { formatTime } from "@/lib/timetable";
 import { IconBadge, Notice, Panel } from "./dashboard-ui";
+import { FollowupFallback, FollowupPanel } from "./followup-panel";
 
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
@@ -38,7 +41,8 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
 
   const today = parseISODate(todayISO())!;
   const period = currentPeriod();
-  const [classes, lessons, rollCalls, resources] = await Promise.all([
+  const viewer = await messagingViewer(ctx);
+  const [classes, lessons, rollCalls, resources, unread] = await Promise.all([
     db.classGroup.findMany({
       where: { schoolId, id: { in: ids } },
       include: { gradeLevel: true, _count: { select: { enrollments: { where: { status: "ACTIVE" } } } } },
@@ -51,6 +55,7 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
     }),
     db.rollCall.findMany({ where: { schoolId, classGroupId: { in: ids }, date: today, period } }),
     db.teachingResource.count({ where: { schoolId, authorId: ctx.user.id } }),
+    countUnread(schoolId, viewer),
   ]);
   const done = new Set(rollCalls.map((r) => r.classGroupId));
   // Cours en ce moment (ou qui commence dans les 10 minutes) : l'appel en un toucher.
@@ -84,14 +89,21 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
             >
               <ClipboardList size={16} aria-hidden /> {dict.grades.title}
             </Link>
+            <Link
+              href={`/${lang}/classes/${current.classGroupId}/cahier`}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-semibold text-blue-900 ring-1 ring-slate-200"
+            >
+              <NotebookPen size={16} aria-hidden /> {dict.homework.tab}
+            </Link>
           </div>
         </section>
       )}
-      <section className={`relative grid grid-cols-3 gap-3 md:px-4 ${current ? "" : "-mt-12 md:-mt-10"}`}>
+      <section className={`relative grid grid-cols-2 gap-3 sm:grid-cols-4 md:px-4 ${current ? "" : "-mt-12 md:-mt-10"}`}>
         {[
           { href: `/${lang}/atelier`, icon: Sparkles, tone: "gold" as const, label: dict.nav.workshop, extra: t(th.resources, { count: resources }) },
           { href: `/${lang}/espace-classe`, icon: Newspaper, tone: "green" as const, label: dict.nav.classSpace, extra: null },
           { href: `/${lang}/enseignants/${teacher.id}`, icon: CalendarDays, tone: "blue" as const, label: th.myTimetable, extra: null },
+          { href: `/${lang}/messages`, icon: MessageSquare, tone: "blue" as const, label: dict.nav.messages, extra: unread > 0 ? `${unread} · ${dict.messages.unread}` : null },
         ].map((c) => (
           <Link key={c.href} href={c.href} className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-card ring-1 ring-slate-200/80 hover:ring-gold-400">
             <IconBadge icon={c.icon} tone={c.tone} />
@@ -166,6 +178,12 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
           )}
         </Panel>
       </div>
+
+      {ids.length > 0 && (
+        <Suspense fallback={<FollowupFallback dict={dict} />}>
+          <FollowupPanel schoolId={schoolId} classIds={ids} money={false} lang={lang} dict={dict} />
+        </Suspense>
+      )}
     </>
   );
 }
