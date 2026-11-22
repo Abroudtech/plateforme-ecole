@@ -76,6 +76,21 @@ export async function createTeacherAccess(lang: string, teacherId: string, _prev
       if (other) throw new FormError("accountConflict");
     }
 
+    // Compte déjà utilisé dans un autre établissement : on le relie à l'école
+    // sans changer son mot de passe (sinon une école pourrait prendre la main
+    // sur un compte qui ne lui appartient pas).
+    if (user && user.memberships.some((m) => m.isActive && m.schoolId !== schoolId)) {
+      await db.$transaction([
+        db.teacher.update({ where: { id: teacher.id }, data: { userId: user.id } }),
+        db.membership.upsert({
+          where: { userId_schoolId_role: { userId: user.id, schoolId, role: "TEACHER" } },
+          update: { isActive: true },
+          create: { userId: user.id, schoolId, role: "TEACHER" },
+        }),
+      ]);
+      return { ok: true, notice: "accountLinked" };
+    }
+
     const password = generateTempPassword();
     const passwordHash = await hashPassword(password);
 
