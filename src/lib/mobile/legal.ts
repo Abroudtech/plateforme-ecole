@@ -44,7 +44,7 @@ export const legal: Record<Locale, LegalText> = {
       {
         title: "Qui sommes-nous",
         paragraphs: [
-          "Plateforme École est un service de gestion scolaire utilisé par des écoles privées. Chaque école est responsable des données de ses élèves, de leurs parents et de son personnel. L'éditeur de la plateforme (Abroudtech) héberge et traite ces données pour le compte de l'école, uniquement pour faire fonctionner le service.",
+          "Ma Plume est un service de gestion scolaire utilisé par des écoles privées. Chaque école est responsable des données de ses élèves, de leurs parents et de son personnel. L'éditeur de la plateforme (Abroudtech) héberge et traite ces données pour le compte de l'école, uniquement pour faire fonctionner le service.",
         ],
       },
       {
@@ -121,7 +121,7 @@ export const legal: Record<Locale, LegalText> = {
       {
         title: "من نحن",
         paragraphs: [
-          "منصة المدرسة خدمة لتسيير المدارس الخاصة. كل مدرسة مسؤولة عن بيانات تلاميذها وأوليائهم وموظفيها. ناشر المنصة (Abroudtech) يستضيف هذه البيانات ويعالجها لحساب المدرسة، فقط لتشغيل الخدمة.",
+          "Ma Plume خدمة لتسيير المدارس الخاصة. كل مدرسة مسؤولة عن بيانات تلاميذها وأوليائهم وموظفيها. ناشر المنصة (Abroudtech) يستضيف هذه البيانات ويعالجها لحساب المدرسة، فقط لتشغيل الخدمة.",
         ],
       },
       {

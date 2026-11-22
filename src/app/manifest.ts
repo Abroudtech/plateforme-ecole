@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 /** L'application s'installe sur l'écran d'accueil du téléphone, comme une vraie app. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "École — Plateforme scolaire",
-    short_name: "École",
+    name: "Ma Plume — Plateforme scolaire",
+    short_name: "Ma Plume",
     description: "Notes, absences, paiements et messages de l'école.",
     start_url: "/",
     display: "standalone",

@@ -10,7 +10,7 @@ export type ExportCell = string | number | Date | null | undefined;
  */
 export async function buildExport(sheetName: string, columns: ExportColumn[], rows: ExportCell[][], rtl = false): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Plateforme École";
+  wb.creator = "Ma Plume";
   wb.created = new Date();
   const ws = wb.addWorksheet(sheetName.slice(0, 31), { views: [{ state: "frozen", ySplit: 1, rightToLeft: rtl }] });
   ws.columns = columns.map((c) => ({
