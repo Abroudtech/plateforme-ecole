@@ -19,13 +19,9 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
   if (can(roles, "teacher.space") && !can(roles, "dashboard.admin")) {
     const classes: NavItem = { href: h("classes"), label: dict.nav.myClasses, icon: "classes" };
     const attendance: NavItem = { href: h("absences"), label: dict.nav.attendance, icon: "attendance" };
-    const parent: NavItem[] = can(roles, "children.read")
-      ? [
-          { href: h("messages"), label: dict.nav.messages, icon: "messages" },
-          { href: h("annonces"), label: dict.messages.announcements, icon: "announcements" },
-        ]
-      : [];
-    const all: NavItem[] = [home, classes, attendance, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, ...parent, account];
+    const parent: NavItem[] = can(roles, "children.read") ? [{ href: h("annonces"), label: dict.messages.announcements, icon: "announcements" }] : [];
+    const messages: NavItem = { href: h("messages"), label: dict.nav.messages, icon: "messages" };
+    const all: NavItem[] = [home, classes, attendance, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, messages, ...parent, account];
     return { all, bottom: [home, classes, attendance, workshop, { href: h("menu"), label: dict.nav.more, icon: "more" }] };
   }
 
@@ -33,6 +29,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
   if (can(roles, "student.space")) {
     const items: NavItem[] = [
       home,
+      { href: h("devoirs"), label: dict.homework.myHomework, icon: "homework" },
       { href: h("defis"), label: dict.nav.challenges, icon: "challenges" },
       { href: h("jeux"), label: dict.nav.games, icon: "games" },
       classSpace,

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   BookOpen,
   CalendarCheck,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { StudentDashboard } from "./student-dashboard";
 import { TeacherDashboard } from "./teacher-dashboard";
+import { FollowupFallback, FollowupPanel } from "./followup-panel";
 import { Hero, IconBadge, Initials, Panel, TONES, type Tone } from "./dashboard-ui";
 import { getDirectorOverview, getSetupSteps } from "@/lib/data/director";
 import { Money } from "@/components/money";
@@ -262,6 +264,10 @@ async function AdminDashboard({ ctx, lang, dict, hello, today, push }: Props & {
         </Panel>
       </div>
 
+      <Suspense fallback={<FollowupFallback dict={dict} />}>
+        <FollowupPanel schoolId={ctx.school.id} classIds={null} money={can(ctx.roles, "payments.read")} lang={lang} dict={dict} />
+      </Suspense>
+
       {push}
 
       <section className="flex flex-col gap-3">
@@ -329,7 +335,7 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
   const year = await getCurrentYear(ctx.school.id);
   const [unread, announcements] = guardian
     ? await Promise.all([
-        countUnread(ctx.school.id, ctx.user.id, guardian.id),
+        countUnread(ctx.school.id, { userId: ctx.user.id, schoolSide: false, guardianId: guardian.id, teacherId: null }),
         listAnnouncementsFor(ctx.school.id, await parentScope(ctx.school.id, guardian.id, year?.id ?? null), 2),
       ])
     : [0, []];
@@ -392,6 +398,9 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                     )}
                     <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.reportCards.myBulletins}
+                    </Link>
+                    <Link href={`/${lang}/eleves/${child.id}/devoirs`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
+                      {dict.homework.myHomework}
                     </Link>
                     <Link href={`/${lang}/eleves/${child.id}/absences`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.attendance.title}

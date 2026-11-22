@@ -8,7 +8,7 @@ import { getAnnualRule } from "@/lib/data/annual";
 import { formulaText } from "@/lib/grades/annual";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, Input, PageHeader } from "@/components/ui";
-import { addAdmin, removeAdmin, resetAnnualRule, saveAnnualRule, saveGradesVisibility, saveSchoolInfo } from "./actions";
+import { addAdmin, removeAdmin, resetAnnualRule, saveAnnualRule, saveGradesVisibility, saveSchoolInfo, saveTeacherMessaging } from "./actions";
 import { db } from "@/lib/db";
 import { personName } from "@/i18n/localized";
 
@@ -50,6 +50,18 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
             <span>
               <span className="block font-medium">{dict.progress.settingLabel}</span>
               <span className="text-slate-500">{dict.progress.settingHint}</span>
+            </span>
+          </label>
+        </ActionForm>
+      </Card>
+
+      <Card title={dict.messages.settingTitle}>
+        <ActionForm action={saveTeacherMessaging.bind(null, lang)} labels={formLabels(dict, dict.common.save)}>
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" name="teacherMessaging" defaultChecked={school.teacherMessaging} className="mt-0.5 h-5 w-5 shrink-0" />
+            <span>
+              <span className="block font-medium">{dict.messages.settingLabel}</span>
+              <span className="text-slate-500">{dict.messages.settingHint}</span>
             </span>
           </label>
         </ActionForm>

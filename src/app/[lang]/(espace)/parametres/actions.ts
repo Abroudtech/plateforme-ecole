@@ -37,6 +37,13 @@ export async function saveGradesVisibility(lang: string, _prev: FormState, formD
   });
 }
 
+export async function saveTeacherMessaging(lang: string, _prev: FormState, formData: FormData) {
+  return runAction(lang, "settings.write", async (ctx) => {
+    await db.school.update({ where: { id: ctx.school.id }, data: { teacherMessaging: formData.get("teacherMessaging") === "on" } });
+    refresh();
+  });
+}
+
 export async function saveAnnualRule(lang: string, cycle: Cycle, _prev: FormState, formData: FormData) {
   return runAction(lang, "settings.write", async (ctx) => {
     if (!CYCLES.includes(cycle)) throw new FormError("invalid");

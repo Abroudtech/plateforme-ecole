@@ -50,6 +50,8 @@ export const PERMISSIONS = {
   "classSpace.read": ["ADMIN", "TEACHER", "STUDENT"],
   // Espace élève (V3) : défis, jeux, classement, mur de sa classe
   "student.space": ["STUDENT"],
+  // Cahier de textes : écrire les séances et les devoirs de ses classes
+  "homework.write": ["ADMIN", "TEACHER"],
   // Espace parent : voir uniquement ses propres enfants
   "children.read": ["PARENT"],
 } as const satisfies Record<string, readonly Role[]>;
