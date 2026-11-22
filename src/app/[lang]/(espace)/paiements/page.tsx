@@ -57,6 +57,11 @@ export default async function PaymentsPage({ params, searchParams }: PageProps<"
         title={p.title}
         subtitle={year ? ltr(year.label) : dict.formErrors.noYear}
         back={{ href: `/${lang}/tableau-de-bord`, label: dict.nav.dashboard }}
+        action={
+          <Link href={`/${lang}/paiements/services`} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50">
+            {dict.services.title}
+          </Link>
+        }
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -72,8 +72,8 @@ enum EnrollmentStatus {
 
 /// Un établissement (une école cliente de la plateforme).
 model School {
-  id                  String   @id @default(cuid())
-  slug                String   @unique
+  id                  String    @id @default(cuid())
+  slug                String    @unique
   nameFr              String
   nameAr              String
   city                String?
@@ -82,21 +82,29 @@ model School {
   email               String?
   /// Cycles proposés par l'école (une école peut avoir primaire + collège + lycée).
   cycles              Cycle[]
-  defaultLocale       Locale   @default(fr)
-  currency            String   @default("TND")
+  defaultLocale       Locale    @default(fr)
+  currency            String    @default("TND")
   /// Alertes automatiques aux parents (SMS) : absence, bulletin publié, nouveau message.
-  alertAbsence        Boolean  @default(true)
-  alertReportCard     Boolean  @default(true)
-  alertMessage        Boolean  @default(true)
+  alertAbsence        Boolean   @default(true)
+  alertReportCard     Boolean   @default(true)
+  alertMessage        Boolean   @default(true)
   /// Les parents voient les notes au fil du trimestre (sinon seulement le bulletin publié).
-  showGradesToParents Boolean  @default(false)
+  showGradesToParents Boolean   @default(false)
   /// Les parents peuvent écrire aux enseignants de leurs enfants (et inversement), sous le regard de la direction.
-  teacherMessaging    Boolean  @default(true)
+  teacherMessaging    Boolean   @default(true)
   /// Pas de SMS pour un parent qui reçoit déjà les notifications de l'application (économie).
-  smsOnlyWithoutApp   Boolean  @default(false)
-  isActive            Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  smsOnlyWithoutApp   Boolean   @default(false)
+  /// Abonnement à la plateforme (géré par l'équipe de la plateforme).
+  plan                String?
+  /// Prix mensuel convenu, en millimes.
+  planPriceMillimes   Int?
+  /// Abonnement payé jusqu'au (inclus).
+  paidUntil           DateTime? @db.Date
+  /// Note interne de l'équipe plateforme (contact, conditions...).
+  platformNote        String?
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   memberships        Membership[]
   academicYears      AcademicYear[]
@@ -845,6 +853,8 @@ model StudentFee {
   /// null = montant normal du frais
   amountMillimes Int?
   note           String?
+  /// Pour les listes de service : arrêt du bus, allergie à la cantine, groupe d'activité...
+  serviceInfo    String?
 
   school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)

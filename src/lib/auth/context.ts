@@ -82,3 +82,11 @@ export async function requirePermission(lang: Locale, permission: Permission) {
   if (!can(ctx.roles, permission)) redirect(`/${lang}/acces-refuse`);
   return ctx;
 }
+
+/** Espace plateforme : réservé à l'équipe de la plateforme (pas aux écoles clientes). */
+export async function requirePlatformAdmin(lang: Locale) {
+  const ctx = await loadContext();
+  if (!ctx) redirect(`/${lang}/connexion`);
+  if (!ctx.user.isPlatformAdmin) redirect(`/${lang}/acces-refuse`);
+  return ctx;
+}

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { todayISO } from "@/lib/dates";
 import { getSchoolAccounts } from "@/lib/data/payments";
 import { getCurrentYear } from "@/lib/data/school";
+import { parseMonth, teachingMinutes, weekdayCounts } from "@/lib/payroll";
 import { buildExport, type ExportCell, type ExportColumn } from "@/lib/export/excel";
 import type { Permission } from "@/lib/auth/permissions";
 
@@ -13,10 +14,11 @@ const TYPES: Record<string, Permission> = {
   absences: "attendance.justify",
   encaissements: "payments.read",
   soldes: "payments.read",
+  heures: "payments.read",
 };
 
-/** Téléchargement Excel (élèves, absences, encaissements, soldes) pour la direction ou le comptable. */
-export async function GET(_request: Request, { params }: RouteContext<"/[lang]/exporter/[type]">) {
+/** Téléchargement Excel (élèves, absences, encaissements, soldes, heures des enseignants) pour la direction ou le comptable. */
+export async function GET(request: Request, { params }: RouteContext<"/[lang]/exporter/[type]">) {
   const { lang: raw, type } = await params;
   const lang = isLocale(raw) ? raw : "fr";
   const permission = TYPES[type];
@@ -33,6 +35,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[lang]/e
 
   let columns: ExportColumn[] = [];
   let rows: ExportCell[][] = [];
+  let period = todayISO();
 
   if (type === "eleves") {
     const students = await db.student.findMany({
@@ -95,8 +98,32 @@ export async function GET(_request: Request, { params }: RouteContext<"/[lang]/e
     ]);
   }
 
+  else if (type === "heures") {
+    // Heures de cours du mois choisi, pour la paie (d'après l'emploi du temps).
+    const chosen = parseMonth(new URL(request.url).searchParams.get("mois")) ?? parseMonth(todayISO().slice(0, 7))!;
+    period = `${chosen.year}-${String(chosen.month).padStart(2, "0")}`;
+    const counts = weekdayCounts(chosen.year, chosen.month);
+    const teachers = await db.teacher.findMany({
+      where: { schoolId, isActive: true },
+      include: { entries: { where: { classGroup: { academicYearId: yearId } }, include: { classGroup: true, subject: true } } },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    });
+    columns = [
+      { header: x.teacher, width: 28 }, { header: x.nameAr, width: 24 }, { header: x.phone, width: 16 }, { header: x.classes, width: 24 },
+      { header: x.subjects, width: 24 }, { header: x.weekHours }, { header: x.sessions }, { header: x.monthHours },
+    ];
+    rows = teachers.map((t) => {
+      const m = teachingMinutes(t.entries, counts);
+      const sessions = t.entries.reduce((n, e) => n + (counts[e.dayOfWeek] ?? 0), 0);
+      return [
+        name(t), nameAr(t), t.phone ?? "", [...new Set(t.entries.map((e) => e.classGroup.name))].sort().join(", "),
+        [...new Set(t.entries.map((e) => e.subject.nameFr))].join(", "), Math.round((m.week / 60) * 100) / 100, sessions, Math.round((m.month / 60) * 100) / 100,
+      ];
+    });
+  }
+
   const buffer = await buildExport(x.sheets[type as keyof typeof x.sheets], columns, rows, lang === "ar");
-  const fileName = `${type}-${ctx.school.slug}-${todayISO()}.xlsx`;
+  const fileName = `${type}-${ctx.school.slug}-${period}.xlsx`;
   return new Response(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

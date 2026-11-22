@@ -14,7 +14,8 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
-    "ecole:creer": "tsx scripts/creer-ecole.ts"
+    "ecole:creer": "tsx scripts/creer-ecole.ts",
+    "plateforme:admin": "tsx scripts/admin-plateforme.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0",
