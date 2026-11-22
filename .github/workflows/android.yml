@@ -32,6 +32,8 @@ jobs:
           SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKM" --licenses > /dev/null || true
           "$SDKM" "build-tools;$BUILD_TOOLS" "platforms;android-36" > /dev/null
+          # Bubblewrap cherche les outils dans « tools » (ancien emplacement).
+          [ -e "$ANDROID_HOME/tools" ] || sudo ln -s "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
           npm install -g "@bubblewrap/cli@$BUBBLEWRAP_VERSION"
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
