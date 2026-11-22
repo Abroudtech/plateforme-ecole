@@ -1,0 +1,15 @@
+{
+  "appId": "fr.abroudtech.ecole",
+  "appName": "Plateforme École",
+  "webDir": "www",
+  "server": {
+    "url": "https://ecole-5tdk.onrender.com",
+    "errorPath": "hors-ligne.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#14213d",
+    "appendUserAgent": "PlateformeEcoleApp/ios",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "packageId": "fr.abroudtech.ecole",
+  "host": "ecole-5tdk.onrender.com",
+  "name": "Plateforme École",
+  "launcherName": "École",
+  "display": "standalone",
+  "themeColor": "#14213D",
+  "themeColorDark": "#14213D",
+  "navigationColor": "#14213D",
+  "navigationColorDark": "#14213D",
+  "navigationDividerColor": "#14213D",
+  "navigationDividerColorDark": "#14213D",
+  "backgroundColor": "#F6F3EC",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://ecole-5tdk.onrender.com/icon-512.png",
+  "maskableIconUrl": "https://ecole-5tdk.onrender.com/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "upload"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://ecole-5tdk.onrender.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://ecole-5tdk.onrender.com/",
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": []
+}
