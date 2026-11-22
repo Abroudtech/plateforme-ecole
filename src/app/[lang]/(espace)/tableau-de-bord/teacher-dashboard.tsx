@@ -19,6 +19,15 @@ function weekday(now = new Date()) {
   return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(d) + 1;
 }
 
+/** Minutes écoulées depuis minuit, à l'heure de Tunis. */
+function minutesNow(now = new Date()) {
+  const [h, m] = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Tunis", hour: "2-digit", minute: "2-digit", hour12: false })
+    .format(now)
+    .split(":")
+    .map(Number);
+  return h * 60 + m;
+}
+
 /** Accueil de l'enseignant : cours du jour, ses classes, raccourcis. */
 export async function TeacherDashboard({ ctx, lang, dict }: Props) {
   const th = dict.teacherHome;
@@ -44,10 +53,41 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
     db.teachingResource.count({ where: { schoolId, authorId: ctx.user.id } }),
   ]);
   const done = new Set(rollCalls.map((r) => r.classGroupId));
+  // Cours en ce moment (ou qui commence dans les 10 minutes) : l'appel en un toucher.
+  const nowMin = minutesNow();
+  const current = lessons.find((l) => l.startMinute - 10 <= nowMin && nowMin < l.endMinute);
 
   return (
     <>
-      <section className="relative -mt-12 grid grid-cols-3 gap-3 md:-mt-10 md:px-4">
+      {current && (
+        <section className="relative -mt-12 rounded-2xl bg-white p-4 shadow-card ring-2 ring-gold-400 md:-mt-10 md:mx-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gold-700">{th.now}</p>
+          <p className="mt-1 text-lg font-bold leading-tight">
+            {pickName(current.subject, lang)} · {className(current.classGroup, lang)}
+          </p>
+          <p className="text-sm text-slate-500">
+            <bdi dir="ltr">{formatTime(current.startMinute)} – {formatTime(current.endMinute)}</bdi>
+            {current.room ? ` · ${current.room.name}` : ""}
+          </p>
+          <div className="mt-3 flex gap-2">
+            <Link
+              href={`/${lang}/classes/${current.classGroupId}/absences`}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold ${
+                done.has(current.classGroupId) ? "bg-emerald-50 text-emerald-800" : "bg-blue-900 text-white"
+              }`}
+            >
+              <CalendarCheck size={16} aria-hidden /> {done.has(current.classGroupId) ? dict.attendance.done : th.rollCallNow}
+            </Link>
+            <Link
+              href={`/${lang}/classes/${current.classGroupId}/notes`}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-semibold text-blue-900 ring-1 ring-slate-200"
+            >
+              <ClipboardList size={16} aria-hidden /> {dict.grades.title}
+            </Link>
+          </div>
+        </section>
+      )}
+      <section className={`relative grid grid-cols-3 gap-3 md:px-4 ${current ? "" : "-mt-12 md:-mt-10"}`}>
         {[
           { href: `/${lang}/atelier`, icon: Sparkles, tone: "gold" as const, label: dict.nav.workshop, extra: t(th.resources, { count: resources }) },
           { href: `/${lang}/espace-classe`, icon: Newspaper, tone: "green" as const, label: dict.nav.classSpace, extra: null },

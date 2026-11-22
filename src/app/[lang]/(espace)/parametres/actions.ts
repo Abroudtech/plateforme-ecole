@@ -29,6 +29,14 @@ export async function saveSchoolInfo(lang: string, _prev: FormState, formData: F
   });
 }
 
+/** Les parents voient (ou non) les notes au fil du trimestre. */
+export async function saveGradesVisibility(lang: string, _prev: FormState, formData: FormData) {
+  return runAction(lang, "settings.write", async (ctx) => {
+    await db.school.update({ where: { id: ctx.school.id }, data: { showGradesToParents: formData.get("showGradesToParents") === "on" } });
+    refresh();
+  });
+}
+
 export async function saveAnnualRule(lang: string, cycle: Cycle, _prev: FormState, formData: FormData) {
   return runAction(lang, "settings.write", async (ctx) => {
     if (!CYCLES.includes(cycle)) throw new FormError("invalid");

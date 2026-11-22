@@ -650,7 +650,9 @@
     "averages": "Moyennes par classe · {term}",
     "details": "Détails",
     "seeAll": "Tout voir",
-    "paidOf": "{paid} encaissés sur {due}"
+    "paidOf": "{paid} encaissés sur {due}",
+    "actionPayment": "Encaisser un paiement",
+    "actionAbsences": "Absents du jour"
   },
   "account": {
     "title": "Mon compte",
@@ -753,7 +755,9 @@
     "noClasses": "Aucune classe ne vous est encore confiée. La direction peut vous en attribuer depuis votre fiche enseignant.",
     "myTimetable": "Mon emploi du temps",
     "resources": "{count} documents",
-    "notLinked": "Votre compte n'est relié à aucune fiche enseignant. Contactez la direction."
+    "notLinked": "Votre compte n'est relié à aucune fiche enseignant. Contactez la direction.",
+    "now": "En ce moment",
+    "rollCallNow": "Faire l'appel maintenant"
   },
   "workshop": {
     "title": "Atelier IA",
@@ -905,6 +909,75 @@
         "title": "Le bon mot",
         "text": "Choisis le mot français qui va avec l'image."
       }
+    }
+  },
+  "progress": {
+    "title": "Notes du trimestre",
+    "provisional": "Notes au fil du trimestre. Les moyennes sont provisoires : seul le bulletin publié par l'école fait foi.",
+    "none": "Aucune note pour ce trimestre pour le moment.",
+    "myGrades": "Notes",
+    "settingTitle": "Notes visibles par les parents",
+    "settingLabel": "Les parents voient les notes au fil du trimestre (en plus du bulletin publié)",
+    "settingHint": "Désactivé : les parents ne voient que les bulletins publiés."
+  },
+  "search": {
+    "title": "Rechercher",
+    "placeholder": "Nom d'un élève, d'un parent, téléphone ou classe",
+    "tooShort": "Tapez au moins 2 lettres.",
+    "none": "Aucun résultat.",
+    "payTitle": "Encaisser un paiement",
+    "payHint": "Cherchez l'élève (ou son parent), puis choisissez-le."
+  },
+  "setup": {
+    "title": "Bien démarrer ({done}/{total})",
+    "steps": {
+      "info": "Compléter les informations de l'école (adresse, téléphone)",
+      "import": "Importer les classes et les élèves depuis Excel",
+      "teachers": "Ajouter les enseignants",
+      "timetable": "Construire les emplois du temps",
+      "fees": "Définir les frais de l'année",
+      "parents": "Créer les accès des parents"
+    }
+  },
+  "exports": {
+    "title": "Exporter en Excel",
+    "intro": "Téléchargez vos données de l'année en cours, par exemple pour le comptable ou pour garder une copie.",
+    "number": "Matricule",
+    "lastFirst": "Nom et prénom",
+    "nameAr": "Nom en arabe",
+    "class": "Classe",
+    "birthDate": "Date de naissance",
+    "gender": "Sexe",
+    "genders": {
+      "MALE": "Garçon",
+      "FEMALE": "Fille"
+    },
+    "parent": "Parent principal",
+    "phone": "Téléphone",
+    "email": "E-mail",
+    "parent2": "Autre parent",
+    "phone2": "Téléphone (autre)",
+    "date": "Date",
+    "period": "Demi-journée",
+    "status": "Statut",
+    "justified": "Justifiée",
+    "reason": "Motif",
+    "yes": "Oui",
+    "no": "Non",
+    "receipt": "N° reçu",
+    "amount": "Montant (DT)",
+    "method": "Mode",
+    "reference": "Référence",
+    "cancelled": "Annulé",
+    "due": "Total dû (DT)",
+    "paid": "Payé (DT)",
+    "balance": "Reste à payer (DT)",
+    "overdue": "En retard (DT)",
+    "sheets": {
+      "eleves": "Élèves et parents",
+      "absences": "Absences",
+      "encaissements": "Encaissements",
+      "soldes": "Soldes des familles"
     }
   }
 }

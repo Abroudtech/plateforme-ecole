@@ -23,7 +23,7 @@ import {
 import { StudentDashboard } from "./student-dashboard";
 import { TeacherDashboard } from "./teacher-dashboard";
 import { Hero, IconBadge, Initials, Panel, TONES, type Tone } from "./dashboard-ui";
-import { getDirectorOverview } from "@/lib/data/director";
+import { getDirectorOverview, getSetupSteps } from "@/lib/data/director";
 import { Money } from "@/components/money";
 import { getCurrentYear } from "@/lib/data/school";
 import { countUnread, getGuardianForUser, listAnnouncementsFor, parentScope } from "@/lib/data/messages";
@@ -63,7 +63,8 @@ export default async function DashboardPage({ params }: PageProps<"/[lang]/table
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
 async function AdminDashboard({ ctx, lang, dict, hello, today }: Props & { hello: string; today: string }) {
-  const o = await getDirectorOverview(ctx.school.id, ctx.user.id);
+  const [o, setup] = await Promise.all([getDirectorOverview(ctx.school.id, ctx.user.id), getSetupSteps(ctx.school)]);
+  const setupLeft = setup.filter((x) => !x.done).length;
   const d = dict.director;
   const termName = o.currentTerm ? (lang === "ar" ? o.currentTerm.nameAr : o.currentTerm.nameFr) : "";
   const className = (c: { name: string; nameAr: string | null }) => (lang === "ar" && c.nameAr ? c.nameAr : c.name);
@@ -119,6 +120,39 @@ async function AdminDashboard({ ctx, lang, dict, hello, today }: Props & { hello
         <Kpi href={`/${lang}/paiements`} icon={Wallet} tone="gold" label={d.collected} value={rate == null ? "—" : `${Math.round(rate * 100)} %`} sub={d.ofDue} />
         <Kpi href={`/${lang}/messages`} icon={MessageSquare} tone="green" label={dict.nav.messages} value={String(o.unread)} sub={d.unreadShort} />
       </section>
+
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 md:px-4">
+        <Link href={`/${lang}/recherche?pour=paiement`} className="flex items-center gap-3 rounded-2xl bg-blue-900 p-3.5 text-sm font-semibold text-white shadow-card hover:bg-blue-800">
+          <Wallet size={20} className="shrink-0 text-gold-300" aria-hidden /> {d.actionPayment}
+        </Link>
+        <Link href={`/${lang}/absences`} className="flex items-center gap-3 rounded-2xl bg-white p-3.5 text-sm font-semibold text-blue-900 shadow-card ring-1 ring-slate-200/80 hover:ring-gold-400">
+          <CalendarCheck size={20} className="shrink-0" aria-hidden /> {d.actionAbsences}
+        </Link>
+        <Link href={`/${lang}/eleves/nouveau`} className="col-span-2 flex items-center gap-3 rounded-2xl bg-white p-3.5 text-sm font-semibold text-blue-900 shadow-card ring-1 ring-slate-200/80 hover:ring-gold-400 md:col-span-1">
+          <Users size={20} className="shrink-0" aria-hidden /> {dict.students.add}
+        </Link>
+      </section>
+
+      {setupLeft > 0 && (
+        <Panel title={t(dict.setup.title, { done: setup.length - setupLeft, total: setup.length })}>
+          <ol className="flex flex-col gap-1.5">
+            {setup.map((x, i) => (
+              <li key={x.key}>
+                <Link
+                  href={`/${lang}/${x.href}`}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${x.done ? "text-slate-500" : "bg-slate-50 font-semibold hover:bg-gold-50"}`}
+                >
+                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold ${x.done ? "bg-emerald-100 text-emerald-700" : "bg-blue-900 text-white"}`}>
+                    {x.done ? <CircleCheck size={14} aria-hidden /> : i + 1}
+                  </span>
+                  <span className={x.done ? "line-through" : ""}>{dict.setup.steps[x.key]}</span>
+                  {!x.done && <ChevronRight size={16} className="ms-auto shrink-0 text-slate-400 rtl:rotate-180" aria-hidden />}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </Panel>
+      )}
 
       {o.studentCount === 0 && (
         <Link href={`/${lang}/importer`} className="flex items-center gap-3 rounded-2xl bg-gold-50 p-4 text-sm text-gold-900 ring-1 ring-gold-200 hover:bg-gold-100">
@@ -335,6 +369,11 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                 )}
                 {enrollment && (
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {ctx.school.showGradesToParents && (
+                      <Link href={`/${lang}/eleves/${child.id}/notes`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
+                        {dict.progress.myGrades}
+                      </Link>
+                    )}
                     <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.reportCards.myBulletins}
                     </Link>
