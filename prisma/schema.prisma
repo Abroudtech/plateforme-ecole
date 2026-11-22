@@ -90,6 +90,8 @@ model School {
   alertMessage    Boolean  @default(true)
   /// Les parents voient les notes au fil du trimestre (sinon seulement le bulletin publié).
   showGradesToParents Boolean @default(false)
+  /// Pas de SMS pour un parent qui reçoit déjà les notifications de l'application (économie).
+  smsOnlyWithoutApp   Boolean @default(false)
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -122,6 +124,7 @@ model School {
   challenges         Challenge[]
   classPosts         ClassPost[]
   aiRequests         AiRequest[]
+  absenceNotes       AbsenceNote[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -162,6 +165,8 @@ model User {
   classPosts        ClassPost[]
   postReactions     PostReaction[]
   challenges        Challenge[]
+  passwordResets    PasswordReset[]
+  pushSubscriptions PushSubscription[]
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -391,6 +396,7 @@ model Student {
   conversations     Conversation[]
   challengeAttempts ChallengeAttempt[]
   gameScores        GameScore[]
+  absenceNotes      AbsenceNote[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -1113,4 +1119,68 @@ model AiRequest {
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   @@index([schoolId, createdAt])
+}
+
+/// Mot de passe oublié : code reçu par SMS (SMS_CODE), ou demande traitée
+/// par la direction de l'école (SCHOOL).
+model PasswordReset {
+  id          String    @id @default(cuid())
+  userId      String
+  kind        String
+  /// Empreinte du code à 6 chiffres (jamais le code lui-même).
+  codeHash    String?
+  attempts    Int       @default(0)
+  expiresAt   DateTime
+  usedAt      DateTime?
+  handledById String?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([kind, usedAt])
+}
+
+/// Notifications sur le téléphone (application installée sur l'écran d'accueil).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Réglages techniques de la plateforme (par ex. clés des notifications), créés automatiquement.
+model PlatformSetting {
+  key   String @id
+  value String
+}
+
+/// Justificatif d'absence envoyé par un parent (motif + photo éventuelle),
+/// validé ou refusé par la direction.
+model AbsenceNote {
+  id           String    @id @default(cuid())
+  schoolId     String
+  studentId    String
+  authorId     String
+  /// Absences concernées (identifiants des AttendanceRecord).
+  recordIds    String[]
+  reason       String
+  fileData     Bytes?
+  fileType     String?
+  status       String    @default("PENDING")
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, status])
+  @@index([studentId])
 }

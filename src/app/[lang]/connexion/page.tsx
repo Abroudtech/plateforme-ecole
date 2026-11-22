@@ -8,7 +8,7 @@ import { LoginForm } from "./login-form";
 
 export default async function LoginPage({ params, searchParams }: PageProps<"/[lang]/connexion">) {
   const { lang } = await params;
-  const { erreur } = await searchParams;
+  const { erreur, reinit } = await searchParams;
   const dict = await getDictionary(lang);
 
   const ctx = await getOptionalContext();
@@ -28,6 +28,9 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
       <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
         <h1 className="font-display text-[1.7rem] font-semibold text-blue-900">{dict.login.title}</h1>
         <p className="mt-1 mb-6 text-sm text-slate-600">{dict.login.subtitle}</p>
+        {reinit === "1" && (
+          <p role="status" className="mb-4 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">{dict.reset.done}</p>
+        )}
         {erreur === "acces" && (
           <p role="alert" className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
             {dict.login.noAccess}
@@ -48,6 +51,9 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
             },
           }}
         />
+        <a href={`/${lang}/mot-de-passe-oublie`} className="mt-4 block text-center text-sm font-medium text-blue-800 underline">
+          {dict.reset.link}
+        </a>
       </div>
     </main>
   );

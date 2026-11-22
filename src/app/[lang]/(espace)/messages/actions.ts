@@ -13,8 +13,22 @@ import { getGuardianForUser } from "@/lib/data/messages";
 import { getPrimaryGuardian } from "@/lib/data/payments";
 import { getCurrentYear } from "@/lib/data/school";
 import { FormError, requiredText } from "@/lib/forms";
+import { schoolAdminIds, sendPush } from "@/lib/push";
+import { after } from "next/server";
+import type { Locale } from "@/i18n/config";
 
 const body = z.string().trim().min(1).max(4000);
+
+function isLocaleLang(raw: string): Locale {
+  return raw === "ar" ? "ar" : "fr";
+}
+
+/** Prévient la direction (notification sur le téléphone) qu'un parent a écrit. */
+function notifySchool(school: { id: string; nameFr: string; nameAr: string }, conversationId: string, subject: string, lang: Locale) {
+  after(async () => {
+    await sendPush(await schoolAdminIds(school.id), { title: lang === "ar" ? school.nameAr : school.nameFr, body: subject, url: `/${lang}/messages/${conversationId}`, tag: conversationId });
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Conversations
@@ -51,6 +65,7 @@ export async function startConversation(lang: string, _prev: FormState, formData
     if (fromSchool && ctx.school.alertMessage) {
       await alertGuardian(ctx.school, guardianId, "MESSAGE", (d, _lg, v) => t(d.alerts.message, v));
     }
+    if (!fromSchool) notifySchool(ctx.school, conv.id, data.subject, l);
     redirect(`/${l}/messages/${conv.id}`);
   });
 }
@@ -75,6 +90,7 @@ export async function replyMessage(lang: string, conversationId: string, _prev: 
     if (fromSchool && ctx.school.alertMessage) {
       await alertGuardian(ctx.school, conv.guardianId, "MESSAGE", (d, _lg, v) => t(d.alerts.message, v));
     }
+    if (!fromSchool) notifySchool(ctx.school, conv.id, conv.subject, isLocaleLang(lang));
     refresh();
   });
 }
@@ -154,6 +170,7 @@ export async function saveAlertSettings(lang: string, _prev: FormState, formData
         alertAbsence: formData.get("alertAbsence") === "on",
         alertReportCard: formData.get("alertReportCard") === "on",
         alertMessage: formData.get("alertMessage") === "on",
+        smsOnlyWithoutApp: formData.get("smsOnlyWithoutApp") === "on",
       },
     });
     refresh();

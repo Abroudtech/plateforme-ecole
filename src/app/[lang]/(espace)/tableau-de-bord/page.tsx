@@ -33,8 +33,11 @@ import { t } from "@/i18n/format";
 import { personName, pickName } from "@/i18n/localized";
 import { requireContext, type AppContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
-import { getParentChildren } from "@/lib/data/school";
+import { getParentChildren, pendingResetRequests } from "@/lib/data/school";
 import { getStudentAttendance } from "@/lib/data/attendance";
+import { PushToggle } from "@/components/push-toggle";
+import { db } from "@/lib/db";
+import { vapidKeys } from "@/lib/push";
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
   const { lang: rawLang } = await params;
@@ -44,7 +47,10 @@ export default async function DashboardPage({ params }: PageProps<"/[lang]/table
   const today = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Tunis" }).format(new Date());
   const hello = t(dict.dashboard.hello, { name: personName(ctx.user, lang) });
 
-  if (can(ctx.roles, "dashboard.admin")) return <AdminDashboard ctx={ctx} lang={lang} dict={dict} hello={hello} today={today} />;
+  const keys = await vapidKeys();
+  // Proposition d'activer les notifications (se cache une fois activées).
+  const push = <PushToggle publicKey={keys.publicKey} labels={dict.push} compact />;
+  if (can(ctx.roles, "dashboard.admin")) return <AdminDashboard ctx={ctx} lang={lang} dict={dict} hello={hello} today={today} push={push} />;
   return (
     <div className="flex flex-col gap-6">
       <Hero hello={hello} line={today} overlap={can(ctx.roles, "children.read") || can(ctx.roles, "teacher.space") || can(ctx.roles, "student.space")} />
@@ -56,14 +62,20 @@ export default async function DashboardPage({ params }: PageProps<"/[lang]/table
         </Link>
       )}
       {can(ctx.roles, "student.space") && <StudentDashboard ctx={ctx} lang={lang} dict={dict} />}
+      {!can(ctx.roles, "student.space") && push}
     </div>
   );
 }
 
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
-async function AdminDashboard({ ctx, lang, dict, hello, today }: Props & { hello: string; today: string }) {
-  const [o, setup] = await Promise.all([getDirectorOverview(ctx.school.id, ctx.user.id), getSetupSteps(ctx.school)]);
+async function AdminDashboard({ ctx, lang, dict, hello, today, push }: Props & { hello: string; today: string; push: React.ReactNode }) {
+  const [o, setup, resets] = await Promise.all([
+    getDirectorOverview(ctx.school.id, ctx.user.id),
+    getSetupSteps(ctx.school),
+    pendingResetRequests(ctx.school.id),
+  ]);
+  const notesToReview = await db.absenceNote.count({ where: { schoolId: ctx.school.id, status: "PENDING" } });
   const setupLeft = setup.filter((x) => !x.done).length;
   const d = dict.director;
   const termName = o.currentTerm ? (lang === "ar" ? o.currentTerm.nameAr : o.currentTerm.nameFr) : "";
@@ -85,6 +97,8 @@ async function AdminDashboard({ ctx, lang, dict, hello, today }: Props & { hello
       text: t(d.todoReports, { count: o.unpublished.length, term: termName }),
       detail: o.unpublished.map(className).join(", "),
     },
+    notesToReview > 0 && { href: `/${lang}/absences`, icon: CalendarCheck, tone: "gold", text: t(dict.absenceNotes.todo, { count: notesToReview }), detail: null },
+    resets.length > 0 && { href: `/${lang}/acces`, icon: UserRound, tone: "blue", text: t(dict.reset.todo, { count: resets.length }), detail: null },
     o.unread > 0 && { href: `/${lang}/messages`, icon: MessageSquare, tone: "green", text: t(d.todoMessages, { count: o.unread }), detail: null },
   ].filter(Boolean) as { href: string; icon: LucideIcon; tone: Tone; text: string; detail: string | null; amount?: number }[];
 
@@ -248,6 +262,8 @@ async function AdminDashboard({ ctx, lang, dict, hello, today }: Props & { hello
         </Panel>
       </div>
 
+      {push}
+
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-bold text-blue-900">{d.quick}</h2>
         <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
@@ -376,6 +392,9 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
                     )}
                     <Link href={`/${lang}/eleves/${child.id}/bulletin`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.reportCards.myBulletins}
+                    </Link>
+                    <Link href={`/${lang}/eleves/${child.id}/absences`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
+                      {dict.attendance.title}
                     </Link>
                     <Link href={`/${lang}/eleves/${child.id}/paiements`} className="inline-block rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gold-100">
                       {dict.payments.myPayments}

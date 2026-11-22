@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { parseForm, runAction } from "@/lib/actions";
 import { hashPassword } from "@/lib/auth/password";
 import { generateTempPassword } from "@/lib/auth/temp-password";
+import { provisionGuardianAccess } from "@/lib/auth/guardian-access";
 import { getCurrentYear } from "@/lib/data/school";
 import { nextStudentNumber } from "@/lib/data/students";
 import { FormError, optionalText, requiredText } from "@/lib/forms";
@@ -278,74 +279,12 @@ export async function unlinkGuardian(lang: string, studentId: string, guardianId
  */
 export async function createGuardianAccess(lang: string, guardianId: string, _prev: FormState, _fd: FormData) {
   return runAction(lang, "students.write", async (ctx) => {
-    const schoolId = ctx.school.id;
-    const guardian = await db.guardian.findFirst({ where: { id: guardianId, schoolId } });
+    const guardian = await db.guardian.findFirst({ where: { id: guardianId, schoolId: ctx.school.id } });
     if (!guardian) throw new FormError("notFound");
-    if (!guardian.phone && !guardian.email) throw new FormError("contactRequired");
-
-    // Compte déjà relié, ou compte existant avec le même téléphone / e-mail
-    // (par exemple un parent déjà inscrit dans une autre école).
-    const or = [guardian.phone ? { phone: guardian.phone } : null, guardian.email ? { email: guardian.email } : null].filter(
-      (x) => x !== null,
-    );
-    const user =
-      (guardian.userId && (await db.user.findUnique({ where: { id: guardian.userId }, include: { memberships: true } }))) ||
-      (await db.user.findFirst({ where: { OR: or }, include: { memberships: true } }));
-
-    // Par sécurité, on ne touche jamais au mot de passe d'un compte du personnel.
-    if (user && (user.isPlatformAdmin || user.memberships.some((m) => m.role !== "PARENT"))) {
-      throw new FormError("accountConflict");
-    }
-
-    // Compte déjà utilisé dans un autre établissement : on le relie à l'école
-    // sans changer son mot de passe (sinon une école pourrait prendre la main
-    // sur un compte qui ne lui appartient pas).
-    if (user && user.memberships.some((m) => m.isActive && m.schoolId !== schoolId)) {
-      await db.$transaction([
-        db.guardian.update({ where: { id: guardian.id }, data: { userId: user.id } }),
-        db.membership.upsert({
-          where: { userId_schoolId_role: { userId: user.id, schoolId, role: "PARENT" } },
-          update: { isActive: true },
-          create: { userId: user.id, schoolId, role: "PARENT" },
-        }),
-      ]);
-      return { ok: true, notice: "accountLinked" };
-    }
-
-    const password = generateTempPassword();
-    const passwordHash = await hashPassword(password);
-
-    await db.$transaction(async (tx) => {
-      const account = user
-        ? await tx.user.update({ where: { id: user.id }, data: { passwordHash, isActive: true } })
-        : await tx.user.create({
-            data: {
-              phone: guardian.phone,
-              email: guardian.email,
-              passwordHash,
-              firstName: guardian.firstName,
-              lastName: guardian.lastName,
-              firstNameAr: guardian.firstNameAr,
-              lastNameAr: guardian.lastNameAr,
-              preferredLocale: ctx.school.defaultLocale,
-            },
-          });
-      if (user) {
-        // Le mot de passe change : on déconnecte les anciennes sessions.
-        await tx.session.deleteMany({ where: { userId: account.id } });
-      }
-      await tx.guardian.update({ where: { id: guardian.id }, data: { userId: account.id } });
-      await tx.membership.upsert({
-        where: { userId_schoolId_role: { userId: account.id, schoolId, role: "PARENT" } },
-        update: { isActive: true },
-        create: { userId: account.id, schoolId, role: "PARENT" },
-      });
-    });
-
-    return {
-      ok: true,
-      credentials: { login: guardian.phone ? guardian.phone.replace(/^\+216/, "") : guardian.email!, password },
-    };
+    const r = await provisionGuardianAccess(ctx.school, guardian);
+    if (r.status === "created" || r.status === "reset") return { ok: true, credentials: { login: r.login, password: r.password } };
+    if (r.status === "linked") return { ok: true, notice: "accountLinked" };
+    throw new FormError(r.status === "noContact" ? "contactRequired" : "accountConflict");
   });
 }
 

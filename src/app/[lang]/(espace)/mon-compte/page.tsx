@@ -7,21 +7,24 @@ import { db } from "@/lib/db";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, Input, PageHeader, Select } from "@/components/ui";
 import { changePassword, setPreferredLocale } from "./actions";
+import { PushToggle } from "@/components/push-toggle";
+import { vapidKeys } from "@/lib/push";
 
 export default async function AccountPage({ params }: PageProps<"/[lang]/mon-compte">) {
   const lang = (await params).lang as Locale;
   const dict = await getDictionary(lang);
   const ctx = await requireContext(lang);
   const a = dict.account;
-  const user = await db.user.findUniqueOrThrow({ where: { id: ctx.user.id } });
+  const [user, keys] = await Promise.all([db.user.findUniqueOrThrow({ where: { id: ctx.user.id } }), vapidKeys()]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={a.title} subtitle={personName(user, lang)} back={{ href: `/${lang}/tableau-de-bord`, label: dict.nav.dashboard }} />
       <Card>
         <p className="text-sm text-slate-500">{a.identity}</p>
-        <p className="font-semibold"><bdi dir="ltr">{user.email ?? user.phone?.replace(/^\+216/, "")}</bdi></p>
+        <p className="font-semibold"><bdi dir="ltr">{user.email ?? user.phone?.replace(/^\+216/, "") ?? user.username}</bdi></p>
       </Card>
+      <PushToggle publicKey={keys.publicKey} labels={dict.push} />
       <Card title={a.password}>
         <ActionForm action={changePassword.bind(null, lang)} labels={formLabels(dict, a.password)} resetOnSuccess>
           <Field label={a.current}>
