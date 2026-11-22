@@ -52,12 +52,13 @@ export async function login(lang: string, _prev: LoginState, formData: FormData)
     return { error: "invalid" };
   }
   await db.loginAttempt.deleteMany({ where: { identifier: key } });
-  if (user.memberships.length === 0) return { error: "noAccess" };
+  if (user.memberships.length === 0 && !user.isPlatformAdmin) return { error: "noAccess" };
 
-  await createSession(user.id, user.memberships[0].schoolId, (await headers()).get("user-agent"));
+  await createSession(user.id, user.memberships[0]?.schoolId ?? null, (await headers()).get("user-agent"));
   await db.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
 
   // La langue préférée du compte prend le relais si l'adresse n'en a pas.
   const target = isLocale(lang) ? lang : user.preferredLocale;
-  redirect(`/${target}/tableau-de-bord`);
+  // Équipe de la plateforme sans école : directement à l'espace plateforme.
+  redirect(user.memberships.length === 0 ? `/${target}/plateforme` : `/${target}/tableau-de-bord`);
 }

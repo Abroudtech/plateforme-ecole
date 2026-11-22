@@ -10,6 +10,7 @@ import { ActionForm } from "@/components/action-form";
 import { Card, Field, Input, PageHeader } from "@/components/ui";
 import { addAdmin, removeAdmin, resetAnnualRule, saveAnnualRule, saveGradesVisibility, saveSchoolInfo, saveTeacherMessaging } from "./actions";
 import { db } from "@/lib/db";
+import { todayISO } from "@/lib/dates";
 import { personName } from "@/i18n/localized";
 
 export default async function SettingsPage({ params }: PageProps<"/[lang]/parametres">) {
@@ -123,6 +124,14 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
             </a>
           ))}
         </div>
+        <form action={`/${lang}/exporter/heures`} method="get" className="mt-4 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-4">
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            {dict.exports.sheets.heures}
+            <Input type="month" name="mois" defaultValue={todayISO().slice(0, 7)} required className="w-44" />
+          </label>
+          <button className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">{dict.exports.download}</button>
+          <p className="w-full text-xs text-slate-500">{dict.exports.hoursHint}</p>
+        </form>
       </Card>
 
       <Card title={st.team}>

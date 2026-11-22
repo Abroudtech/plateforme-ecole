@@ -24,7 +24,7 @@ import {
 import { StudentDashboard } from "./student-dashboard";
 import { TeacherDashboard } from "./teacher-dashboard";
 import { FollowupFallback, FollowupPanel } from "./followup-panel";
-import { Hero, IconBadge, Initials, Panel, TONES, type Tone } from "./dashboard-ui";
+import { Hero, IconBadge, Initials, Notice, Panel, TONES, type Tone } from "./dashboard-ui";
 import { getDirectorOverview, getSetupSteps } from "@/lib/data/director";
 import { Money } from "@/components/money";
 import { getCurrentYear } from "@/lib/data/school";
@@ -39,6 +39,7 @@ import { getParentChildren, pendingResetRequests } from "@/lib/data/school";
 import { getStudentAttendance } from "@/lib/data/attendance";
 import { PushToggle } from "@/components/push-toggle";
 import { db } from "@/lib/db";
+import { todayISO, toISODate } from "@/lib/dates";
 import { vapidKeys } from "@/lib/push";
 
 export default async function DashboardPage({ params }: PageProps<"/[lang]/tableau-de-bord">) {
@@ -263,6 +264,8 @@ async function AdminDashboard({ ctx, lang, dict, hello, today, push }: Props & {
           )}
         </Panel>
       </div>
+
+      {ctx.school.paidUntil && toISODate(ctx.school.paidUntil) < todayISO() && <Notice text={dict.platform.subscriptionLate} />}
 
       <Suspense fallback={<FollowupFallback dict={dict} />}>
         <FollowupPanel schoolId={ctx.school.id} classIds={null} money={can(ctx.roles, "payments.read")} lang={lang} dict={dict} />

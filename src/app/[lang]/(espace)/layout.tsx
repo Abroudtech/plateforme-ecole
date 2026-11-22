@@ -32,6 +32,11 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-2">
+            {ctx.user.isPlatformAdmin && (
+              <Link href={`/${lang}/plateforme`} className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/20">
+                {dict.platform.title}
+              </Link>
+            )}
             {can(ctx.roles, "students.read") && (
               <Link
                 href={`/${lang}/recherche`}
