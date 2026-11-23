@@ -1217,6 +1217,10 @@
     "active": "École active",
     "activeHint": "Décochez pour suspendre l'accès de toute l'école (les données sont conservées).",
     "admins": "Comptes de la direction",
-    "subscriptionLate": "L'abonnement à la plateforme est arrivé à échéance. Merci de contacter l'équipe de la plateforme pour le renouveler."
+    "subscriptionLate": "L'abonnement à la plateforme est arrivé à échéance. Merci de contacter l'équipe de la plateforme pour le renouveler.",
+    "demoTitle": "École de démonstration (testeurs Google et Apple)",
+    "demoIntro": "Google et Apple testent l'application avec un compte avant de la publier. Ce bouton prépare une école fictive complète (élèves, notes, absences, paiements, messages) avec un compte direction et un compte parent. Le relancer change le mot de passe.",
+    "demoButton": "Préparer l'école de démonstration",
+    "demoDone": "École de démonstration prête. À copier dans la Play Console (Accès à l'application) et dans App Store Connect (Informations pour l'examen) :"
   }
 }
