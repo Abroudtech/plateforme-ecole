@@ -11,5 +11,14 @@
     "backgroundColor": "#14213d",
     "appendUserAgent": "PlateformeEcoleApp/ios",
     "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    }
   }
 }

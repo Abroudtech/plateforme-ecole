@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { getOptionalContext } from "@/lib/auth/context";
 import { db } from "@/lib/db";
+import { APNS_PREFIX, isApnsToken } from "@/lib/apns";
 
 const subSchema = z.object({
   endpoint: z.url().max(1000),
@@ -28,5 +29,25 @@ export async function unsubscribePush(endpoint: string): Promise<{ ok: boolean }
   const ctx = await getOptionalContext();
   if (!ctx) return { ok: false };
   await db.pushSubscription.deleteMany({ where: { endpoint: String(endpoint).slice(0, 1000), userId: ctx.user.id } });
+  return { ok: true };
+}
+
+/** Application iPhone : enregistre le jeton de notification donné par Apple. */
+export async function subscribeNativePush(token: unknown): Promise<{ ok: boolean }> {
+  const ctx = await getOptionalContext();
+  if (!ctx || typeof token !== "string" || !isApnsToken(token)) return { ok: false };
+  const endpoint = APNS_PREFIX + token.toLowerCase();
+  await db.pushSubscription.upsert({
+    where: { endpoint },
+    update: { userId: ctx.user.id },
+    create: { userId: ctx.user.id, endpoint, p256dh: "", auth: "" },
+  });
+  return { ok: true };
+}
+
+export async function unsubscribeNativePush(token: unknown): Promise<{ ok: boolean }> {
+  const ctx = await getOptionalContext();
+  if (!ctx || typeof token !== "string" || !isApnsToken(token)) return { ok: false };
+  await db.pushSubscription.deleteMany({ where: { endpoint: APNS_PREFIX + token.toLowerCase(), userId: ctx.user.id } });
   return { ok: true };
 }
