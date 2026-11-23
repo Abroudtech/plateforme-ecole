@@ -9,7 +9,7 @@ import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/payments";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, Input, PageHeader } from "@/components/ui";
-import { createSchool } from "./actions";
+import { createSchool, prepareDemoSchool } from "./actions";
 
 export default async function PlatformPage({ params }: PageProps<"/[lang]/plateforme">) {
   const lang = (await params).lang as Locale;
@@ -61,6 +61,14 @@ export default async function PlatformPage({ params }: PageProps<"/[lang]/platef
             })}
           </ul>
         )}
+      </Card>
+
+      <Card title={p.demoTitle}>
+        <p className="mb-3 text-sm text-slate-600">{p.demoIntro}</p>
+        <ActionForm
+          action={prepareDemoSchool.bind(null, lang)}
+          labels={{ ...formLabels(dict, p.demoButton), credentials: { intro: p.demoDone, login: dict.account.identity, password: dict.guardians.tempPassword } }}
+        />
       </Card>
 
       <Card title={p.newSchool}>
