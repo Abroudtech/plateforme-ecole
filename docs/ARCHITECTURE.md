@@ -355,3 +355,21 @@ des deux langues est vide, l'autre est affichée.
   le parent voit « Fait » dans le cahier de textes de son enfant.
 - **Atelier** : le texte d'un document se modifie, et un examen ou une série d'exercices
   s'imprime en version élève (sans corrigé) ou corrigé seul (`src/lib/ai/answer-key.ts`, testé).
+
+## 20. Programme officiel du primaire et fiches de cours
+
+- **Référentiel** (`src/lib/curriculum/`, testé) : pour chaque année de la 1re à la 6e, les
+  matières (arabe, mathématiques, français, anglais, éveil scientifique, éducation islamique,
+  histoire-géographie, éducation civique), leur compétence de fin d'année, leurs domaines et
+  leurs leçons avec le trimestre, en français et en arabe. Ce sont des repères établis d'après
+  les programmes officiels du ministère de l'Éducation ; l'ordre exact suit le manuel de la classe.
+- **Page « Programme officiel »** (`/atelier/programme`) : par niveau et par trimestre. Chaque
+  leçon ouvre l'atelier déjà rempli (fiche, exercices ou examen).
+- **Atelier** : une liste « Leçon du programme » remplit le thème et le trimestre. La leçon choisie
+  (`lessonId`) ajoute à la demande faite à l'IA le domaine, la compétence et la leçon précédente
+  (prérequis probable), sans jamais reprendre le texte d'un manuel.
+- **Droits** : les programmes officiels sont des textes administratifs, non protégés par le droit
+  d'auteur (loi n° 94-36, art. 1). Les manuels du CNP sont protégés : la plateforme n'en publie pas
+  de copie et renvoie vers les sites officiels (CNP, ministère, Edunet). L'exception pour
+  l'enseignement (art. 10) ne couvre que de courts extraits, sans but commercial ; mettre les
+  manuels complets en ligne demande l'accord écrit du CNP.

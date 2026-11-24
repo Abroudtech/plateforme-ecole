@@ -842,7 +842,11 @@
     "editText": "Modifier le texte",
     "editHint": "Le texte utilise des repères simples : # pour un titre, ## pour un sous-titre, - pour une liste, **gras**.",
     "saveText": "Enregistrer le texte",
-    "printThis": "Imprimer cette version"
+    "printThis": "Imprimer cette version",
+    "programmeLink": "Programme officiel",
+    "lesson": "Leçon du programme",
+    "lessonNone": "— Autre thème (à écrire ci-dessous) —",
+    "lessonHint": "remplit le thème et le trimestre"
   },
   "studentSpace": {
     "access": "Espace élève",
@@ -1546,5 +1550,21 @@
     "student": "Élève",
     "answer": "Réponse",
     "by": "Répondu par"
+  },
+  "programme": {
+    "title": "Programme officiel du primaire",
+    "subtitle": "Les leçons de la 1re à la 6e année, par matière et par trimestre. Choisissez une leçon : la fiche, les exercices ou l'examen se préparent en un clic.",
+    "allTerms": "Toute l'année",
+    "term": "Trimestre",
+    "competence": "Compétence de fin d'année",
+    "prepareLesson": "Préparer la fiche",
+    "sourcesTitle": "Sources officielles et manuels",
+    "sourcesText": "Ce référentiel reprend les notions des programmes officiels du ministère de l'Éducation. L'ordre exact des leçons suit le manuel de la classe : gardez-le comme référence.",
+    "sources": {
+      "cnp": "Centre national pédagogique (CNP) : manuels scolaires officiels",
+      "ministry": "Ministère de l'Éducation : programmes officiels",
+      "edunet": "Edunet : ressources éducatives"
+    },
+    "manualsNote": "Les manuels du CNP sont protégés par le droit d'auteur : la plateforme n'en publie pas de copie. L'IA rédige des fiches et des exercices originaux, à partir des notions du programme."
   }
 }

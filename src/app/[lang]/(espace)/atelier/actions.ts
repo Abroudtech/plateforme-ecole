@@ -9,6 +9,7 @@ import { aiQuotaReached } from "@/lib/ai/quota";
 import { subjectLanguage } from "@/lib/ai/programme-primaire";
 import { extractTitle, resourceRequestSchema } from "@/lib/ai/prompt";
 import { FormError } from "@/lib/forms";
+import { findLesson, lessonContext, programmeSubjectFor } from "@/lib/curriculum";
 
 export async function createResource(lang: string, _prev: FormState, formData: FormData) {
   let id: string | null = null;
@@ -24,6 +25,10 @@ export async function createResource(lang: string, _prev: FormState, formData: F
 
     if (await aiQuotaReached(schoolId)) throw new FormError("aiQuota");
 
+    // Leçon du référentiel : seulement si elle correspond bien au niveau et à la matière choisis.
+    const lesson = req.lessonId ? findLesson(req.lessonId) : null;
+    const programme = lesson && lesson.level === level.code && lesson.subject === programmeSubjectFor(subject) ? lessonContext(lesson) : undefined;
+
     const language = subjectLanguage(subject);
     const result = await generateResource({
       ...req,
@@ -31,6 +36,7 @@ export async function createResource(lang: string, _prev: FormState, formData: F
       subject,
       language,
       schoolName: ctx.school.nameFr,
+      programme,
     });
     if (!result.ok) {
       throw new FormError({ refused: "aiRefused", busy: "aiBusy", unavailable: "aiUnavailable", empty: "aiUnavailable" }[result.reason]);
