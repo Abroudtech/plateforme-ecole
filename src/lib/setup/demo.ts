@@ -343,6 +343,27 @@ export async function seedDemoSchool(db: PrismaClient, passwordHash: string) {
     });
   }
 
+  // Un défi de calcul en 6A, prêt à être lancé en direct.
+  if ((await db.challenge.count({ where: { schoolId } })) === 0) {
+    const math = await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code: "MATH" } } });
+    await db.challenge.create({
+      data: {
+        schoolId,
+        classGroupId: classes["6A"],
+        authorId: teacherUser.id,
+        subjectId: math.id,
+        title: "Les fractions en 5 questions",
+        questions: [
+          { q: "Quelle fraction est égale à 1/2 ?", choices: ["2/4", "1/3", "3/4", "2/3"], answer: 0 },
+          { q: "3/4 + 1/4 = ?", choices: ["4/8", "1", "3/16", "2/4"], answer: 1 },
+          { q: "Quelle est la plus grande fraction ?", choices: ["1/5", "1/3", "1/2", "1/4"], answer: 2 },
+          { q: "La moitié de 3/5, c'est…", choices: ["3/10", "6/5", "3/2", "1/5"], answer: 0 },
+          { q: "Combien de quarts dans 2 unités ?", choices: ["4", "6", "8", "2"], answer: 2 },
+        ],
+      },
+    });
+  }
+
   // Paiements : frais de l'année, quelques encaissements (Adam a un impayé).
   if ((await db.fee.count({ where: { schoolId, academicYearId: year.id } })) === 0) {
     const d = (iso: string) => new Date(`${iso}T00:00:00Z`);

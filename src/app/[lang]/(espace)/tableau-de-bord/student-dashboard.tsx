@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { Leaderboard } from "../espace-classe/leaderboard";
 import { IconBadge, Notice } from "./dashboard-ui";
 import { UpcomingPanel } from "./upcoming-panel";
+import { LiveBanner } from "@/components/live-banner";
 
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
@@ -48,6 +49,8 @@ export async function StudentDashboard({ ctx, lang, dict }: Props) {
           </Link>
         ))}
       </section>
+
+      <LiveBanner schoolId={ctx.school.id} classId={classId} lang={lang} dict={dict} />
 
       <section className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/80">
         <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-gold-500 text-2xl font-bold text-blue-950">

@@ -8,6 +8,7 @@ import { POINTS_PER_CHALLENGE_ANSWER } from "@/lib/challenges";
 import { studentOf } from "@/lib/data/class-space";
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/ui";
+import { LiveBanner } from "@/components/live-banner";
 
 /** Défis de la classe de l'élève : à faire, puis terminés avec le score. */
 export default async function ChallengesPage({ params }: PageProps<"/[lang]/defis">) {
@@ -31,6 +32,7 @@ export default async function ChallengesPage({ params }: PageProps<"/[lang]/defi
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title={dict.nav.challenges} subtitle={cs.challengesSubtitle} />
+      {student?.classGroup && <LiveBanner schoolId={ctx.school.id} classId={student.classGroup.id} lang={lang} dict={dict} />}
       <section className="flex flex-col gap-2">
         <h2 className="font-bold text-blue-900">{cs.todo}</h2>
         {todo.length === 0 ? (
