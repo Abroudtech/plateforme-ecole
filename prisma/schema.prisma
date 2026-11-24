@@ -422,6 +422,8 @@ model Student {
   challengeAttempts ChallengeAttempt[]
   gameScores        GameScore[]
   absenceNotes      AbsenceNote[]
+  livePlayers       LivePlayer[]
+  liveAnswers       LiveAnswer[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -1137,6 +1139,7 @@ model Challenge {
   author     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   subject    Subject?           @relation(fields: [subjectId], references: [id], onDelete: SetNull)
   attempts   ChallengeAttempt[]
+  liveQuizs  LiveQuiz[]
 
   @@index([classGroupId, createdAt])
 }
@@ -1400,4 +1403,58 @@ model SchoolEvent {
   createdBy  User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([schoolId, date])
+}
+
+/// Défi en direct : l'enseignant projette les questions une à une, les élèves
+/// répondent sur leur téléphone ; les plus rapides gagnent plus de points.
+model LiveQuiz {
+  id                String    @id @default(cuid())
+  schoolId          String
+  challengeId       String
+  classGroupId      String
+  hostId            String
+  /// LOBBY (on attend les élèves), QUESTION, REVEAL (bonne réponse), DONE (podium).
+  phase             String    @default("LOBBY")
+  /// Question en cours (à partir de 0).
+  current           Int       @default(0)
+  questionStartedAt DateTime?
+  /// Temps pour répondre à chaque question, en secondes.
+  seconds           Int       @default(20)
+  createdAt         DateTime  @default(now())
+  endedAt           DateTime?
+
+  challenge Challenge    @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  players   LivePlayer[]
+  answers   LiveAnswer[]
+
+  @@index([classGroupId, phase])
+}
+
+model LivePlayer {
+  id        String   @id @default(cuid())
+  liveId    String
+  studentId String
+  joinedAt  DateTime @default(now())
+
+  live    LiveQuiz @relation(fields: [liveId], references: [id], onDelete: Cascade)
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([liveId, studentId])
+}
+
+model LiveAnswer {
+  id        String   @id @default(cuid())
+  liveId    String
+  studentId String
+  question  Int
+  choice    Int
+  /// Temps mis pour répondre, en millisecondes.
+  ms        Int
+  points    Int
+  createdAt DateTime @default(now())
+
+  live    LiveQuiz @relation(fields: [liveId], references: [id], onDelete: Cascade)
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([liveId, studentId, question])
 }

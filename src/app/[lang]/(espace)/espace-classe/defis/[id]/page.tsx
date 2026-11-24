@@ -8,6 +8,7 @@ import { hasClassAccess } from "@/lib/auth/scope";
 import { challengeQuestionsSchema } from "@/lib/challenges";
 import { db } from "@/lib/db";
 import { Card, PageHeader } from "@/components/ui";
+import { LiveLaunch } from "@/components/live-launch";
 
 /** Résultats d'un défi pour l'enseignant : qui a répondu, et les questions difficiles. */
 export default async function ChallengeResultsPage({ params }: PageProps<"/[lang]/espace-classe/defis/[id]">) {
@@ -40,6 +41,7 @@ export default async function ChallengeResultsPage({ params }: PageProps<"/[lang
         subtitle={`${className(c.classGroup, lang)} · ${t(cs.answered, { count: c.attempts.length, total: enrolled.length })}`}
         back={{ href: `/${lang}/espace-classe?classe=${c.classGroupId}&onglet=defis`, label: dict.nav.classSpace }}
       />
+      <LiveLaunch lang={lang} challengeId={c.id} dict={dict} />
       <div className="grid gap-4 md:grid-cols-2">
         <Card title={cs.results}>
           <ul className="flex flex-col gap-1.5">

@@ -329,3 +329,17 @@ des deux langues est vide, l'autre est affichée.
   pour l'école, un niveau ou une classe), semaine par semaine sur 8 semaines.
   Seule la direction ajoute des dates. Les accueils affichent « À venir ».
 - Calculs sans base de données dans `src/lib/calendar.ts` (testés).
+
+## 18. Défi en direct
+
+- Depuis un défi (Espace classe > Défis > « Lancer en direct »), l'enseignant
+  ouvre un **écran à projeter** (`/direct/<id>`). Les élèves de la classe reçoivent
+  une notification et voient un bandeau « Rejoindre » sur leur accueil.
+- Étapes (`LiveQuiz.phase`) : attente des élèves → question (compte à rebours) →
+  bonne réponse et répartition des choix → question suivante → podium. La réponse
+  s'affiche toute seule quand le temps est écoulé ou que tout le monde a répondu.
+- Points : 500 par bonne réponse + jusqu'à 500 selon la rapidité (`src/lib/live.ts`, testé).
+  La bonne réponse n'est envoyée aux téléphones qu'après la question.
+- L'écran et les téléphones lisent l'état chaque seconde (`/api/direct/<id>`).
+- À la fin, chaque participant reçoit une tentative du défi : ses bonnes réponses
+  comptent dans le classement de la classe (sans doublon s'il l'avait déjà fait).

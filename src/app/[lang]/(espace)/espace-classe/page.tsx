@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, ChevronRight, Trophy } from "lucide-react";
+import { BarChart3, ChevronRight, Trophy, Zap } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
@@ -142,6 +142,12 @@ export default async function ClassSpacePage({ params, searchParams }: PageProps
                         </span>
                       </span>
                       <ChevronRight size={16} className="ms-auto shrink-0 text-slate-400 rtl:rotate-180" aria-hidden />
+                    </Link>
+                    <Link
+                      href={`/${lang}/espace-classe/defis/${c.id}#direct`}
+                      className="flex shrink-0 items-center gap-1 rounded-lg bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-gold-300 hover:bg-blue-900"
+                    >
+                      <Zap size={13} aria-hidden /> {dict.live.launch}
                     </Link>
                     <ActionForm
                       action={deleteChallenge.bind(null, lang, c.id)}
