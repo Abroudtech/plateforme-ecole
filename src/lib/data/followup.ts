@@ -56,14 +56,22 @@ export async function studentsToFollow(schoolId: string, classIds: string[] | nu
   });
 
   // Notes : trimestre en cours, comparé au précédent.
-  for (const c of classes) {
-    const terms = await getTerms(schoolId, c.academicYearId, c.gradeLevel.cycle);
-    const term = pickTerm(terms);
-    if (!term) continue;
-    const report = await computeClassReport(schoolId, c.id, term.id);
-    if (!report || report.assessmentCount < FOLLOWUP.minAssessments) continue;
-    const idx = terms.findIndex((t) => t.id === term.id);
-    const prev = idx > 0 ? await computeClassReport(schoolId, c.id, terms[idx - 1].id) : null;
+  // Les classes sont calculées en parallèle (la page s'affiche plus vite).
+  const reports = await Promise.all(
+    classes.map(async (c) => {
+      const terms = await getTerms(schoolId, c.academicYearId, c.gradeLevel.cycle);
+      const term = pickTerm(terms);
+      if (!term) return null;
+      const report = await computeClassReport(schoolId, c.id, term.id);
+      if (!report || report.assessmentCount < FOLLOWUP.minAssessments) return null;
+      const idx = terms.findIndex((t) => t.id === term.id);
+      const prev = idx > 0 ? await computeClassReport(schoolId, c.id, terms[idx - 1].id) : null;
+      return { c, report, prev };
+    }),
+  );
+  for (const entry of reports) {
+    if (!entry) continue;
+    const { c, report, prev } = entry;
     for (const s of report.students) {
       const g = report.generals.get(s.id);
       if (g == null) continue;

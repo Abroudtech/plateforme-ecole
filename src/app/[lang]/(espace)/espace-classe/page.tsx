@@ -130,8 +130,8 @@ export default async function ClassSpacePage({ params, searchParams }: PageProps
               {challenges.map((c) => {
                 const avg = c.attempts.length ? c.attempts.reduce((s, a) => s + a.score / a.maxScore, 0) / c.attempts.length : null;
                 return (
-                  <li key={c.id} className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5">
-                    <Link href={`/${lang}/espace-classe/defis/${c.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                  <li key={c.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5">
+                    <Link href={`/${lang}/espace-classe/defis/${c.id}`} className="flex min-w-[min(100%,14rem)] flex-1 items-center gap-3">
                       <Trophy size={18} className="shrink-0 text-gold-600" aria-hidden />
                       <span className="min-w-0">
                         <span className="block truncate font-semibold" dir="auto">{c.title}</span>

@@ -15,7 +15,7 @@ function isActive(pathname: string, href: string) {
 export function TopNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   return (
-    <nav className="mx-auto hidden max-w-6xl gap-1 overflow-x-auto px-4 pb-3 text-sm font-medium md:flex">
+    <nav className="mx-auto hidden max-w-6xl flex-wrap gap-1 px-4 pb-3 text-sm font-medium md:flex">
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = NAV_ICONS[item.icon];

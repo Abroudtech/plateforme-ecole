@@ -9,6 +9,8 @@ import { Card, Field, Input, PageHeader, Select } from "@/components/ui";
 import { changePassword, setPreferredLocale } from "./actions";
 import { PushToggle } from "@/components/push-toggle";
 import { vapidKeys } from "@/lib/push";
+import { LogOut } from "lucide-react";
+import { logout } from "@/app/actions/session";
 
 export default async function AccountPage({ params }: PageProps<"/[lang]/mon-compte">) {
   const lang = (await params).lang as Locale;
@@ -48,6 +50,12 @@ export default async function AccountPage({ params }: PageProps<"/[lang]/mon-com
           </Select>
         </ActionForm>
       </Card>
+      {/* Se déconnecter aussi depuis « Mon compte », où on le cherche naturellement sur téléphone. */}
+      <form action={logout.bind(null, lang)}>
+        <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white p-3.5 text-sm font-semibold text-red-700 shadow-card ring-1 ring-slate-200 hover:bg-red-50">
+          <LogOut size={18} className="rtl:rotate-180" aria-hidden /> {dict.nav.logout}
+        </button>
+      </form>
     </div>
   );
 }

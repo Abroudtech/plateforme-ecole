@@ -50,18 +50,24 @@ export async function getDirectorOverview(schoolId: string, userId: string) {
   const results = [];
   let currentTerm: { id: string; nameFr: string; nameAr: string } | null = null;
   const unpublished: typeof activeClasses = [];
-  for (const c of activeClasses) {
-    const terms = await getTerms(schoolId, c.academicYearId, c.gradeLevel.cycle);
-    const term = pickTerm(terms);
+  // Les classes sont calculées en parallèle (l'accueil s'affiche plus vite).
+  const perClass = await Promise.all(
+    activeClasses.map(async (c) => {
+      const term = pickTerm(await getTerms(schoolId, c.academicYearId, c.gradeLevel.cycle));
+      return { c, term, report: term ? await computeClassReport(schoolId, c.id, term.id) : null };
+    }),
+  );
+  for (const { c, term, report } of perClass) {
     if (!term) continue;
     currentTerm ??= term;
-    const report = await computeClassReport(schoolId, c.id, term.id);
     if (!report) continue;
     if (!report.publication) unpublished.push(c);
     if (report.assessmentCount === 0 || !report.classStats) continue;
     const below = [...report.generals.values()].filter((g) => g != null && round2(g) < 10).length;
     results.push({ cls: c, term, mean: report.classStats.mean, below, count: report.students.length });
   }
+  // École sans classe encore : le trimestre en cours vient du calendrier de l'année.
+  if (!currentTerm && year) currentTerm = pickTerm(await db.term.findMany({ where: { schoolId, academicYearId: year.id, cycle: null }, orderBy: { order: "asc" } }));
 
   // Élèves les plus absents sur 30 jours.
   const byStudent = new Map<string, { student: (typeof records30)[number]["student"]; cls: (typeof records30)[number]["classGroup"]; total: number; unjustified: number }>();

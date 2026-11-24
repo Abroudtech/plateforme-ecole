@@ -37,6 +37,8 @@ export default async function ClassesPage({ params }: PageProps<"/[lang]/classes
 
       {CYCLES.filter((c) => ctx.school.cycles.includes(c)).map((cycle) => {
         const list = classes.filter((c) => c.gradeLevel.cycle === cycle);
+        // Un enseignant ne voit que les cycles où il a des classes.
+        if (list.length === 0 && !canWrite) return null;
         return (
           <Card key={cycle} title={dict.cycles[cycle]}>
             {list.length === 0 ? (

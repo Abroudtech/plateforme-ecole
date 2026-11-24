@@ -1,9 +1,28 @@
-import Link from "next/link";
+"use client";
 
-/** Rangée d'onglets (liens), défilable sur téléphone. */
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+
+/**
+ * Rangée d'onglets (liens), défilable sur téléphone.
+ * L'onglet ouvert est ramené à l'écran : sur un petit écran, on voit toujours
+ * où l'on se trouve, même si l'onglet est loin dans la rangée.
+ */
 export function Tabs({ items, active }: { items: { href: string; label: string; key: string }[]; active: string }) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = ref.current;
+    const current = nav?.querySelector<HTMLElement>("[aria-current=page]");
+    if (!nav || !current || nav.scrollWidth <= nav.clientWidth) return;
+    const navBox = nav.getBoundingClientRect();
+    const box = current.getBoundingClientRect();
+    if (box.left < navBox.left || box.right > navBox.right) {
+      nav.scrollBy({ left: box.left - navBox.left - (navBox.width - box.width) / 2 });
+    }
+  }, [active]);
+
   return (
-    <nav className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 text-sm font-medium">
+    <nav ref={ref} className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 text-sm font-medium">
       {items.map((item) => (
         <Link
           key={item.key}
