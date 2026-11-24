@@ -17,6 +17,7 @@ Web d'abord, pensée pour le téléphone, en **français et en arabe**.
 | 7. Paiements | Frais par niveau, services optionnels, réductions, encaissements et reçus bilingues, suivi des impayés, relances WhatsApp et lettre, consultation parents | ✅ |
 | 8. Messagerie | Conversations école ↔ parents, annonces (école, niveau, classe), alertes SMS automatiques (absence, bulletin, message) | ✅ |
 | V2. Espace enseignant | Compte enseignant limité à ses classes (appel, notes), tableau de bord, atelier IA : fiches de leçon, exercices et examens conformes au primaire tunisien | ✅ |
+| Vitrine | Page publique de chaque école (présentation, atouts, cycles, photos, inscriptions, contact, demandes des familles), réglée par la direction en français et en arabe, avec son propre nom de domaine | ✅ |
 | V3. Espace élève | Compte élève, mur de classe supervisé par l'enseignant, défis (quiz, proposés par l'IA), jeux éducatifs, classement de la classe | ✅ |
 
 Également disponibles : moyenne annuelle et bulletin annuel, tableau de bord

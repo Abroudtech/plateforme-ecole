@@ -295,3 +295,21 @@ lignes correctes ; les lignes en erreur sont listées pour être corrigées.
 - **Classement** : 2 points par bonne réponse à un défi, 1 point par bonne
   réponse dans un jeu ; classement de la semaine et de l'année, par classe.
   Les élèves ne voient des autres que le prénom et l'initiale du nom.
+
+## Page vitrine de l'école
+
+Chaque école a une page publique sur Internet, réglée par la direction dans
+**Site de l'école** (menu de l'administration) : couleur, logo, grande photo,
+présentation, atouts, cycles, galerie de photos, inscriptions, horaires,
+WhatsApp et réseaux. Chaque texte existe en français et en arabe ; si l'une
+des deux langues est vide, l'autre est affichée.
+
+- Tant que la page n'est pas **publiée**, seule la direction la voit (aperçu).
+- Adresse sur la plateforme : `/fr/ecole/<identifiant-de-l-ecole>`.
+- **Adresse propre** (ex. `laplume-dor.tn`) : réglée par l'équipe plateforme
+  (Espace plateforme > l'école). Quand quelqu'un arrive sur ce domaine, la page
+  d'accueil affiche directement la vitrine (`src/app/[lang]/page.tsx`).
+- Les photos sont réduites dans le navigateur avant l'envoi, puis gardées dans
+  la base (`SitePhoto`) et servies par `/api/vitrine/photo/<id>`.
+- Le formulaire « Demande de renseignements » enregistre la demande
+  (`SiteInquiry`) et prévient la direction par notification.

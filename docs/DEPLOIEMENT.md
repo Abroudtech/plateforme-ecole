@@ -45,6 +45,10 @@ démarrage, et chaque fusion sur `main` met le site à jour tout seul.
    ADMIN_EMAIL="direction@ecole.tn" ADMIN_PRENOM="Prénom" ADMIN_NOM="Nom" \
    npm run ecole:creer
    ```
+   **Page vitrine sur le domaine principal** (ex. `laplume-dor.tn`) : ajouter
+   aussi ce domaine (et `www.`) dans **Custom Domains** du service `ecole`,
+   faire pointer le DNS comme indiqué par Render, puis saisir le domaine dans
+   **Espace plateforme > l'école > Page vitrine : adresse propre**.
 5. Sauvegardes : Render garde de quoi revenir à n'importe quel moment des
    3 derniers jours (base `ecole-base` > **Recovery**). Pour garder une copie
    chez soi, utiliser **Export** de temps en temps.

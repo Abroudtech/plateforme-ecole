@@ -7,7 +7,8 @@ import { toISODate } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, Input, PageHeader, Textarea } from "@/components/ui";
-import { saveSubscription } from "../actions";
+import { saveSiteDomain, saveSubscription } from "../actions";
+import { t } from "@/i18n/format";
 
 export default async function PlatformSchoolPage({ params }: PageProps<"/[lang]/plateforme/[id]">) {
   const { lang: rawLang, id } = await params;
@@ -24,6 +25,7 @@ export default async function PlatformSchoolPage({ params }: PageProps<"/[lang]/
     db.membership.findMany({ where: { schoolId: id, role: "ADMIN", isActive: true }, include: { user: true } }),
     db.user.aggregate({ where: { memberships: { some: { schoolId: id } } }, _max: { lastLoginAt: true } }),
   ]);
+  const site = await db.schoolSite.findUnique({ where: { schoolId: id }, select: { domain: true } });
   const fmt = (d: Date | null) =>
     d ? new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Tunis" }).format(d) : "—";
 
@@ -60,6 +62,15 @@ export default async function PlatformSchoolPage({ params }: PageProps<"/[lang]/
               <span className="text-slate-500">{p.activeHint}</span>
             </span>
           </label>
+        </ActionForm>
+      </Card>
+
+      <Card title={p.siteDomain}>
+        <ActionForm action={saveSiteDomain.bind(null, lang, school.id)} labels={formLabels(dict, dict.common.save)}>
+          <Field label={p.siteDomain} hint={dict.common.optional}>
+            <Input name="domain" dir="ltr" maxLength={253} defaultValue={site?.domain ?? ""} placeholder="monecole.tn" />
+          </Field>
+          <p className="text-sm text-slate-500">{p.siteDomainHint} {t(p.siteDomainNone, { slug: school.slug })}</p>
         </ActionForm>
       </Card>
 

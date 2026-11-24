@@ -39,6 +39,8 @@ export const PERMISSIONS = {
   "alerts.manage": ["ADMIN"],
   // Paramètres de l'école (nom, adresse, calcul de la moyenne annuelle)
   "settings.write": ["ADMIN"],
+  // Page vitrine publique de l'école (textes, photos, demandes des familles)
+  "site.write": ["ADMIN"],
   // Import en masse depuis Excel (classes, enseignants, élèves, parents...)
   "import.write": ["ADMIN"],
   // Espace enseignant (V2) et atelier pédagogique avec l'IA

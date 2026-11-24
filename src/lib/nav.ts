@@ -51,6 +51,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
       { href: h("emplois-du-temps"), label: dict.nav.timetables, icon: "timetable" },
       ...(payments ? [payments] : []),
       ...(can(roles, "messages.school") ? [{ href: h("messages"), label: dict.nav.messages, icon: "messages" } as NavItem] : []),
+      ...(can(roles, "site.write") ? [{ href: h("site-vitrine"), label: dict.nav.site, icon: "site" } as NavItem] : []),
       ...(can(roles, "settings.write") ? [{ href: h("parametres"), label: dict.nav.settings, icon: "settings" } as NavItem] : []),
       account,
     ];
