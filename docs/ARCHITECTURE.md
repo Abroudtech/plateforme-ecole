@@ -343,3 +343,15 @@ des deux langues est vide, l'autre est affichée.
 - L'écran et les téléphones lisent l'état chaque seconde (`/api/direct/<id>`).
 - À la fin, chaque participant reçoit une tentative du défi : ses bonnes réponses
   comptent dans le classement de la classe (sans doublon s'il l'avait déjà fait).
+
+## 19. Autorisations, devoirs cochés, version élève des sujets
+
+- **Autorisations** (`/autorisations`, `ConsentRequest` / `ConsentReply`) : la direction
+  (école, niveau ou classe) ou l'enseignant (ses classes) envoie une demande ; chaque
+  parent répond « Oui » ou « Non » pour son enfant, depuis son accueil, et peut changer
+  d'avis jusqu'à la date limite. L'équipe voit les réponses par classe, relance les
+  parents sans réponse et imprime la liste.
+- **Devoirs « fait »** (`HomeworkDone`) : l'élève coche ses devoirs (barre de progression) ;
+  le parent voit « Fait » dans le cahier de textes de son enfant.
+- **Atelier** : le texte d'un document se modifie, et un examen ou une série d'exercices
+  s'imprime en version élève (sans corrigé) ou corrigé seul (`src/lib/ai/answer-key.ts`, testé).

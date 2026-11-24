@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { FileText } from "lucide-react";
+import { CircleCheck, FileText } from "lucide-react";
+import { ActionForm, type FormState } from "./action-form";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
@@ -49,20 +50,63 @@ export function HomeworkEntry({ item, lang, dict, showDate = false, showAuthor =
 }
 
 /** Vue parent / élève : le travail à faire, puis les dernières séances. */
-export function StudentHomework({ data, lang, dict }: { data: NonNullable<Awaited<ReturnType<typeof import("@/lib/data/homework").homeworkForStudent>>> | null; lang: Locale; dict: Dictionary }) {
+export function StudentHomework({
+  data,
+  lang,
+  dict,
+  toggle,
+}: {
+  data: NonNullable<Awaited<ReturnType<typeof import("@/lib/data/homework").homeworkForStudent>>> | null;
+  lang: Locale;
+  dict: Dictionary;
+  /** Espace élève : bouton « J'ai fini » sur chaque devoir. Sans lui (parent), on affiche seulement « Fait ». */
+  toggle?: (homeworkId: string) => (state: FormState, formData: FormData) => Promise<FormState>;
+}) {
   const h = dict.homework;
   if (!data) return <p className="text-sm text-slate-500">{h.noClass}</p>;
+  const done = new Set(data.done);
+  const count = data.upcoming.filter((it) => done.has(it.id)).length;
+  const total = data.upcoming.length;
   return (
     <div className="flex flex-col gap-4">
       <section className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/80">
-        <h2 className="mb-3 font-bold">{h.upcoming}</h2>
-        {data.upcoming.length === 0 ? (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="font-bold">{h.upcoming}</h2>
+          {total > 0 && <span className="text-sm font-semibold text-emerald-700">{t(h.doneCount, { count, total })}</span>}
+        </div>
+        {total > 0 && (
+          <div className="mb-3 h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${Math.round((count / total) * 100)}%` }} />
+          </div>
+        )}
+        {total === 0 ? (
           <p className="text-sm text-slate-500">{h.noUpcoming}</p>
         ) : (
           <div className="flex flex-col gap-2">
-            {data.upcoming.map((it) => (
-              <HomeworkEntry key={it.id} item={it} lang={lang} dict={dict} />
-            ))}
+            {data.upcoming.map((it) => {
+              const isDone = done.has(it.id);
+              return (
+                <div key={it.id} className={isDone ? "opacity-60" : ""}>
+                  <HomeworkEntry
+                    item={it}
+                    lang={lang}
+                    dict={dict}
+                    actions={
+                      toggle ? (
+                        <ActionForm
+                          action={toggle(it.id)}
+                          labels={{ submit: isDone ? `✓ ${h.done} · ${h.undo}` : h.markDone, pending: "…", errors: dict.formErrors as Record<string, string> }}
+                          variant={isDone ? "secondary" : "primary"}
+                          className="contents"
+                        />
+                      ) : isDone ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"><CircleCheck size={13} aria-hidden /> {h.done}</span>
+                      ) : undefined
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </section>

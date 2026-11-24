@@ -131,7 +131,7 @@ export default async function ExamPage({ params, searchParams }: PageProps<"/[la
         {exam.resource ? (
           <div className="flex flex-wrap items-center gap-2">
             <span className="flex min-w-0 items-center gap-2 font-semibold" dir="auto"><FileText size={18} className="shrink-0 text-blue-800" aria-hidden /> {exam.resource.title}</span>
-            <Link href={`/${lang}/atelier/${exam.resource.id}`} className="ms-auto inline-flex items-center gap-2 rounded-xl bg-blue-900 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+            <Link href={`/${lang}/atelier/${exam.resource.id}?version=eleve`} className="ms-auto inline-flex items-center gap-2 rounded-xl bg-blue-900 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-800">
               <Printer size={15} aria-hidden /> {e.printPaper}
             </Link>
           </div>

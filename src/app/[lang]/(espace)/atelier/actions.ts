@@ -69,3 +69,19 @@ export async function deleteResource(lang: string, resourceId: string, _prev: Fo
   if (done) redirect(`/${lang}/atelier`);
   return state;
 }
+
+/** L'enseignant corrige le texte proposé par l'IA avant de l'imprimer. */
+export async function updateResource(lang: string, resourceId: string, _prev: FormState, formData: FormData) {
+  let done = false;
+  const state = await runAction(lang, "ai.use", async (ctx) => {
+    const r = await db.teachingResource.findFirst({ where: { id: resourceId, schoolId: ctx.school.id } });
+    if (!r) throw new FormError("notFound");
+    if (r.authorId !== ctx.user.id && !ctx.roles.includes("ADMIN")) throw new FormError("forbidden");
+    const content = String(formData.get("content") ?? "").trim();
+    if (content.length < 10 || content.length > 60_000) throw new FormError("invalid");
+    await db.teachingResource.update({ where: { id: r.id }, data: { content, title: extractTitle(content, r.title) } });
+    done = true;
+  });
+  if (done) redirect(`/${lang}/atelier/${resourceId}`);
+  return state;
+}

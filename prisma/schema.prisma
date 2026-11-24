@@ -424,6 +424,8 @@ model Student {
   absenceNotes      AbsenceNote[]
   livePlayers       LivePlayer[]
   liveAnswers       LiveAnswer[]
+  homeworkDones     HomeworkDone[]
+  consentReplies    ConsentReply[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId, lastName])
@@ -786,6 +788,7 @@ model Homework {
   subject    Subject?          @relation(fields: [subjectId], references: [id], onDelete: SetNull)
   author     User?             @relation(fields: [authorId], references: [id], onDelete: SetNull)
   resource   TeachingResource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+  done       HomeworkDone[]
 
   @@index([classGroupId, date])
   @@index([schoolId, dueDate])
@@ -1457,4 +1460,53 @@ model LiveAnswer {
   student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([liveId, studentId, question])
+}
+
+/// L'élève coche un devoir quand il l'a fait (sa liste à lui).
+model HomeworkDone {
+  homeworkId String
+  studentId  String
+  doneAt     DateTime @default(now())
+
+  homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([homeworkId, studentId])
+}
+
+/// Coupon-réponse envoyé aux parents (autorisation de sortie, photo, activité...) :
+/// chaque parent répond « oui » ou « non » pour son enfant, depuis l'application.
+model ConsentRequest {
+  id           String               @id @default(cuid())
+  schoolId     String
+  title        String
+  details      String?              @db.Text
+  /// Date limite pour répondre (facultatif).
+  deadline     DateTime?            @db.Date
+  audience     AnnouncementAudience @default(CLASS)
+  gradeLevelId String?
+  classGroupId String?
+  createdById  String?
+  createdAt    DateTime             @default(now())
+
+  replies ConsentReply[]
+
+  @@index([schoolId, createdAt])
+}
+
+model ConsentReply {
+  id        String   @id @default(cuid())
+  requestId String
+  studentId String
+  /// Compte du parent qui a répondu.
+  userId    String
+  accepted  Boolean
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  request ConsentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  student Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, studentId])
 }
