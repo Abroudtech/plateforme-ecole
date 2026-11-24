@@ -17,6 +17,8 @@ export const resourceRequestSchema = z.object({
   /** Nombre d'exercices voulus (série d'exercices). */
   count: z.coerce.number().int().min(3).max(15).default(6),
   instructions: z.string().trim().max(1500).optional().default(""),
+  /** Leçon choisie dans le référentiel du programme (facultatif). */
+  lessonId: z.string().trim().max(40).optional().default(""),
 });
 export type ResourceRequest = z.infer<typeof resourceRequestSchema>;
 
@@ -25,6 +27,8 @@ export type PromptInput = ResourceRequest & {
   subject: { nameFr: string; nameAr: string };
   language: DocLanguage;
   schoolName: string;
+  /** Repères du programme officiel pour la leçon choisie (voir `lessonContext`). */
+  programme?: string;
 };
 
 const LANGUAGE_RULE: Record<DocLanguage, string> = {
@@ -88,6 +92,7 @@ export function userPrompt(p: PromptInput): string {
     `Matière : ${p.subject.nameFr} (${p.subject.nameAr})`,
     `Trimestre : ${p.term}`,
     `Thème ou leçon : ${p.topic}`,
+    p.programme ? `\n${p.programme}` : "",
     "",
     task(p),
     "",

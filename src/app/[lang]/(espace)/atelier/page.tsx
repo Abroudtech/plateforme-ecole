@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, FileText } from "lucide-react";
+import { BookOpen, ChevronRight, FileText } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { personName, pickName } from "@/i18n/localized";
@@ -9,7 +9,8 @@ import { aiEnabled } from "@/lib/ai/generate";
 import { db } from "@/lib/db";
 import { Card, PageHeader } from "@/components/ui";
 import { createResource } from "./actions";
-import { WorkshopForm } from "./workshop-form";
+import { findLesson, lessonsOf, lessonTitle, programmeSubjectFor } from "@/lib/curriculum";
+import { WorkshopForm, type LessonOption } from "./workshop-form";
 
 /** Atelier pédagogique : l'IA prépare fiches, séries d'exercices et examens. */
 export default async function WorkshopPage({ params, searchParams }: PageProps<"/[lang]/atelier">) {
@@ -48,11 +49,31 @@ export default async function WorkshopPage({ params, searchParams }: PageProps<"
     const list = (subjectsByLevel[c.gradeLevelId] ??= []);
     if (!list.includes(c.subjectId)) list.push(c.subjectId);
   }
+  // Leçons du programme officiel pour chaque couple niveau / matière de l'école.
+  const lessonsBy: Record<string, LessonOption[]> = {};
+  for (const l of levels) {
+    for (const s of subjects) {
+      const prog = programmeSubjectFor(s);
+      const list = prog ? lessonsOf(l.code, prog) : [];
+      if (list.length) {
+        lessonsBy[`${l.id}|${s.id}`] = list.map((x) => ({ id: x.id, label: lessonTitle(x, lang), term: x.term, domain: lessonTitle(x.domain, lang) }));
+      }
+    }
+  }
+  const prefillLesson = one(sp.lecon) ? findLesson(one(sp.lecon)!) : null;
   const fmt = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Tunis" });
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={w.title} subtitle={w.subtitle} />
+      <PageHeader
+        title={w.title}
+        subtitle={w.subtitle}
+        action={
+          <Link href={`/${lang}/atelier/programme`} className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-blue-900 ring-1 ring-slate-200 hover:ring-gold-400">
+            <BookOpen size={16} aria-hidden /> {w.programmeLink}
+          </Link>
+        }
+      />
       <Card title={w.newDoc}>
         {aiEnabled() ? (
           <WorkshopForm
@@ -60,11 +81,14 @@ export default async function WorkshopPage({ params, searchParams }: PageProps<"
             levels={levels.map((l) => ({ id: l.id, label: pickName(l, lang) }))}
             subjects={subjects.map((s) => ({ id: s.id, label: pickName(s, lang) }))}
             subjectsByLevel={subjectsByLevel}
+            lessonsBy={lessonsBy}
             defaults={{
               kind: prefillKind === "EXAM" || prefillKind === "EXERCISES" || prefillKind === "LESSON" ? prefillKind : undefined,
               levelId: one(sp.niveau),
               subjectId: one(sp.matiere),
-              topic: one(sp.theme)?.slice(0, 300),
+              topic: one(sp.theme)?.slice(0, 300) ?? (prefillLesson ? lessonTitle(prefillLesson, lang) : undefined),
+              lessonId: prefillLesson?.id,
+              term: prefillLesson ? String(prefillLesson.term) : undefined,
             }}
             labels={{
               form: { submit: w.generate, pending: w.generating, errors: dict.formErrors as Record<string, string> },
@@ -83,6 +107,9 @@ export default async function WorkshopPage({ params, searchParams }: PageProps<"
               instructionsHint: w.instructionsHint,
               minutes: w.minutes,
               waitNote: w.waitNote,
+              lesson: w.lesson,
+              lessonNone: w.lessonNone,
+              lessonHint: w.lessonHint,
             }}
           />
         ) : (
