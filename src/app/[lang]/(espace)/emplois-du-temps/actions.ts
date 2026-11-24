@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
 import { generateTempPassword } from "@/lib/auth/temp-password";
 import { getCurrentYear } from "@/lib/data/school";
+import { parseISODate } from "@/lib/dates";
 import { parseForm, runAction } from "@/lib/actions";
 import { FormError, optionalText, requiredText } from "@/lib/forms";
 import { normalizePhone } from "@/lib/phone";
@@ -23,6 +24,9 @@ const teacherSchema = z.object({
   lastNameAr: optionalText,
   phone: optionalText,
   email: optionalText,
+  gender: z.enum(["MALE", "FEMALE"]).optional().or(z.literal("")).transform((v) => v || null),
+  cin: optionalText,
+  hiredOn: z.string().optional().transform((v) => v || null),
 });
 
 export async function saveTeacher(lang: string, teacherId: string | null, _prev: FormState, formData: FormData) {
@@ -30,7 +34,9 @@ export async function saveTeacher(lang: string, teacherId: string | null, _prev:
     const data = parseForm(teacherSchema, formData);
     const phone = data.phone ? normalizePhone(data.phone) : null;
     if (data.phone && !phone) throw new FormError("phoneInvalid");
-    const fields = { ...data, phone, email: data.email?.toLowerCase() ?? null };
+    const hiredOn = data.hiredOn ? parseISODate(data.hiredOn) : null;
+    if (data.hiredOn && !hiredOn) throw new FormError("dateInvalid");
+    const fields = { ...data, phone, email: data.email?.toLowerCase() ?? null, hiredOn };
     if (teacherId) {
       const t = await db.teacher.findFirst({ where: { id: teacherId, schoolId: ctx.school.id } });
       if (!t) throw new FormError("notFound");

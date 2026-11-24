@@ -80,6 +80,11 @@ model School {
   address             String?
   phone               String?
   email               String?
+  /// Pour les attestations : adresse et ville en arabe, nom du directeur (signataire).
+  addressAr           String?
+  cityAr              String?
+  directorName        String?
+  directorNameAr      String?
   /// Cycles proposés par l'école (une école peut avoir primaire + collège + lycée).
   cycles              Cycle[]
   defaultLocale       Locale    @default(fr)
@@ -141,6 +146,7 @@ model School {
   homework           Homework[]
   exams              Exam[]
   events             SchoolEvent[]
+  journals           ClassJournal[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -186,6 +192,7 @@ model User {
   homework          Homework[]
   exams             Exam[]
   schoolEvents      SchoolEvent[]
+  journals          ClassJournal[]
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -340,6 +347,7 @@ model ClassGroup {
   homework           Homework[]
   exams              Exam[]
   events             SchoolEvent[]
+  journals           ClassJournal[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -698,12 +706,17 @@ model Teacher {
   lastNameAr  String?
   phone       String?
   email       String?
+  /// Pour l'attestation de travail : civilité, carte d'identité, date d'entrée.
+  gender      Gender?
+  cin         String?
+  hiredOn     DateTime? @db.Date
   isActive    Boolean  @default(true)
   userId      String?
   createdAt   DateTime @default(now())
 
   school        School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  journals      ClassJournal[]
   entries       TimetableEntry[]
   assignments   TeacherAssignment[]
   conversations Conversation[]
@@ -1509,4 +1522,35 @@ model ConsentReply {
   student Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([requestId, studentId])
+}
+
+/// Journal de classe (préparation de la journée) : une page par enseignant, classe et jour.
+model ClassJournal {
+  id           String   @id @default(cuid())
+  schoolId     String
+  classGroupId String
+  authorId     String
+  teacherId    String?
+  date         DateTime @db.Date
+  /// Horaire de la journée, en minutes depuis minuit.
+  startMinute  Int?
+  endMinute    Int?
+  /// Repères du journal papier : semaine, unité (module) et jour dans l'unité.
+  week         String?
+  unit         String?
+  unitDay      String?
+  /// Compétences de vie cochées (voir src/lib/journal.ts).
+  lifeSkills   String[]
+  /// Activités de la journée : [{ subjectId, field, activity, duration, competence, objective, content, goal, lessonId }].
+  rows         Json     @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  school     School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  teacher    Teacher?   @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@unique([classGroupId, date, authorId])
+  @@index([schoolId, date])
 }

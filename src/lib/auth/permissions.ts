@@ -62,6 +62,11 @@ export const PERMISSIONS = {
   "events.write": ["ADMIN"],
   // Autorisations (coupons-réponses) : la direction pour l'école, l'enseignant pour ses classes
   "consents.write": ["ADMIN", "TEACHER"],
+  // Journal de classe : l'enseignant prépare ses journées, la direction les consulte
+  "journal.write": ["TEACHER"],
+  "journal.read": ["ADMIN", "TEACHER"],
+  // Attestations (présence, scolarité, travail) délivrées par la direction
+  "attestations.write": ["ADMIN"],
   // Espace parent : voir uniquement ses propres enfants
   "children.read": ["PARENT"],
 } as const satisfies Record<string, readonly Role[]>;

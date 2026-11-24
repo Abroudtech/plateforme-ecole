@@ -2,7 +2,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { Tabs } from "@/components/tabs";
 
 /** Onglets d'une classe : élèves, notes, bulletins, matières. */
-export function ClassTabs({ lang, classId, dict, active }: { lang: string; classId: string; dict: Dictionary; active: "students" | "grades" | "reports" | "curriculum" | "attendance" | "timetable" | "homework" }) {
+export function ClassTabs({ lang, classId, dict, active }: { lang: string; classId: string; dict: Dictionary; active: "students" | "grades" | "reports" | "curriculum" | "attendance" | "timetable" | "homework" | "journal" }) {
   const base = `/${lang}/classes/${classId}`;
   return (
     <Tabs
@@ -12,6 +12,7 @@ export function ClassTabs({ lang, classId, dict, active }: { lang: string; class
         { key: "timetable", href: `${base}/emploi-du-temps`, label: dict.timetable.title },
         { key: "attendance", href: `${base}/absences`, label: dict.attendance.rollCall },
         { key: "homework", href: `${base}/cahier`, label: dict.homework.tab },
+        { key: "journal", href: `/${lang}/journal/${classId}`, label: dict.nav.journal },
         { key: "grades", href: `${base}/notes`, label: dict.grades.title },
         { key: "reports", href: `${base}/bulletins`, label: dict.reportCards.title },
         { key: "curriculum", href: `${base}/matieres`, label: dict.curriculum.title },

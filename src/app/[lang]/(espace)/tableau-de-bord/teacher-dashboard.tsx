@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { CalendarCheck, CalendarDays, ChevronRight, ClipboardList, MessageSquare, Newspaper, NotebookPen, Sparkles, Users } from "lucide-react";
+import { BookOpenCheck, CalendarCheck, CalendarDays, ChevronRight, ClipboardList, MessageSquare, NotebookPen, Sparkles, Users } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { t } from "@/i18n/format";
@@ -102,7 +102,7 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
       <section className={`relative grid grid-cols-2 gap-3 sm:grid-cols-4 md:px-4 ${current ? "" : "-mt-12 md:-mt-10"}`}>
         {[
           { href: `/${lang}/atelier`, icon: Sparkles, tone: "gold" as const, label: dict.nav.workshop, extra: t(th.resources, { count: resources }) },
-          { href: `/${lang}/espace-classe`, icon: Newspaper, tone: "green" as const, label: dict.nav.classSpace, extra: null },
+          { href: `/${lang}/journal`, icon: BookOpenCheck, tone: "green" as const, label: th.journal, extra: null },
           { href: `/${lang}/enseignants/${teacher.id}`, icon: CalendarDays, tone: "blue" as const, label: th.myTimetable, extra: null },
           { href: `/${lang}/messages`, icon: MessageSquare, tone: "blue" as const, label: dict.nav.messages, extra: unread > 0 ? `${unread} · ${dict.messages.unread}` : null },
         ].map((c) => (

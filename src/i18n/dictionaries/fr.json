@@ -46,7 +46,8 @@
     "site": "Site de l'école",
     "exams": "Examens",
     "calendar": "Calendrier",
-    "consents": "Autorisations"
+    "consents": "Autorisations",
+    "journal": "Journal de classe"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -170,7 +171,8 @@
     "domainInvalid": "Adresse invalide (par exemple monecole.tn).",
     "domainTaken": "Cette adresse est déjà utilisée par une autre école.",
     "examPast": "La date de l'examen est déjà passée.",
-    "endBeforeStart": "Le dernier jour est avant le premier."
+    "endBeforeStart": "Le dernier jour est avant le premier.",
+    "journalEmpty": "Ajoutez au moins une activité au journal."
   },
   "classes": {
     "title": "Classes",
@@ -435,7 +437,15 @@
     "classes": "Classes de l'enseignant",
     "classesHelp": "Cochez les classes de cet enseignant. Il pourra y faire l'appel et saisir les notes. Les classes de son emploi du temps sont ajoutées automatiquement.",
     "fromTimetable": "emploi du temps",
-    "noClasses": "Aucune classe cette année."
+    "noClasses": "Aucune classe cette année.",
+    "gender": "Civilité",
+    "genders": {
+      "MALE": "Monsieur",
+      "FEMALE": "Madame"
+    },
+    "cin": "N° de carte d'identité (CIN)",
+    "hiredOn": "Dans l'école depuis le",
+    "attestation": "Attestation de travail"
   },
   "rooms": {
     "title": "Salles",
@@ -641,7 +651,12 @@
     "removeAccess": "Retirer l'accès",
     "you": "vous",
     "firstName": "Prénom",
-    "lastName": "Nom"
+    "lastName": "Nom",
+    "addressAr": "Adresse (arabe)",
+    "cityAr": "Ville (arabe)",
+    "directorName": "Nom du directeur (français)",
+    "directorNameAr": "Nom du directeur (arabe)",
+    "docsHint": "Ces informations apparaissent sur les attestations (signature et adresse)."
   },
   "decisions": {
     "PASS": "Admis(e)",
@@ -791,7 +806,8 @@
     "resources": "{count} {count:document|documents}",
     "notLinked": "Votre compte n'est relié à aucune fiche enseignant. Contactez la direction.",
     "now": "En ce moment",
-    "rollCallNow": "Faire l'appel maintenant"
+    "rollCallNow": "Faire l'appel maintenant",
+    "journal": "Journal de classe"
   },
   "workshop": {
     "title": "Atelier IA",
@@ -1568,5 +1584,77 @@
       "edunet": "Edunet : ressources éducatives"
     },
     "manualsNote": "Les manuels du CNP sont protégés par le droit d'auteur : la plateforme n'en publie pas de copie. L'IA rédige des fiches et des exercices originaux, à partir des notions du programme."
+  },
+  "journal": {
+    "title": "Journal de classe",
+    "intro": "Préparez chaque journée comme dans le cahier papier : activités, objectifs et compétences de vie. La direction peut le consulter.",
+    "adminIntro": "Les journées préparées par les enseignants. Touchez une case pour lire le journal.",
+    "today": "Aujourd'hui",
+    "prevWeek": "Semaine précédente",
+    "nextWeek": "Semaine suivante",
+    "prevDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "weekOf": "Semaine du {date}",
+    "fill": "Remplir",
+    "open": "Ouvrir",
+    "filled": "Rempli",
+    "noClasses": "Aucune classe pour le moment.",
+    "date": "Date",
+    "from": "De",
+    "to": "À",
+    "hours": "Horaire",
+    "week": "Semaine",
+    "unit": "Unité",
+    "unitDay": "Jour",
+    "teacher": "Enseignant",
+    "class": "Classe",
+    "activities": "Activités de la journée",
+    "addRow": "Ajouter une activité",
+    "removeRow": "Retirer cette activité",
+    "subject": "Matière",
+    "lesson": "Leçon du programme",
+    "lessonHint": "remplit le domaine, la composante et le contenu",
+    "noLesson": "Choisir une leçon…",
+    "termN": "Trimestre {n}",
+    "field": "Domaine",
+    "activity": "Activité",
+    "duration": "Durée (min)",
+    "competence": "Composante de la compétence",
+    "objective": "Objectif spécifique",
+    "content": "Contenu",
+    "goal": "Objectif de la séance",
+    "lifeSkills": "Compétences de vie",
+    "lifeSkillsHint": "Cochez celles travaillées dans la journée.",
+    "save": "Enregistrer le journal",
+    "fromTimetable": "Les activités sont proposées d'après votre emploi du temps : complétez puis enregistrez.",
+    "print": "Imprimer",
+    "printWeek": "Imprimer la semaine",
+    "none": "Aucun journal pour ce jour.",
+    "readOnly": "Lecture seule : seul l'enseignant modifie son journal.",
+    "byTeacher": "Journal de {name}",
+    "delete": "Supprimer ce journal",
+    "confirmDelete": "Supprimer le journal de ce jour ?",
+    "minutes": "{n} min",
+    "nothingToPrint": "Aucun journal sur cette période.",
+    "notTeacher": "Votre compte n'est pas relié à une fiche enseignant : demandez à la direction.",
+    "printHint": "Conseil : imprimez en paysage. Pour un PDF, choisissez « Enregistrer au format PDF »."
+  },
+  "attestations": {
+    "title": "Attestations",
+    "button": "Attestations",
+    "presence": "Attestation de présence",
+    "scolarite": "Attestation scolaire (toutes les années)",
+    "work": "Attestation de travail",
+    "kind": "Attestation",
+    "language": "Langue",
+    "date": "Date",
+    "show": "Afficher",
+    "print": "Imprimer / PDF",
+    "printHint": "Pour un PDF : « Imprimer / PDF », puis « Enregistrer au format PDF ».",
+    "missingDirector": "Ajoutez le nom du directeur et l'adresse dans Paramètres : ils apparaîtront sur les attestations.",
+    "settingsLink": "Ouvrir les paramètres",
+    "notEnrolled": "Cet élève n'est inscrit dans aucune classe : seule l'attestation scolaire est possible.",
+    "missing": "À compléter dans la fiche pour une attestation complète : {fields}.",
+    "neverEnrolled": "Cet élève n'a jamais été inscrit dans une classe."
   }
 }

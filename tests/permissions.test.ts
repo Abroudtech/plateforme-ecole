@@ -21,3 +21,17 @@ describe("rôles et permissions", () => {
     expect(can(["PARENT", "TEACHER"], "students.read")).toBe(true);
   });
 });
+
+describe("journal de classe et attestations", () => {
+  it("l'enseignant écrit son journal, la direction le lit", () => {
+    expect(can(["TEACHER"], "journal.write")).toBe(true);
+    expect(can(["ADMIN"], "journal.write")).toBe(false);
+    expect(can(["ADMIN"], "journal.read")).toBe(true);
+    expect(can(["PARENT"], "journal.read")).toBe(false);
+  });
+
+  it("seule la direction délivre les attestations", () => {
+    expect(can(["ADMIN"], "attestations.write")).toBe(true);
+    expect(can(["TEACHER"], "attestations.write")).toBe(false);
+  });
+});
