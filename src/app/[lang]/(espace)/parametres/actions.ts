@@ -19,7 +19,18 @@ const CYCLES = ["PRIMARY", "MIDDLE", "SECONDARY"] as const;
 export async function saveSchoolInfo(lang: string, _prev: FormState, formData: FormData) {
   return runAction(lang, "settings.write", async (ctx) => {
     const data = parseForm(
-      z.object({ nameFr: requiredText, nameAr: requiredText, address: optionalText, city: optionalText, phone: optionalText, email: optionalText }),
+      z.object({
+        nameFr: requiredText,
+        nameAr: requiredText,
+        address: optionalText,
+        city: optionalText,
+        phone: optionalText,
+        email: optionalText,
+        addressAr: optionalText,
+        cityAr: optionalText,
+        directorName: optionalText,
+        directorNameAr: optionalText,
+      }),
       formData,
     );
     const phone = data.phone ? normalizePhone(data.phone) : null;

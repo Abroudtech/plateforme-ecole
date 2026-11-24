@@ -12,7 +12,7 @@ import { getTeacherTimetable } from "@/lib/data/timetable";
 import { formatDuration } from "@/lib/timetable";
 import { ActionForm } from "@/components/action-form";
 import { PrintButton } from "@/components/print-button";
-import { Card, PageHeader } from "@/components/ui";
+import { ButtonLink, Card, PageHeader } from "@/components/ui";
 import { WeekTimetable } from "@/components/week-timetable";
 import { createTeacherAccess, saveTeacher, saveTeacherClasses, setTeacherActive } from "../../emplois-du-temps/actions";
 import { TeacherFields } from "../teacher-fields";
@@ -55,7 +55,12 @@ export default async function TeacherPage({ params }: PageProps<"/[lang]/enseign
               ? { href: `/${lang}/enseignants`, label: dict.teachers.title }
               : { href: `/${lang}/tableau-de-bord`, label: dict.nav.dashboard }
           }
-          action={<PrintButton label={dict.reportCards.print} />}
+          action={
+            <div className="flex flex-wrap gap-2">
+              <PrintButton label={dict.reportCards.print} />
+              {can(ctx.roles, "attestations.write") && <ButtonLink href={`/${lang}/enseignants/${teacher.id}/attestation`}>{tt.attestation}</ButtonLink>}
+            </div>
+          }
         />
       </div>
       <h1 className="hidden text-xl font-bold print:block">{dict.teachers.timetable} · {personName(teacher, lang)}</h1>

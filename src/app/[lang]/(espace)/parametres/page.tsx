@@ -40,7 +40,12 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
             <Field label={st.city} hint={dict.common.optional}><Input name="city" defaultValue={school.city ?? ""} /></Field>
             <Field label={st.phone} hint={dict.common.optional}><Input name="phone" type="tel" dir="ltr" defaultValue={school.phone ?? ""} /></Field>
             <Field label={st.email} hint={dict.common.optional}><Input name="email" type="email" dir="ltr" defaultValue={school.email ?? ""} /></Field>
+            <Field label={st.addressAr} hint={dict.common.optional}><Input name="addressAr" lang="ar" dir="rtl" defaultValue={school.addressAr ?? ""} /></Field>
+            <Field label={st.cityAr} hint={dict.common.optional}><Input name="cityAr" lang="ar" dir="rtl" defaultValue={school.cityAr ?? ""} /></Field>
+            <Field label={st.directorName} hint={dict.common.optional}><Input name="directorName" defaultValue={school.directorName ?? ""} /></Field>
+            <Field label={st.directorNameAr} hint={dict.common.optional}><Input name="directorNameAr" lang="ar" dir="rtl" defaultValue={school.directorNameAr ?? ""} /></Field>
           </div>
+          <p className="text-xs text-slate-500">{st.docsHint}</p>
         </ActionForm>
       </Card>
 

@@ -1,6 +1,7 @@
 // Icônes du menu, partagées entre les pages serveur et la navigation (client).
 import {
   BookOpen,
+  BookOpenCheck,
   CalendarCheck,
   CalendarDays,
   CalendarRange,
@@ -47,6 +48,7 @@ export const NAV_ICONS = {
   calendar: CalendarRange,
   exams: ClipboardPen,
   consents: FileSignature,
+  journal: BookOpenCheck,
 } satisfies Record<string, LucideIcon>;
 
 export type NavItem = { href: string; label: string; icon: keyof typeof NAV_ICONS };

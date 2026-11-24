@@ -373,3 +373,22 @@ des deux langues est vide, l'autre est affichée.
   de copie et renvoie vers les sites officiels (CNP, ministère, Edunet). L'exception pour
   l'enseignement (art. 10) ne couvre que de courts extraits, sans but commercial ; mettre les
   manuels complets en ligne demande l'accord écrit du CNP.
+
+## 21. Journal de classe et attestations
+
+- **Journal de classe** (`/journal`, `ClassJournal`) : la préparation de la journée, comme le cahier
+  papier du primaire. Une page par enseignant, classe et jour : horaire, semaine / unité / jour, puis
+  une ligne par activité (domaine, activité et durée, composante de la compétence, objectif
+  spécifique, contenu, objectif de la séance) et les compétences de vie cochées.
+  - Une journée vide est proposée d'après l'**emploi du temps** de l'enseignant (matières, durées,
+    horaire) ; la semaine et l'unité reprennent celles du dernier journal.
+  - Choisir une **leçon du programme officiel** remplit le domaine, la composante et le contenu
+    (`src/lib/journal.ts`, testé). Les matières arabes s'écrivent en arabe, le français et l'anglais en français.
+  - **Impression** (`/journal/<classe>/imprimer`) : une page A4 en paysage par jour, au format du cahier.
+  - **Droits** : `journal.write` (l'enseignant, ses classes), `journal.read` (la direction voit tout,
+    semaine par semaine ; l'enseignant ses journaux).
+- **Attestations** (`attestations.write`, direction) depuis la fiche élève (présence pour l'année en
+  cours, ou scolaire avec toutes les années) et la fiche enseignant (travail), en français ou en
+  arabe, d'après le modèle de l'école (`src/lib/attestations.ts`, testé). Rien n'est enregistré : la
+  page s'imprime ou s'enregistre en PDF. Le nom du directeur et l'adresse en arabe se règlent dans
+  **Paramètres** ; la civilité, la CIN et la date d'entrée d'un enseignant dans sa fiche.
