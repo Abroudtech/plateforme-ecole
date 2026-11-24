@@ -139,6 +139,8 @@ model School {
   aiRequests         AiRequest[]
   absenceNotes       AbsenceNote[]
   homework           Homework[]
+  exams              Exam[]
+  events             SchoolEvent[]
 }
 
 /// Un compte de connexion. Une même personne peut avoir des rôles dans
@@ -182,6 +184,8 @@ model User {
   passwordResets    PasswordReset[]
   pushSubscriptions PushSubscription[]
   homework          Homework[]
+  exams             Exam[]
+  schoolEvents      SchoolEvent[]
 }
 
 /// Le rôle d'un compte dans une école donnée.
@@ -283,6 +287,7 @@ model GradeLevel {
   fees               Fee[]
   announcements      Announcement[]
   teachingResources  TeachingResource[]
+  schoolEvents       SchoolEvent[]
 
   @@unique([schoolId, code])
   @@index([schoolId, cycle])
@@ -333,6 +338,8 @@ model ClassGroup {
   challenges         Challenge[]
   gameScores         GameScore[]
   homework           Homework[]
+  exams              Exam[]
+  events             SchoolEvent[]
 
   @@unique([schoolId, academicYearId, name])
   @@index([schoolId, academicYearId])
@@ -354,6 +361,7 @@ model Subject {
   teachingResources  TeachingResource[]
   challenges         Challenge[]
   homework           Homework[]
+  exams              Exam[]
 
   @@unique([schoolId, code])
 }
@@ -514,6 +522,7 @@ model Assessment {
   subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   term       Term       @relation(fields: [termId], references: [id], onDelete: Cascade)
   grades     Grade[]
+  exam       Exam?
 
   @@index([schoolId, classGroupId, termId])
 }
@@ -744,6 +753,7 @@ model TeachingResource {
   gradeLevel GradeLevel @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
   subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   homework   Homework[]
+  exams      Exam[]
 
   @@index([schoolId, authorId, createdAt])
 }
@@ -1250,36 +1260,36 @@ model AbsenceNote {
 /// Contenu de la page vitrine d'une école. Chaque texte existe en français et
 /// en arabe ; si l'une des deux langues est vide, l'autre est affichée.
 model SchoolSite {
-  id            String   @id @default(cuid())
-  schoolId      String   @unique
+  id           String   @id @default(cuid())
+  schoolId     String   @unique
   /// Visible par tous sur Internet (sinon seule la direction voit l'aperçu).
-  published     Boolean  @default(false)
+  published    Boolean  @default(false)
   /// Adresse propre de l'école (ex. « laplume-dor.tn »), réglée par l'équipe plateforme.
-  domain        String?  @unique
+  domain       String?  @unique
   /// Couleur de la page (voir src/lib/site/themes.ts).
-  theme         String   @default("encre")
-  heroTitleFr   String?
-  heroTitleAr   String?
-  heroTextFr    String?
-  heroTextAr    String?
-  aboutFr       String?
-  aboutAr       String?
+  theme        String   @default("encre")
+  heroTitleFr  String?
+  heroTitleAr  String?
+  heroTextFr   String?
+  heroTextAr   String?
+  aboutFr      String?
+  aboutAr      String?
   /// Atouts de l'école : [{ titleFr, titleAr, textFr, textAr }].
-  highlights    Json     @default("[]")
+  highlights   Json     @default("[]")
   /// Texte libre par cycle : { PRIMARY: { fr, ar }, ... }.
-  cycleTexts    Json     @default("{}")
-  admissionsFr  String?
-  admissionsAr  String?
-  hoursFr       String?
-  hoursAr       String?
-  whatsapp      String?
-  facebookUrl   String?
-  instagramUrl  String?
-  mapUrl        String?
+  cycleTexts   Json     @default("{}")
+  admissionsFr String?
+  admissionsAr String?
+  hoursFr      String?
+  hoursAr      String?
+  whatsapp     String?
+  facebookUrl  String?
+  instagramUrl String?
+  mapUrl       String?
   /// Formulaire « Demande de renseignements » affiché sur la page.
-  inquiryForm   Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  inquiryForm  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 }
@@ -1322,4 +1332,72 @@ model SiteInquiry {
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   @@index([schoolId, createdAt])
+}
+
+/// Examen annoncé par un enseignant (ou la direction) pour une classe :
+/// visible par les élèves et les parents dans le calendrier, avec ce qu'il faut réviser.
+model Exam {
+  id              String         @id @default(cuid())
+  schoolId        String
+  classGroupId    String
+  subjectId       String
+  authorId        String?
+  kind            AssessmentKind @default(CONTROL)
+  title           String?
+  date            DateTime       @db.Date
+  /// Heure de début, en minutes depuis minuit (facultatif).
+  startMinute     Int?
+  durationMinutes Int?
+  room            String?
+  /// Ce qu'il faut réviser (chapitres, pages, exercices).
+  revision        String?        @db.Text
+  /// Sujet préparé dans l'atelier (visible seulement par l'équipe).
+  resourceId      String?
+  /// Évaluation du carnet de notes créée pour saisir les notes de cet examen.
+  assessmentId    String?        @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  school     School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup        @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  subject    Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  author     User?             @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  resource   TeachingResource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+  assessment Assessment?       @relation(fields: [assessmentId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, date])
+  @@index([classGroupId, date])
+}
+
+enum EventKind {
+  HOLIDAY // Vacances, jour férié
+  MEETING // Réunion de parents
+  EVENT // Fête, spectacle, journée portes ouvertes
+  TRIP // Sortie
+  OTHER
+}
+
+/// Date du calendrier de l'école (vacances, réunion, fête, sortie...),
+/// pour toute l'école, un niveau ou une classe.
+model SchoolEvent {
+  id           String               @id @default(cuid())
+  schoolId     String
+  kind         EventKind            @default(EVENT)
+  title        String
+  details      String?              @db.Text
+  date         DateTime             @db.Date
+  /// Dernier jour (vacances sur plusieurs jours), facultatif.
+  endDate      DateTime?            @db.Date
+  audience     AnnouncementAudience @default(SCHOOL)
+  gradeLevelId String?
+  classGroupId String?
+  createdById  String?
+  createdAt    DateTime             @default(now())
+
+  school     School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  gradeLevel GradeLevel? @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
+  classGroup ClassGroup? @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  createdBy  User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, date])
 }

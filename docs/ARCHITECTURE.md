@@ -313,3 +313,19 @@ des deux langues est vide, l'autre est affichée.
   la base (`SitePhoto`) et servies par `/api/vitrine/photo/<id>`.
 - Le formulaire « Demande de renseignements » enregistre la demande
   (`SiteInquiry`) et prévient la direction par notification.
+
+## 17. Examens et calendrier
+
+- **Préparer un examen** (`/examens`, enseignants et direction) : classe, matière,
+  type (contrôle, synthèse...), date, heure, durée, salle, ce qu'il faut réviser et,
+  au choix, le sujet préparé dans l'atelier (visible seulement par l'équipe). Les
+  élèves et les parents de la classe sont prévenus sur leur téléphone.
+- Une alerte s'affiche si la classe a déjà un examen le même jour.
+- **Saisir les notes** depuis l'examen crée une seule fois l'évaluation dans le carnet
+  de notes, au trimestre qui contient la date (`termForDate`). La page de l'examen
+  montre ensuite la moyenne, les notes extrêmes et la répartition.
+- **Calendrier** (`/calendrier`, tous les comptes) : examens, devoirs à rendre
+  (familles) et dates de l'école (`SchoolEvent` : vacances, réunions, sorties...,
+  pour l'école, un niveau ou une classe), semaine par semaine sur 8 semaines.
+  Seule la direction ajoute des dates. Les accueils affichent « À venir ».
+- Calculs sans base de données dans `src/lib/calendar.ts` (testés).

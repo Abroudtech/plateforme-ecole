@@ -12,8 +12,11 @@ import { createResource } from "./actions";
 import { WorkshopForm } from "./workshop-form";
 
 /** Atelier pédagogique : l'IA prépare fiches, séries d'exercices et examens. */
-export default async function WorkshopPage({ params }: PageProps<"/[lang]/atelier">) {
+export default async function WorkshopPage({ params, searchParams }: PageProps<"/[lang]/atelier">) {
   const lang = (await params).lang as Locale;
+  const sp = await searchParams;
+  const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : undefined);
+  const prefillKind = one(sp.type);
   const dict = await getDictionary(lang);
   const ctx = await requirePermission(lang, "ai.use");
   const w = dict.workshop;
@@ -57,6 +60,12 @@ export default async function WorkshopPage({ params }: PageProps<"/[lang]/atelie
             levels={levels.map((l) => ({ id: l.id, label: pickName(l, lang) }))}
             subjects={subjects.map((s) => ({ id: s.id, label: pickName(s, lang) }))}
             subjectsByLevel={subjectsByLevel}
+            defaults={{
+              kind: prefillKind === "EXAM" || prefillKind === "EXERCISES" || prefillKind === "LESSON" ? prefillKind : undefined,
+              levelId: one(sp.niveau),
+              subjectId: one(sp.matiere),
+              topic: one(sp.theme)?.slice(0, 300),
+            }}
             labels={{
               form: { submit: w.generate, pending: w.generating, errors: dict.formErrors as Record<string, string> },
               kind: w.kind,

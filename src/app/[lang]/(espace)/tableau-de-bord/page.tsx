@@ -4,9 +4,11 @@ import {
   BookOpen,
   CalendarCheck,
   CalendarDays,
+  CalendarRange,
   ChevronRight,
   CircleCheck,
   ClipboardCheck,
+  ClipboardPen,
   FileSpreadsheet,
   FileText,
   GraduationCap,
@@ -24,6 +26,7 @@ import {
 import { StudentDashboard } from "./student-dashboard";
 import { TeacherDashboard } from "./teacher-dashboard";
 import { FollowupFallback, FollowupPanel } from "./followup-panel";
+import { UpcomingPanel } from "./upcoming-panel";
 import { Hero, IconBadge, Initials, Notice, Panel, TONES, type Tone } from "./dashboard-ui";
 import { getDirectorOverview, getSetupSteps } from "@/lib/data/director";
 import { Money } from "@/components/money";
@@ -280,7 +283,7 @@ async function AdminDashboard({ ctx, lang, dict, hello, today, push }: Props & {
             <li key={key}>
               <Link href={`/${lang}/${href}`} className="flex h-full flex-col items-center gap-2 rounded-2xl bg-white p-3 text-center shadow-card ring-1 ring-slate-200/80 hover:ring-gold-400">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-900"><Icon size={20} aria-hidden /></span>
-                <span className="text-xs font-semibold leading-tight">{key === "settings" || key === "workshop" || key === "classSpace" ? dict.nav[key] : dict.modules[key]}</span>
+                <span className="text-xs font-semibold leading-tight">{key === "settings" || key === "workshop" || key === "classSpace" || key === "calendar" || key === "exams" ? dict.nav[key] : dict.modules[key]}</span>
               </Link>
             </li>
           ))}
@@ -295,6 +298,8 @@ const QUICK = [
   { key: "classes", href: "classes", icon: BookOpen },
   { key: "attendance", href: "absences", icon: CalendarCheck },
   { key: "timetable", href: "emplois-du-temps", icon: CalendarDays },
+  { key: "calendar", href: "calendrier", icon: CalendarRange },
+  { key: "exams", href: "examens", icon: ClipboardPen },
   { key: "teachers", href: "enseignants", icon: GraduationCap },
   { key: "payments", href: "paiements", icon: Wallet },
   { key: "messages", href: "messages", icon: MessageSquare },
@@ -357,6 +362,7 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
         </Link>
       ))}
     </section>
+    <UpcomingPanel ctx={ctx} lang={lang} dict={dict} />
     <section className="flex flex-col gap-3">
       <h2 className="text-lg font-bold text-blue-900">{dict.dashboard.myChildren}</h2>
       {children.length === 0 ? (
