@@ -14,7 +14,8 @@ on:
 
 jobs:
   ios:
-    runs-on: macos-15
+    # Machines Intel : les machines Apple Silicon de GitHub sont souvent saturées.
+    runs-on: macos-15-intel
     defaults:
       run:
         working-directory: mobile/ios
