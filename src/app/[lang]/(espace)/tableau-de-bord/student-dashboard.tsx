@@ -10,6 +10,7 @@ import { parseISODate, todayISO } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { Leaderboard } from "../espace-classe/leaderboard";
 import { IconBadge, Notice } from "./dashboard-ui";
+import { UpcomingPanel } from "./upcoming-panel";
 
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
@@ -57,6 +58,8 @@ export async function StudentDashboard({ ctx, lang, dict }: Props) {
           <p className="text-sm text-slate-600">{me && me.points > 0 ? t(cs.myRank, { rank: me.rank, total: year.length }) : cs.startPlaying}</p>
         </div>
       </section>
+
+      <UpcomingPanel ctx={ctx} lang={lang} dict={dict} />
 
       {lastPost && (
         <Link href={`/${lang}/espace-classe`} className="block rounded-2xl bg-blue-50 p-4 ring-1 ring-blue-100">

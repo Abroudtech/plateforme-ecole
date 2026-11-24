@@ -13,6 +13,7 @@ import { countUnread, messagingViewer } from "@/lib/data/messages";
 import { formatTime } from "@/lib/timetable";
 import { IconBadge, Notice, Panel } from "./dashboard-ui";
 import { FollowupFallback, FollowupPanel } from "./followup-panel";
+import { UpcomingPanel } from "./upcoming-panel";
 
 type Props = { ctx: AppContext & { school: NonNullable<AppContext["school"]> }; lang: Locale; dict: Dictionary };
 
@@ -178,6 +179,8 @@ export async function TeacherDashboard({ ctx, lang, dict }: Props) {
           )}
         </Panel>
       </div>
+
+      <UpcomingPanel ctx={ctx} lang={lang} dict={dict} />
 
       {ids.length > 0 && (
         <Suspense fallback={<FollowupFallback dict={dict} />}>

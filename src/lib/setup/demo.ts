@@ -7,15 +7,17 @@ import { trimesterDates } from "./school";
 export const DEMO_SCHOOL_SLUG = "ecole-demo";
 export const DEMO_ADMIN_EMAIL = "admin@demo.tn";
 export const DEMO_PARENT_PHONE = "22 000 000";
+export const DEMO_TEACHER_EMAIL = "enseignant@demo.tn";
+export const DEMO_STUDENT_LOGIN = "yasmine.demo";
 
 /**
  * École de démonstration : les trois cycles, quelques classes, des élèves avec
  * notes, absences, paiements, emplois du temps et messages, un compte
- * administration et un compte parent.
+ * administration, un compte parent, un compte enseignant et un compte élève.
  *
  * Utilisée en local (npm run db:seed) et en ligne pour les testeurs de Google
  * et d'Apple (espace plateforme). Peut être relancée : rien n'est créé deux
- * fois, seul le mot de passe des deux comptes est remplacé.
+ * fois, seul le mot de passe des comptes est remplacé.
  */
 export async function seedDemoSchool(db: PrismaClient, passwordHash: string) {
   const cycles: Cycle[] = ["PRIMARY", "MIDDLE", "SECONDARY"];
@@ -278,6 +280,67 @@ export async function seedDemoSchool(db: PrismaClient, passwordHash: string) {
     for (const [code, hours] of [["AR", 5], ["FR", 4], ["MATH", 5], ["EVEIL", 2], ["EN", 1.5]] as const) {
       await db.curriculumSubject.updateMany({ where: { schoolId, gradeLevelId: p6.id, trackId: null, subjectId: await subjectId(code) }, data: { hoursPerWeek: hours } });
     }
+  }
+
+  // Compte enseignant (M. Jaziri, mathématiques en 6A et 7B1) et compte élève (Yasmine, 6A).
+  const teacherUser = await db.user.upsert({
+    where: { email: DEMO_TEACHER_EMAIL },
+    update: { passwordHash },
+    create: { email: DEMO_TEACHER_EMAIL, passwordHash, firstName: "Karim", lastName: "Jaziri", firstNameAr: "كريم", lastNameAr: "الجزيري" },
+  });
+  await db.membership.upsert({
+    where: { userId_schoolId_role: { userId: teacherUser.id, schoolId, role: "TEACHER" } },
+    update: {},
+    create: { userId: teacherUser.id, schoolId, role: "TEACHER" },
+  });
+  const karim = await db.teacher.findFirst({ where: { schoolId, firstName: "Karim", lastName: "Jaziri" } });
+  if (karim && !karim.userId) await db.teacher.update({ where: { id: karim.id }, data: { userId: teacherUser.id } });
+  if (karim) {
+    for (const cls of ["6A", "7B1"]) {
+      await db.teacherAssignment.upsert({
+        where: { teacherId_classGroupId: { teacherId: karim.id, classGroupId: classes[cls] } },
+        update: {},
+        create: { schoolId, teacherId: karim.id, classGroupId: classes[cls] },
+      });
+    }
+  }
+  const yasmineStudent = await db.student.findUniqueOrThrow({ where: { schoolId_studentNumber: { schoolId, studentNumber: "2026-001" } } });
+  const studentUser = await db.user.upsert({
+    where: { username: DEMO_STUDENT_LOGIN },
+    update: { passwordHash },
+    create: { username: DEMO_STUDENT_LOGIN, passwordHash, firstName: "Yasmine", lastName: "Ben Salah", firstNameAr: "ياسمين", lastNameAr: "بن صالح" },
+  });
+  await db.membership.upsert({
+    where: { userId_schoolId_role: { userId: studentUser.id, schoolId, role: "STUDENT" } },
+    update: {},
+    create: { userId: studentUser.id, schoolId, role: "STUDENT" },
+  });
+  if (!yasmineStudent.userId) await db.student.update({ where: { id: yasmineStudent.id }, data: { userId: studentUser.id } });
+
+  // Calendrier : un examen annoncé en 6A et deux dates de l'école, quelques jours après la création.
+  if ((await db.exam.count({ where: { schoolId } })) === 0) {
+    const inDays = (n: number) => {
+      const d = new Date();
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() + n);
+      // Pas d'examen le dimanche.
+      if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1);
+      return d;
+    };
+    const math = await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code: "MATH" } } });
+    const ar = await db.subject.findUniqueOrThrow({ where: { schoolId_code: { schoolId, code: "AR" } } });
+    await db.exam.createMany({
+      data: [
+        { schoolId, classGroupId: classes["6A"], subjectId: math.id, authorId: teacherUser.id, kind: "CONTROL", title: "Les fractions", date: inDays(3), startMinute: 8 * 60, durationMinutes: 60, room: "Salle 1", revision: "Leçons 7 et 8 : comparer et additionner des fractions. Exercices 2 à 5 page 64." },
+        { schoolId, classGroupId: classes["6A"], subjectId: ar.id, kind: "SYNTHESIS", title: "الإنتاج الكتابي", date: inDays(9), startMinute: 10 * 60 + 15, durationMinutes: 90, revision: "مراجعة دروس الثلاثي الأول في القراءة والقواعد." },
+      ],
+    });
+    await db.schoolEvent.createMany({
+      data: [
+        { schoolId, kind: "MEETING", title: "Réunion parents-enseignants · اجتماع الأولياء", date: inDays(6), details: "De 9h à 12h, dans les classes.", createdById: admin.id },
+        { schoolId, kind: "HOLIDAY", title: "Vacances d'hiver · عطلة الشتاء", date: inDays(24), endDate: inDays(38), createdById: admin.id },
+      ],
+    });
   }
 
   // Paiements : frais de l'année, quelques encaissements (Adam a un impayé).

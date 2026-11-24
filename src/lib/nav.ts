@@ -14,6 +14,8 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
 
   const workshop: NavItem = { href: h("atelier"), label: dict.nav.workshop, icon: "workshop" };
   const classSpace: NavItem = { href: h("espace-classe"), label: dict.nav.classSpace, icon: "classSpace" };
+  const calendar: NavItem = { href: h("calendrier"), label: dict.nav.calendar, icon: "calendar" };
+  const exams: NavItem = { href: h("examens"), label: dict.nav.exams, icon: "exams" };
 
   // Enseignant (sans être de la direction) : ses classes, l'appel, l'atelier IA.
   if (can(roles, "teacher.space") && !can(roles, "dashboard.admin")) {
@@ -21,7 +23,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
     const attendance: NavItem = { href: h("absences"), label: dict.nav.attendance, icon: "attendance" };
     const parent: NavItem[] = can(roles, "children.read") ? [{ href: h("annonces"), label: dict.messages.announcements, icon: "announcements" }] : [];
     const messages: NavItem = { href: h("messages"), label: dict.nav.messages, icon: "messages" };
-    const all: NavItem[] = [home, classes, attendance, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, messages, ...parent, account];
+    const all: NavItem[] = [home, classes, attendance, exams, calendar, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, messages, ...parent, account];
     return { all, bottom: [home, classes, attendance, workshop, { href: h("menu"), label: dict.nav.more, icon: "more" }] };
   }
 
@@ -35,7 +37,8 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
       classSpace,
       account,
     ];
-    return { all: items, bottom: items };
+    // Le calendrier est sur l'accueil et dans le menu de l'ordinateur ; la barre du téléphone reste à 6 onglets.
+    return { all: [items[0], items[1], calendar, ...items.slice(2)], bottom: items };
   }
 
   if (can(roles, "students.read")) {
@@ -49,6 +52,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
       classes,
       attendance,
       { href: h("emplois-du-temps"), label: dict.nav.timetables, icon: "timetable" },
+      calendar,
       ...(payments ? [payments] : []),
       ...(can(roles, "messages.school") ? [{ href: h("messages"), label: dict.nav.messages, icon: "messages" } as NavItem] : []),
       ...(can(roles, "site.write") ? [{ href: h("site-vitrine"), label: dict.nav.site, icon: "site" } as NavItem] : []),
@@ -62,6 +66,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
   if (can(roles, "children.read")) {
     const items: NavItem[] = [
       home,
+      calendar,
       { href: h("messages"), label: dict.nav.messages, icon: "messages" },
       { href: h("annonces"), label: dict.messages.announcements, icon: "announcements" },
       account,

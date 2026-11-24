@@ -3,6 +3,8 @@ import {
   BookOpen,
   CalendarCheck,
   CalendarDays,
+  CalendarRange,
+  ClipboardPen,
   Globe,
   GraduationCap,
   House,
@@ -41,6 +43,8 @@ export const NAV_ICONS = {
   challenges: Trophy,
   games: Puzzle,
   homework: NotebookPen,
+  calendar: CalendarRange,
+  exams: ClipboardPen,
 } satisfies Record<string, LucideIcon>;
 
 export type NavItem = { href: string; label: string; icon: keyof typeof NAV_ICONS };

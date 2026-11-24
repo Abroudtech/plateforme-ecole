@@ -15,7 +15,7 @@ import { FormError, requiredText } from "@/lib/forms";
 import { parseAmount } from "@/lib/payments";
 import { normalizeDomain } from "@/lib/site/content";
 import { bootstrapSchool } from "@/lib/setup/school";
-import { DEMO_ADMIN_EMAIL, DEMO_PARENT_PHONE, seedDemoSchool } from "@/lib/setup/demo";
+import { DEMO_ADMIN_EMAIL, DEMO_PARENT_PHONE, DEMO_STUDENT_LOGIN, DEMO_TEACHER_EMAIL, seedDemoSchool } from "@/lib/setup/demo";
 
 function slugify(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "ecole";
@@ -71,15 +71,15 @@ export async function createSchool(lang: string, _prev: FormState, formData: For
 
 /**
  * École de démonstration pour les testeurs de Google Play et de l'App Store :
- * la crée si besoin, et donne un nouveau mot de passe aux deux comptes
- * (direction et parent). À relancer pour changer le mot de passe.
+ * la crée si besoin, et donne un nouveau mot de passe aux comptes
+ * (direction, parent, enseignant, élève). À relancer pour changer le mot de passe.
  */
 export async function prepareDemoSchool(lang: string, _prev: FormState, _formData: FormData) {
   return platformAction(lang, async () => {
     const password = generateTempPassword(12);
     await seedDemoSchool(db, await hashPassword(password));
     refresh();
-    return { ok: true, credentials: { login: `${DEMO_ADMIN_EMAIL} · ${DEMO_PARENT_PHONE}`, password } };
+    return { ok: true, credentials: { login: `${DEMO_ADMIN_EMAIL} · ${DEMO_PARENT_PHONE} · ${DEMO_TEACHER_EMAIL} · ${DEMO_STUDENT_LOGIN}`, password } };
   });
 }
 

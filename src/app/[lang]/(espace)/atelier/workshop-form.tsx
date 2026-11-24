@@ -39,15 +39,18 @@ export function WorkshopForm({
   levels,
   subjects,
   subjectsByLevel,
+  defaults = {},
 }: {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   labels: WorkshopLabels;
   levels: Option[];
   subjects: Option[];
   subjectsByLevel: Record<string, string[]>;
+  /** Pré-remplissage (par ex. depuis « Préparer un examen »). */
+  defaults?: { kind?: "LESSON" | "EXERCISES" | "EXAM"; levelId?: string; subjectId?: string; topic?: string };
 }) {
-  const [kind, setKind] = useState<"LESSON" | "EXERCISES" | "EXAM">("LESSON");
-  const [level, setLevel] = useState(levels[0]?.id ?? "");
+  const [kind, setKind] = useState<"LESSON" | "EXERCISES" | "EXAM">(defaults.kind ?? "LESSON");
+  const [level, setLevel] = useState(defaults.levelId && levels.some((l) => l.id === defaults.levelId) ? defaults.levelId : levels[0]?.id ?? "");
   const allowed = subjectsByLevel[level];
   // Matières du programme du niveau, dans l'ordre des coefficients.
   const shown = allowed?.length ? allowed.flatMap((id) => subjects.filter((s) => s.id === id)) : subjects;
@@ -79,7 +82,7 @@ export function WorkshopForm({
           </Select>
         </Field>
         <Field label={l.subject}>
-          <Select name="subjectId" key={level} required>
+          <Select name="subjectId" key={level} required defaultValue={defaults.subjectId && shown.some((s) => s.id === defaults.subjectId) ? defaults.subjectId : undefined}>
             {shown.map((o) => (
               <option key={o.id} value={o.id}>{o.label}</option>
             ))}
@@ -95,7 +98,7 @@ export function WorkshopForm({
       </div>
 
       <Field label={l.topic} hint={l.topicHint}>
-        <Input name="topic" required minLength={3} maxLength={300} dir="auto" />
+        <Input name="topic" required minLength={3} maxLength={300} dir="auto" defaultValue={defaults.topic ?? ""} />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-3">

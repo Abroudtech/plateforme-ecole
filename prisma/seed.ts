@@ -1,6 +1,6 @@
 /**
  * Données de démonstration : une école avec les trois cycles, quelques
- * classes, des élèves, un compte administration et un compte parent.
+ * classes, des élèves, et des comptes administration, parent, enseignant et élève.
  *
  * Lancer : npm run db:seed
  * Mot de passe des comptes de démo : variable SEED_PASSWORD (sinon "Demo2026!").
@@ -18,6 +18,8 @@ async function main() {
   console.log("✔ Données de démonstration prêtes.");
   console.log(`  Administration : admin@demo.tn / ${PASSWORD}`);
   console.log(`  Parent         : 22 000 000 (ou parent@demo.tn) / ${PASSWORD}`);
+  console.log(`  Enseignant     : enseignant@demo.tn / ${PASSWORD}`);
+  console.log(`  Élève          : yasmine.demo / ${PASSWORD}`);
 }
 
 main()

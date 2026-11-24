@@ -54,6 +54,12 @@ export const PERMISSIONS = {
   "student.space": ["STUDENT"],
   // Cahier de textes : écrire les séances et les devoirs de ses classes
   "homework.write": ["ADMIN", "TEACHER"],
+  // Examens annoncés aux élèves et aux parents (« Préparer un examen »)
+  "exams.write": ["ADMIN", "TEACHER"],
+  // Calendrier : chacun voit les dates qui le concernent
+  "calendar.read": ["ADMIN", "TEACHER", "PARENT", "STUDENT"],
+  // Dates de l'école (vacances, réunions, fêtes, sorties)
+  "events.write": ["ADMIN"],
   // Espace parent : voir uniquement ses propres enfants
   "children.read": ["PARENT"],
 } as const satisfies Record<string, readonly Role[]>;
