@@ -12,6 +12,8 @@
     "subtitle": "Connectez-vous avec votre e-mail, votre téléphone ou votre identifiant élève.",
     "identifier": "E-mail, téléphone ou identifiant élève",
     "password": "Mot de passe",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
     "submit": "Se connecter",
     "submitting": "Connexion…",
     "invalid": "Identifiant ou mot de passe incorrect.",

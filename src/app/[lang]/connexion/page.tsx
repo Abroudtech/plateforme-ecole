@@ -42,6 +42,8 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
           labels={{
             identifier: dict.login.identifier,
             password: dict.login.password,
+            showPassword: dict.login.showPassword,
+            hidePassword: dict.login.hidePassword,
             submit: dict.login.submit,
             submitting: dict.login.submitting,
             errors: {
