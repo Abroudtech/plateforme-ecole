@@ -13,6 +13,7 @@ import { parseISODate } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { FormError, requiredText } from "@/lib/forms";
 import { parseAmount } from "@/lib/payments";
+import { normalizeDomain } from "@/lib/site/content";
 import { bootstrapSchool } from "@/lib/setup/school";
 import { DEMO_ADMIN_EMAIL, DEMO_PARENT_PHONE, seedDemoSchool } from "@/lib/setup/demo";
 
@@ -96,6 +97,21 @@ export async function saveSubscription(lang: string, schoolId: string, _prev: Fo
       where: { id: schoolId },
       data: { plan: data.plan || null, planPriceMillimes: price, paidUntil, platformNote: data.note || null, isActive: formData.get("isActive") === "on" },
     });
+    refresh();
+  });
+}
+
+/** Adresse propre de la page vitrine d'une école (ex. laplume-dor.tn). Vide : aucune. */
+export async function saveSiteDomain(lang: string, schoolId: string, _prev: FormState, formData: FormData) {
+  return platformAction(lang, async () => {
+    const raw = String(formData.get("domain") ?? "").trim();
+    const domain = raw ? normalizeDomain(raw) : null;
+    if (raw && !domain) throw new FormError("domainInvalid");
+    if (domain) {
+      const other = await db.schoolSite.findUnique({ where: { domain } });
+      if (other && other.schoolId !== schoolId) throw new FormError("domainTaken");
+    }
+    await db.schoolSite.upsert({ where: { schoolId }, update: { domain }, create: { schoolId, domain } });
     refresh();
   });
 }

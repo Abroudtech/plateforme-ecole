@@ -341,5 +341,37 @@ export async function seedDemoSchool(db: PrismaClient, passwordHash: string) {
     });
   }
 
+  // Page vitrine d'exemple (non publiée : la direction de démo la voit en aperçu).
+  await db.schoolSite.upsert({
+    where: { schoolId },
+    update: {},
+    create: {
+      schoolId,
+      theme: "encre",
+      heroTitleFr: "Apprendre, grandir, s'épanouir",
+      heroTitleAr: "نتعلّم، نكبر، نتألّق",
+      heroTextFr: "Une école à taille humaine, de l'année préparatoire au baccalauréat, où chaque enfant est connu par son prénom.",
+      heroTextAr: "مدرسة على مقاس الإنسان، من السنة التحضيرية إلى الباكالوريا، حيث نعرف كل طفل باسمه.",
+      aboutFr:
+        "Fondée en 2009, notre école accueille aujourd'hui plus de 400 élèves du primaire au lycée.\n\nNous suivons le programme officiel tunisien, enrichi par un apprentissage renforcé des langues, des activités culturelles et sportives, et un suivi personnalisé de chaque élève.",
+      aboutAr:
+        "تأسست مدرستنا سنة 2009، وتستقبل اليوم أكثر من 400 تلميذ من الابتدائي إلى الثانوي.\n\nنتّبع البرنامج الرسمي التونسي، مع تعزيز تعلّم اللغات والأنشطة الثقافية والرياضية، ومتابعة شخصية لكل تلميذ.",
+      highlights: [
+        { titleFr: "Petits effectifs", titleAr: "أقسام صغيرة", textFr: "24 élèves au maximum par classe pour un vrai suivi.", textAr: "24 تلميذاً على الأكثر في القسم لمتابعة حقيقية." },
+        { titleFr: "Trois langues", titleAr: "ثلاث لغات", textFr: "Arabe, français et anglais dès la 1re année.", textAr: "العربية والفرنسية والإنجليزية منذ السنة الأولى." },
+        { titleFr: "Cantine et garderie", titleAr: "مطعم وحضانة", textFr: "Repas équilibrés préparés sur place, garderie jusqu'à 18h.", textAr: "وجبات متوازنة تُحضَّر في المدرسة، وحضانة حتى الساعة 18." },
+        { titleFr: "Transport scolaire", titleAr: "النقل المدرسي", textFr: "Plusieurs circuits dans le Grand Tunis.", textAr: "عدة خطوط في تونس الكبرى." },
+        { titleFr: "Clubs et sorties", titleAr: "نوادٍ ورحلات", textFr: "Théâtre, robotique, échecs, sport et sorties pédagogiques.", textAr: "مسرح، روبوتيك، شطرنج، رياضة ورحلات تربوية." },
+        { titleFr: "Parents informés", titleAr: "أولياء على اطّلاع", textFr: "Notes, absences et messages sur l'application Ma Plume.", textAr: "الأعداد والغيابات والرسائل على تطبيق Ma Plume." },
+      ],
+      admissionsFr: "Les inscriptions pour l'année 2027-2028 sont ouvertes à partir du 1er mars.\n\nDocuments à fournir : extrait de naissance, bulletins de l'année précédente, deux photos d'identité. Un rendez-vous avec la direction est proposé à chaque famille.",
+      admissionsAr: "التسجيل للسنة الدراسية 2027-2028 مفتوح بداية من غرة مارس.\n\nالوثائق المطلوبة: مضمون ولادة، بطاقات الأعداد للسنة الفارطة، صورتان شمسيتان. تقترح الإدارة موعداً على كل عائلة.",
+      hoursFr: "Du lundi au vendredi, 7h30 - 17h30 · samedi matin",
+      hoursAr: "من الإثنين إلى الجمعة، 7:30 - 17:30 · السبت صباحاً",
+      whatsapp: "+21622000000",
+      facebookUrl: "https://facebook.com/",
+    },
+  });
+
   return { schoolId };
 }

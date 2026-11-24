@@ -132,6 +132,9 @@ model School {
   annualRules        AnnualRule[]
   teachingResources  TeachingResource[]
   challenges         Challenge[]
+  site               SchoolSite?
+  sitePhotos         SitePhoto[]
+  siteInquiries      SiteInquiry[]
   classPosts         ClassPost[]
   aiRequests         AiRequest[]
   absenceNotes       AbsenceNote[]
@@ -1238,4 +1241,85 @@ model AbsenceNote {
 
   @@index([schoolId, status])
   @@index([studentId])
+}
+
+// ---------------------------------------------------------------------------
+// Page vitrine publique de l'école (site internet), réglée par la direction
+// ---------------------------------------------------------------------------
+
+/// Contenu de la page vitrine d'une école. Chaque texte existe en français et
+/// en arabe ; si l'une des deux langues est vide, l'autre est affichée.
+model SchoolSite {
+  id            String   @id @default(cuid())
+  schoolId      String   @unique
+  /// Visible par tous sur Internet (sinon seule la direction voit l'aperçu).
+  published     Boolean  @default(false)
+  /// Adresse propre de l'école (ex. « laplume-dor.tn »), réglée par l'équipe plateforme.
+  domain        String?  @unique
+  /// Couleur de la page (voir src/lib/site/themes.ts).
+  theme         String   @default("encre")
+  heroTitleFr   String?
+  heroTitleAr   String?
+  heroTextFr    String?
+  heroTextAr    String?
+  aboutFr       String?
+  aboutAr       String?
+  /// Atouts de l'école : [{ titleFr, titleAr, textFr, textAr }].
+  highlights    Json     @default("[]")
+  /// Texte libre par cycle : { PRIMARY: { fr, ar }, ... }.
+  cycleTexts    Json     @default("{}")
+  admissionsFr  String?
+  admissionsAr  String?
+  hoursFr       String?
+  hoursAr       String?
+  whatsapp      String?
+  facebookUrl   String?
+  instagramUrl  String?
+  mapUrl        String?
+  /// Formulaire « Demande de renseignements » affiché sur la page.
+  inquiryForm   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+}
+
+enum SitePhotoKind {
+  LOGO
+  HERO
+  GALLERY
+}
+
+/// Photo de la page vitrine (logo, grande photo d'accueil, galerie).
+model SitePhoto {
+  id        String        @id @default(cuid())
+  schoolId  String
+  kind      SitePhotoKind
+  data      Bytes
+  mimeType  String
+  captionFr String?
+  captionAr String?
+  position  Int           @default(0)
+  createdAt DateTime      @default(now())
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, kind, position])
+}
+
+/// Demande de renseignements ou d'inscription envoyée depuis la page vitrine.
+model SiteInquiry {
+  id         String    @id @default(cuid())
+  schoolId   String
+  parentName String
+  phone      String
+  email      String?
+  childLevel String?
+  message    String
+  handledAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, createdAt])
 }

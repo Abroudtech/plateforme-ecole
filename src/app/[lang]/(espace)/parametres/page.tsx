@@ -44,6 +44,10 @@ export default async function SettingsPage({ params }: PageProps<"/[lang]/parame
         </ActionForm>
       </Card>
 
+      <Link href={`/${lang}/site-vitrine`} className="rounded-xl bg-white p-4 font-medium text-blue-800 ring-1 ring-blue-200 hover:bg-blue-50">
+        {dict.site.settingsLink}
+      </Link>
+
       <Card title={dict.progress.settingTitle}>
         <ActionForm action={saveGradesVisibility.bind(null, lang)} labels={formLabels(dict, dict.common.save)}>
           <label className="flex items-start gap-3 text-sm">
