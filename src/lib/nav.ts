@@ -16,6 +16,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
   const classSpace: NavItem = { href: h("espace-classe"), label: dict.nav.classSpace, icon: "classSpace" };
   const calendar: NavItem = { href: h("calendrier"), label: dict.nav.calendar, icon: "calendar" };
   const exams: NavItem = { href: h("examens"), label: dict.nav.exams, icon: "exams" };
+  const consents: NavItem = { href: h("autorisations"), label: dict.nav.consents, icon: "consents" };
 
   // Enseignant (sans être de la direction) : ses classes, l'appel, l'atelier IA.
   if (can(roles, "teacher.space") && !can(roles, "dashboard.admin")) {
@@ -23,7 +24,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
     const attendance: NavItem = { href: h("absences"), label: dict.nav.attendance, icon: "attendance" };
     const parent: NavItem[] = can(roles, "children.read") ? [{ href: h("annonces"), label: dict.messages.announcements, icon: "announcements" }] : [];
     const messages: NavItem = { href: h("messages"), label: dict.nav.messages, icon: "messages" };
-    const all: NavItem[] = [home, classes, attendance, exams, calendar, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, messages, ...parent, account];
+    const all: NavItem[] = [home, classes, attendance, exams, calendar, { href: h("eleves"), label: dict.nav.students, icon: "students" }, workshop, classSpace, messages, consents, ...parent, account];
     return { all, bottom: [home, classes, attendance, workshop, { href: h("menu"), label: dict.nav.more, icon: "more" }] };
   }
 
@@ -55,6 +56,7 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
       calendar,
       ...(payments ? [payments] : []),
       ...(can(roles, "messages.school") ? [{ href: h("messages"), label: dict.nav.messages, icon: "messages" } as NavItem] : []),
+      ...(can(roles, "consents.write") ? [consents] : []),
       ...(can(roles, "site.write") ? [{ href: h("site-vitrine"), label: dict.nav.site, icon: "site" } as NavItem] : []),
       ...(can(roles, "settings.write") ? [{ href: h("parametres"), label: dict.nav.settings, icon: "settings" } as NavItem] : []),
       account,
@@ -71,7 +73,8 @@ export function navFor(roles: readonly Role[], lang: string, dict: Dictionary): 
       { href: h("annonces"), label: dict.messages.announcements, icon: "announcements" },
       account,
     ];
-    return { all: items, bottom: items };
+    // Les autorisations sont aussi sur l'accueil du parent (la barre du téléphone garde 5 onglets).
+    return { all: [...items.slice(0, -1), consents, items.at(-1)!], bottom: items };
   }
 
   return { all: [home, account], bottom: [home, account] };

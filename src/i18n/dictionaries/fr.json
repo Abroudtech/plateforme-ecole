@@ -43,7 +43,8 @@
     "games": "Jeux",
     "site": "Site de l'école",
     "exams": "Examens",
-    "calendar": "Calendrier"
+    "calendar": "Calendrier",
+    "consents": "Autorisations"
   },
   "roles": {
     "ADMIN": "Administration",
@@ -834,7 +835,14 @@
     "none": "Aucun document pour le moment.",
     "print": "Imprimer",
     "delete": "Supprimer le document",
-    "reviewNote": "Document préparé par l'IA : relisez-le et adaptez-le à votre classe avant de l'utiliser."
+    "reviewNote": "Document préparé par l'IA : relisez-le et adaptez-le à votre classe avant de l'utiliser.",
+    "versionFull": "Tout",
+    "versionStudent": "Version élève (sans corrigé)",
+    "versionKey": "Corrigé seul",
+    "editText": "Modifier le texte",
+    "editHint": "Le texte utilise des repères simples : # pour un titre, ## pour un sous-titre, - pour une liste, **gras**.",
+    "saveText": "Enregistrer le texte",
+    "printThis": "Imprimer cette version"
   },
   "studentSpace": {
     "access": "Espace élève",
@@ -1158,7 +1166,11 @@
     "recent": "Séances des 3 dernières semaines",
     "noClass": "Pas encore inscrit dans une classe cette année.",
     "myHomework": "Devoirs",
-    "document": "Document"
+    "document": "Document",
+    "doneCount": "{count} / {total} faits",
+    "done": "Fait",
+    "undo": "annuler",
+    "markDone": "J'ai fini ✓"
   },
   "followup": {
     "title": "Élèves à suivre",
@@ -1496,5 +1508,43 @@
     "ended": "Ce défi en direct est terminé.",
     "noPlayers": "Personne n'a encore rejoint.",
     "results": "Résultats du défi"
+  },
+  "consents": {
+    "title": "Autorisations",
+    "subtitleStaff": "Demandez une autorisation aux parents (sortie, photos, activité) : ils répondent oui ou non dans l'application.",
+    "subtitleParent": "Répondez aux demandes de l'école pour vos enfants.",
+    "new": "Nouvelle demande",
+    "titleLabel": "Objet",
+    "titlePlaceholder": "Ex. : Sortie au musée du Bardo le 12 décembre",
+    "details": "Précisions",
+    "detailsPlaceholder": "Ex. : Départ 8h30, retour 12h. Prévoir un goûter. Participation : 10 DT.",
+    "deadline": "Répondre avant le",
+    "audience": "Pour",
+    "send": "Envoyer aux parents",
+    "list": "Demandes envoyées",
+    "none": "Aucune demande pour le moment.",
+    "yes": "Oui, j'autorise",
+    "no": "Non",
+    "yesShort": "Oui",
+    "noShort": "Non",
+    "waiting": "Sans réponse",
+    "counts": "{yes} oui · {no} non · {waiting} sans réponse",
+    "toAnswer": "À signer",
+    "answered": "Déjà répondu",
+    "youAnswered": "Vous avez répondu : {answer}",
+    "change": "Changer ma réponse",
+    "before": "avant le {date}",
+    "closed": "Clôturée",
+    "remind": "Relancer les parents sans réponse",
+    "reminded": "Relance envoyée.",
+    "print": "Imprimer la liste",
+    "delete": "Supprimer la demande",
+    "confirmDelete": "Supprimer cette demande et toutes les réponses ?",
+    "pushTitle": "Autorisation à signer",
+    "noChildren": "Aucune demande pour vos enfants.",
+    "for": "Pour {name}",
+    "student": "Élève",
+    "answer": "Réponse",
+    "by": "Répondu par"
   }
 }

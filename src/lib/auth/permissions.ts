@@ -60,6 +60,8 @@ export const PERMISSIONS = {
   "calendar.read": ["ADMIN", "TEACHER", "PARENT", "STUDENT"],
   // Dates de l'école (vacances, réunions, fêtes, sorties)
   "events.write": ["ADMIN"],
+  // Autorisations (coupons-réponses) : la direction pour l'école, l'enseignant pour ses classes
+  "consents.write": ["ADMIN", "TEACHER"],
   // Espace parent : voir uniquement ses propres enfants
   "children.read": ["PARENT"],
 } as const satisfies Record<string, readonly Role[]>;

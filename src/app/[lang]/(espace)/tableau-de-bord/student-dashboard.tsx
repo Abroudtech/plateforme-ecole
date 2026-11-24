@@ -29,7 +29,7 @@ export async function StudentDashboard({ ctx, lang, dict }: Props) {
       where: { schoolId: ctx.school.id, classGroupId: classId, attempts: { none: { studentId: student.id } }, OR: [{ closesAt: null }, { closesAt: { gt: now } }] },
     }),
     db.classPost.findFirst({ where: { classGroupId: classId, status: "PUBLISHED" }, orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }] }),
-    db.homework.count({ where: { schoolId: ctx.school.id, classGroupId: classId, task: { not: null }, dueDate: { gte: parseISODate(todayISO())! } } }),
+    db.homework.count({ where: { schoolId: ctx.school.id, classGroupId: classId, task: { not: null }, dueDate: { gte: parseISODate(todayISO())! }, done: { none: { studentId: student.id } } } }),
   ]);
   const me = year.find((r) => r.student.id === student.id);
 

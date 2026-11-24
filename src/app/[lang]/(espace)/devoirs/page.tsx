@@ -5,6 +5,7 @@ import { studentOf } from "@/lib/data/class-space";
 import { homeworkForStudent } from "@/lib/data/homework";
 import { StudentHomework } from "@/components/homework-entry";
 import { PageHeader } from "@/components/ui";
+import { toggleHomeworkDone } from "./actions";
 
 /** Espace élève : ses devoirs et le cahier de textes de sa classe. */
 export default async function MyHomeworkPage({ params }: PageProps<"/[lang]/devoirs">) {
@@ -16,7 +17,7 @@ export default async function MyHomeworkPage({ params }: PageProps<"/[lang]/devo
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title={dict.homework.myHomework} back={{ href: `/${lang}/tableau-de-bord`, label: dict.nav.dashboard }} />
-      <StudentHomework data={data} lang={lang} dict={dict} />
+      <StudentHomework data={data} lang={lang} dict={dict} toggle={(id) => toggleHomeworkDone.bind(null, lang, id)} />
     </div>
   );
 }

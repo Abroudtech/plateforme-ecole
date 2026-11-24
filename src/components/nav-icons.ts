@@ -5,6 +5,7 @@ import {
   CalendarDays,
   CalendarRange,
   ClipboardPen,
+  FileSignature,
   Globe,
   GraduationCap,
   House,
@@ -45,6 +46,7 @@ export const NAV_ICONS = {
   homework: NotebookPen,
   calendar: CalendarRange,
   exams: ClipboardPen,
+  consents: FileSignature,
 } satisfies Record<string, LucideIcon>;
 
 export type NavItem = { href: string; label: string; icon: keyof typeof NAV_ICONS };

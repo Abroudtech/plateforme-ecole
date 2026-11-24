@@ -27,6 +27,7 @@ import { StudentDashboard } from "./student-dashboard";
 import { TeacherDashboard } from "./teacher-dashboard";
 import { FollowupFallback, FollowupPanel } from "./followup-panel";
 import { UpcomingPanel } from "./upcoming-panel";
+import { ParentConsents } from "./parent-consents";
 import { Hero, IconBadge, Initials, Notice, Panel, TONES, type Tone } from "./dashboard-ui";
 import { getDirectorOverview, getSetupSteps } from "@/lib/data/director";
 import { Money } from "@/components/money";
@@ -362,6 +363,7 @@ async function ParentDashboard({ ctx, lang, dict }: Props) {
         </Link>
       ))}
     </section>
+    <ParentConsents ctx={ctx} lang={lang} dict={dict} />
     <UpcomingPanel ctx={ctx} lang={lang} dict={dict} />
     <section className="flex flex-col gap-3">
       <h2 className="text-lg font-bold text-blue-900">{dict.dashboard.myChildren}</h2>

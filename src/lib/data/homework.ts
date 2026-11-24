@@ -36,7 +36,9 @@ export async function homeworkForStudent(schoolId: string, studentId: string) {
     db.homework.findMany({ where: { schoolId, classGroupId, task: { not: null }, dueDate: { gte: today } }, include, orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }], take: 50 }),
     db.homework.findMany({ where: { schoolId, classGroupId, date: { gte: since } }, include, orderBy: [{ date: "desc" }, { createdAt: "desc" }], take: 60 }),
   ]);
-  return { classGroup: enrollment.classGroup, upcoming, recent };
+  // Devoirs que l'élève a cochés « fait ».
+  const done = await db.homeworkDone.findMany({ where: { studentId, homeworkId: { in: upcoming.map((u) => u.id) } }, select: { homeworkId: true } });
+  return { classGroup: enrollment.classGroup, upcoming, recent, done: done.map((d) => d.homeworkId) };
 }
 
 /** Qui peut lire une entrée : l'équipe de la classe, les parents et les élèves de la classe. */
