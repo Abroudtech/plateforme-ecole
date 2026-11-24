@@ -27,7 +27,7 @@ export default async function PlatformSchoolPage({ params }: PageProps<"/[lang]/
   ]);
   const site = await db.schoolSite.findUnique({ where: { schoolId: id }, select: { domain: true } });
   const fmt = (d: Date | null) =>
-    d ? new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Tunis" }).format(d) : "—";
+    d ? new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Africa/Tunis" }).format(d) : "—";
 
   return (
     <div className="flex flex-col gap-6">

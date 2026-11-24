@@ -35,7 +35,7 @@ export default async function CalendarPage({ params, searchParams }: PageProps<"
   const isAdmin = can(ctx.roles, "events.write");
   const examLinks = can(ctx.roles, "exams.write");
 
-  const scope = await agendaScope(ctx);
+  const scope = await agendaScope(ctx, lang);
   const family = ctx.roles.includes("PARENT") || ctx.roles.includes("STUDENT");
   const [exams, events, homework, levels, classes] = await Promise.all([
     listExams(schoolId, scope.classIds, from, to),

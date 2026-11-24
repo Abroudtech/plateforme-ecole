@@ -22,7 +22,7 @@ export async function UpcomingPanel({ ctx, lang, dict }: Props) {
   const today = todayISO();
   const from = parseISODate(today)!;
   const to = parseISODate(addDays(today, 21))!;
-  const scope = await agendaScope(ctx);
+  const scope = await agendaScope(ctx, lang);
   const [exams, events] = await Promise.all([listExams(ctx.school.id, scope.classIds, from, to), listEvents(ctx.school.id, scope, from, to)]);
   const canPrepare = can(ctx.roles, "exams.write");
   if (exams.length === 0 && events.length === 0 && !canPrepare) return null;

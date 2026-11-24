@@ -38,8 +38,8 @@ export default async function MenuPage({ params }: PageProps<"/[lang]/menu">) {
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-900">
                 <Icon size={20} aria-hidden />
               </span>
-              <span className="min-w-0 text-sm font-semibold leading-tight">{label}</span>
-              <ChevronRight size={16} className="ms-auto shrink-0 text-slate-400 rtl:rotate-180" aria-hidden />
+              <span className="min-w-0 text-sm font-semibold leading-tight [overflow-wrap:anywhere]">{label}</span>
+              <ChevronRight size={16} className="ms-auto hidden shrink-0 text-slate-400 sm:block rtl:rotate-180" aria-hidden />
             </Link>
           </li>
         ))}

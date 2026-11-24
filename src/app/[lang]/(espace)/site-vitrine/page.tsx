@@ -45,7 +45,7 @@ export default async function SiteSettingsPage({ params }: PageProps<"/[lang]/si
   const cycles = (["PRIMARY", "MIDDLE", "SECONDARY"] as const).filter((c) => school.cycles.includes(c));
   const pagePath = `/${lang}/ecole/${school.slug}`;
   const pending = inquiries.filter((i) => !i.handledAt).length;
-  const fmt = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Tunis" });
+  const fmt = new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Africa/Tunis" });
 
   return (
     <div className="flex flex-col gap-6">

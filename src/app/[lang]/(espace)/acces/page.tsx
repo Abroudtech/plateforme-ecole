@@ -29,7 +29,7 @@ export default async function AccessRequestsPage({ params }: PageProps<"/[lang]/
               <p className="text-sm text-slate-500">
                 {req.user.memberships.map((m) => dict.roles[m.role]).join(" · ")} ·{" "}
                 <bdi dir="ltr">{req.user.phone ?? req.user.email ?? req.user.username}</bdi> ·{" "}
-                {new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Tunis" }).format(req.createdAt)}
+                {new Intl.DateTimeFormat(lang === "ar" ? "ar-TN" : "fr-TN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Africa/Tunis" }).format(req.createdAt)}
               </p>
               <div className="mt-3 flex flex-wrap items-start gap-2">
                 <ActionForm

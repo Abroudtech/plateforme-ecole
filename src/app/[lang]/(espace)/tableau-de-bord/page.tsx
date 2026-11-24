@@ -156,18 +156,20 @@ async function AdminDashboard({ ctx, lang, dict, hello, today, push }: Props & {
 
       {setupLeft > 0 && (
         <Panel title={t(dict.setup.title, { done: setup.length - setupLeft, total: setup.length })}>
+          {/* Seules les étapes restantes sont listées ; la barre montre le chemin parcouru. */}
+          <div className="mb-3 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden>
+            <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.round(((setup.length - setupLeft) / setup.length) * 100)}%` }} />
+          </div>
           <ol className="flex flex-col gap-1.5">
-            {setup.map((x, i) => (
+            {setup.map((x, i) => x.done ? null : (
               <li key={x.key}>
                 <Link
                   href={`/${lang}/${x.href}`}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${x.done ? "text-slate-500" : "bg-slate-50 font-semibold hover:bg-gold-50"}`}
+                  className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold hover:bg-gold-50"
                 >
-                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold ${x.done ? "bg-emerald-100 text-emerald-700" : "bg-blue-900 text-white"}`}>
-                    {x.done ? <CircleCheck size={14} aria-hidden /> : i + 1}
-                  </span>
-                  <span className={x.done ? "line-through" : ""}>{dict.setup.steps[x.key]}</span>
-                  {!x.done && <ChevronRight size={16} className="ms-auto shrink-0 text-slate-400 rtl:rotate-180" aria-hidden />}
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-900 text-xs font-bold text-white">{i + 1}</span>
+                  <span>{dict.setup.steps[x.key]}</span>
+                  <ChevronRight size={16} className="ms-auto shrink-0 text-slate-400 rtl:rotate-180" aria-hidden />
                 </Link>
               </li>
             ))}
@@ -222,7 +224,7 @@ async function AdminDashboard({ ctx, lang, dict, hello, today, push }: Props & {
           )}
         </Panel>
 
-        <Panel title={termName ? t(d.averages, { term: termName }) : t(d.results, { term: "" })} className="lg:col-span-3">
+        <Panel title={termName ? t(d.averages, { term: termName }) : t(d.results, { term: "" }).replace(/\s*·\s*$/, "")} className="lg:col-span-3">
           {o.results.length === 0 ? (
             <p className="text-sm text-slate-500">{d.noResults}</p>
           ) : (

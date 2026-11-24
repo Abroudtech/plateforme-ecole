@@ -14,7 +14,7 @@ type Ctx = Pick<AppContext, "roles" | "user"> & { school: { id: string } };
  * l'enseignant, de ses enfants (parent) ou la sienne (élève).
  * `childByClass` donne le prénom de l'enfant à afficher pour un parent.
  */
-export async function agendaScope(ctx: Ctx) {
+export async function agendaScope(ctx: Ctx, lang: "fr" | "ar" = "fr") {
   const schoolId = ctx.school.id;
   if (ctx.roles.includes("ADMIN")) return { classIds: null, levelIds: null, childByClass: new Map<string, string[]>() };
   const classIds = new Set<string>();
@@ -33,7 +33,7 @@ export async function agendaScope(ctx: Ctx) {
     for (const e of enrollments) {
       classIds.add(e.classGroupId);
       // Prénom de l'enfant seulement pour un parent (pas pour l'élève lui-même).
-      if (e.student.userId !== ctx.user.id) childByClass.set(e.classGroupId, [...(childByClass.get(e.classGroupId) ?? []), e.student.firstName]);
+      if (e.student.userId !== ctx.user.id) childByClass.set(e.classGroupId, [...(childByClass.get(e.classGroupId) ?? []), (lang === "ar" && e.student.firstNameAr) || e.student.firstName]);
     }
   }
   const ids = [...classIds];
