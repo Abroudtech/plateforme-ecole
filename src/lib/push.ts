@@ -2,6 +2,7 @@ import "server-only";
 import webpush from "web-push";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { APNS_PREFIX, apnsConfig, sendApns } from "@/lib/apns";
 
 /**
  * Notifications sur le téléphone (Web Push). Les clés sont créées
@@ -39,9 +40,17 @@ export async function sendPush(userIds: string[], message: PushMessage | ((userI
     if (subs.length === 0) return;
     const keys = await vapidKeys();
     const contact = process.env.PUSH_CONTACT ?? "mailto:contact@example.com";
+    const apns = apnsConfig();
     await Promise.all(
       subs.map(async (s) => {
         const m = typeof message === "function" ? message(s.userId) : message;
+        // Application iPhone : notification native Apple.
+        if (s.endpoint.startsWith(APNS_PREFIX)) {
+          if (!apns) return;
+          const r = await sendApns(apns, s.endpoint.slice(APNS_PREFIX.length), m);
+          if (r === "gone") await db.pushSubscription.deleteMany({ where: { id: s.id } });
+          return;
+        }
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },

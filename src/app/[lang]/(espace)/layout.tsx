@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NativeApp } from "@/components/native-app";
 import { LogOut, Search } from "lucide-react";
 import { can } from "@/lib/auth/permissions";
 import type { Locale } from "@/i18n/config";
@@ -22,6 +23,7 @@ export default async function SpaceLayout({ children, params }: LayoutProps<"/[l
 
   return (
     <div className="flex flex-1 flex-col">
+      <NativeApp />
       <header className="sticky top-0 z-10 bg-blue-900 text-white shadow-sm print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link href={`/${lang}/tableau-de-bord`} className="flex min-w-0 items-center gap-2.5">

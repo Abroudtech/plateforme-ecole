@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Bell, BellOff, Download } from "lucide-react";
 import { subscribePush, unsubscribePush } from "@/app/actions/push";
+import { disableNativePush, enableNativePush, nativePush, nativePushState } from "@/lib/native-push";
 
 type Labels = { title: string; intro: string; enable: string; disable: string; enabled: string; denied: string; iphone: string; install: string };
 type State = "loading" | "unsupported" | "off" | "on" | "denied" | "busy";
@@ -31,6 +32,9 @@ export function PushToggle({ publicKey, labels, compact = false }: { publicKey: 
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     (async () => {
+      // Application iPhone : notifications natives d'Apple.
+      const native = nativePush();
+      if (native) return setState(await nativePushState(native));
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return setState("unsupported");
       if (Notification.permission === "denied") return setState("denied");
       const reg = await navigator.serviceWorker.register("/sw.js");
@@ -42,6 +46,8 @@ export function PushToggle({ publicKey, labels, compact = false }: { publicKey: 
 
   async function enable() {
     setState("busy");
+    const native = nativePush();
+    if (native) return setState(await enableNativePush(native).catch(() => "off" as const));
     try {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") return setState(permission === "denied" ? "denied" : "off");
@@ -58,6 +64,11 @@ export function PushToggle({ publicKey, labels, compact = false }: { publicKey: 
 
   async function disable() {
     setState("busy");
+    const native = nativePush();
+    if (native) {
+      await disableNativePush(native).catch(() => {});
+      return setState("off");
+    }
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
@@ -71,9 +82,8 @@ export function PushToggle({ publicKey, labels, compact = false }: { publicKey: 
   }
 
   if (state === "loading" || (compact && (state === "on" || state === "denied"))) return null;
-  // Application iPhone de l'App Store : les notifications du site n'y existent
-  // pas (elles arriveront avec les notifications natives), on n'affiche rien.
-  if (state === "unsupported" && typeof navigator !== "undefined" && navigator.userAgent.includes("PlateformeEcoleApp")) return null;
+  // Ancienne version de l'application iPhone, sans notifications natives : rien à proposer.
+  if (state === "unsupported" && typeof window !== "undefined" && window.Capacitor) return null;
   // iPhone : les notifications ne marchent qu'une fois l'app ajoutée à l'écran d'accueil.
   const ios = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
 

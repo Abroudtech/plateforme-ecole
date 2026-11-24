@@ -15,7 +15,7 @@ natives sur iPhone).
 | Dossier | `mobile/android/twa-manifest.json` | `mobile/ios/` |
 | Fabrication | Actions > « Application Android » > Run workflow | Actions > « Application iPhone » > Run workflow |
 | Résultat | fichier `.aab` à déposer dans la Play Console | envoi direct sur App Store Connect (TestFlight) |
-| Notifications | celles du site, déjà en place | à ajouter (notifications natives Apple) |
+| Notifications | celles du site, déjà en place | notifications natives Apple (clé APNs à mettre sur Render) |
 | Identifiant | `fr.abroudtech.ecole` | `fr.abroudtech.ecole` |
 
 ## Android
@@ -40,6 +40,12 @@ natives sur iPhone).
 - Secrets GitHub à ajouter pour l'envoi sur App Store Connect :
   `APPLE_TEAM_ID`, `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`,
   `APP_STORE_CONNECT_KEY` (contenu du fichier `.p8`, clé avec le rôle Admin).
+- Notifications : l'application demande un jeton à Apple et le site l'enregistre
+  (adresse `apns:<jeton>` dans les abonnements). Le serveur envoie ensuite par
+  le service APNs d'Apple (`src/lib/apns.ts`). À régler une fois sur Render :
+  `APNS_KEY` (contenu du fichier `.p8` d'une clé « Apple Push Notifications
+  service » créée dans developer.apple.com > Keys), `APNS_KEY_ID`,
+  `APPLE_TEAM_ID`.
 - Apple refuse parfois les applications qui « ne font qu'afficher un site »
   (règle 4.2). Les notifications natives et le mode hors ligne aident à
   passer cette étape.
