@@ -1,6 +1,6 @@
 {
   "packageId": "fr.abroudtech.ecole",
-  "host": "ecole-5tdk.onrender.com",
+  "host": "plumedorapp.com",
   "name": "Ma Plume",
   "launcherName": "Ma Plume",
   "display": "standalone",
@@ -13,8 +13,8 @@
   "backgroundColor": "#F6F3EC",
   "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "https://ecole-5tdk.onrender.com/icon-512.png",
-  "maskableIconUrl": "https://ecole-5tdk.onrender.com/icon-maskable-512.png",
+  "iconUrl": "https://plumedorapp.com/icon-512.png",
+  "maskableIconUrl": "https://plumedorapp.com/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
@@ -24,7 +24,7 @@
   "appVersionCode": 1,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://ecole-5tdk.onrender.com/manifest.webmanifest",
+  "webManifestUrl": "https://plumedorapp.com/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://ecole-5tdk.onrender.com/",
+  "fullScopeUrl": "https://plumedorapp.com/",
   "orientation": "default",
   "minSdkVersion": 24,
   "fingerprints": [],

@@ -3,7 +3,7 @@
   "appName": "Ma Plume",
   "webDir": "www",
   "server": {
-    "url": "https://ecole-5tdk.onrender.com",
+    "url": "https://plumedorapp.com",
     "errorPath": "hors-ligne.html"
   },
   "ios": {
