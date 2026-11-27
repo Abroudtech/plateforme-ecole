@@ -1,6 +1,6 @@
 # Applications Play Store et App Store
 
-Les deux applications **affichent le site en ligne** (https://ecole-5tdk.onrender.com)
+Les deux applications **affichent le site en ligne** (https://plumedorapp.com)
 en plein écran, avec l'icône et le nom de la plateforme.
 
 **Conséquence importante : toute évolution du site arrive immédiatement dans
